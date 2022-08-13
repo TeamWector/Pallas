@@ -1,0 +1,16 @@
+name: Pallas
+author: ejt
+game: wow
+
+files:
+  - pallas.lua
+  - common\menu.lua
+  - common\settings.lua
+  - common\targeting.lua
+  - system\behavior.lua
+  - system\combat.lua
+  - system\heal.lua
+  - system\tank.lua
+
+persistent_variables:
+  - Settings
