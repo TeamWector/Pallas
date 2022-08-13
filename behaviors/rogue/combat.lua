@@ -41,7 +41,7 @@ local function RogueCombatCombat()
   -- Start combat behaviors
 
   -- only attack melee
-  if me.Position:DistanceSq(target.Position) > 8 then return end
+  if not me:InMeleeRange(target) then return end
 
   local ss = WoWSpell("Sinister Strike")
   if me.PowerPct > 40 and ss.IsUsable and ss:Cast(target) then return end
