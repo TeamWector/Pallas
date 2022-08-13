@@ -1,6 +1,8 @@
 # Pallas beta
 
-Pallas is currently in BETA which mean this README is useless and you are too.
+Currently in BETA!
+
+Pallas is a general purpose PvE behavior script aimed to support all classes and specializations for Wrath of the Lich King Classic. PvP is not officially supported!
 
 ## Prerequisites
 
@@ -8,7 +10,7 @@ The only prerequisite is having a working copy of Wector and credentials to use 
 
 ## Installing
 
-Download this repository using the method of your liking then place the script into the scripts directory at the root of Wector. Optionally rename the Pallas folder from `Pallas-master` to `Pallas` if you cloned the master branch.
+Download this repository using the method of your liking then place it into the scripts directory at the root of Wector. Optionally rename the Pallas folder from `Pallas-master` to `Pallas` if you cloned the master branch.
 
 After installation the path to Pallas will be `<Wector root>/scripts/Pallas`
 
@@ -18,48 +20,24 @@ After installation the path to Pallas will be `<Wector root>/scripts/Pallas`
 :large_blue_diamond: Kinda supported\
 :heavy_check_mark: Fully supported
 
-| Class/Spec        |        Status        |
-|-------------------|:--------------------:|
-| **Death Knight**  |                      |
-| Blood             |         :x:          |
-| Frost             |         :x:          |
-| Unholy            |         :x:          |
-| **Druid**         |                      |
-| Balance           |         :x:          |
-| Feral             |         :x:          |
-| Restoration       |         :x:          |
-| **Hunter**        |                      |
-| Beast Mastery     |         :x:          |
-| Masksmanship      |         :x:          |
-| Survival          |         :x:          |
-| **Mage**          |                      |
-| Arcane            |         :x:          |
-| Fire              |         :x:          |
-| Frost             |         :x:          |
-| **Paladin**       |                      |
-| Holy              |         :x:          |
-| Protection        |         :x:          |
-| Restribution      |         :x:          |
-| **Priest**        |                      |
-| Discipline        |         :x:          |
-| Holy              |         :x:          |
-| Shadow            |         :x:          |
-| **Rogue**         |                      |
-| Assassination     |         :x:          |
-| Combat            |         :x:          |
-| Sublety           |         :x:          |
-| **Shaman**        |                      |
-| Restoration       |         :x:          |
-| Enhancement       |         :x:          |
-| Elemental         |         :x:          |
-| **Warlock**       |                      |
-| Affliction        |         :x:          |
-| Demonology        |         :x:          |
-| Destruction       |         :x:          |
-| **Warrior**       |                      |
-| Arms              |         :x:          |
-| Fury              | :large_blue_diamond: |
-| Protection        |  :heavy_check_mark:  |
+|                   |                      |                   |                      |                   |                      |
+|-------------------|:--------------------:|-------------------|:--------------------:|-------------------|:--------------------:|
+| **Death Knight**  |                      | **Mage**          |                      | **Rogue**         |                      |
+| Blood             |         :x:          | Arcane            |         :x:          | Assassination     |         :x:          |
+| Frost             |         :x:          | Fire              |         :x:          | Combat            |         :x:          |
+| Unholy            |         :x:          | Frost             |         :x:          | Sublety           |         :x:          |
+| **Druid**         |                      | **Paladin**       |                      | **Shaman**        |                      |
+| Balance           |         :x:          | Holy              |         :x:          | Restoration       |         :x:          |
+| Feral             |         :x:          | Protection        |         :x:          | Enhancement       |         :x:          |
+| Restoration       |         :x:          | Restribution      |         :x:          | Elemental         |         :x:          |
+| **Hunter**        |                      | **Priest**        |                      | **Warlock**       |                      |
+| Beast Mastery     |         :x:          | Discipline        |         :x:          | Affliction        |         :x:          |
+| Masksmanship      |         :x:          | Holy              |         :x:          | Demonology        |         :x:          |
+| Survival          |         :x:          | Shadow            |         :x:          | Destruction       |         :x:          |
+| **Warrior**       |                      |                   |                      |                   |                      |
+| Arms              |         :x:          |                   |                      |                   |                      |
+| Fury              | :large_blue_diamond: |                   |                      |                   |                      |
+| Protection        |  :heavy_check_mark:  |                   |                      |                   |                      |
 
 ## Contribute
 
