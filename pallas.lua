@@ -37,7 +37,7 @@ function Pallas:OnUpdate()
   local objects = wector.Game.GameObjects
   for _, o in pairs(objects) do
     if o.Name == "Netherwing Egg" then
-      wector.Console:Log("EGG!!!!")
+      wector.Console:Log("EGG!!!! Distance: " .. Me.Position:Distance(o.Position))
     end
   end
 

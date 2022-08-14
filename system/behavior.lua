@@ -150,7 +150,8 @@ function Behavior:AddBehaviorOptions(options)
     local type = v[1]
     local id = v[2]
     local text = v[3]
-    local label = text .. '##' .. id
+    local label = string.format('%s##%s', text, id)
+    local safe_id = id:gsub("%s+", "")
     if type == "text" then
       submenu:Add(ImText(text))
     elseif type == "slider" then
