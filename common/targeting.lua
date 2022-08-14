@@ -18,16 +18,18 @@ function Targeting:WantToRun()
 end
 
 function Targeting:Update()
-  self.Targets = {}
+  self:Reset()
 
-  if not self:WantToRun() then
-    return
-  end
+  if not self:WantToRun() then return end
 
   self:CollectTargets()
   self:ExclusionFilter()
   self:InclusionFilter()
   self:WeighFilter()
+end
+
+function Targeting:Reset()
+  self.Targets = {}
 end
 
 function Targeting:CollectTargets()
