@@ -4,29 +4,7 @@ local options = {
 
     -- widgets
     Widgets = {
-        { "text", "TestText", "Hello Text", },
-        { "slider", "TestSlider", "Hello Slider", 50, 0, 100 },
-        { "checkbox", "TestCheckbox", "Hello Checkbox", true },
-        { "combobox", "TestCombobox", "Hello Combobox", {
-            "Hello Option 1",
-            "Hello Option 2",
-            "Hello Option 3",
-            "Hello Option 4",
-        }
-        },
-        { "groupbox", "TestGroupbox", "Hello Groupbox", {
-            { "text", "TestText", "Hello Text", },
-            { "slider", "TestSlider", "Hello Slider", 50, 0, 100 },
-            { "checkbox", "TestCheckbox", "Hello Checkbox" },
-            { "combobox", "TestCombobox", {
-                "Hello Option 1",
-                "Hello Option 2",
-                "Hello Option 3",
-                "Hello Option 4",
-            }
-            }
-        }
-        }
+        { "checkbox", "WandFinish", "Wand Finisher", false }
     }
 }
 
