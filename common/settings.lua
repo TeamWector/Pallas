@@ -1,6 +1,7 @@
 Settings = {
   Core = {
-    AutoTarget = false
+    AutoTarget = false,
+    AttackOutOfCombat = false
   }
 }
 

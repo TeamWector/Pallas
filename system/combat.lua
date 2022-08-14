@@ -30,13 +30,19 @@ function Combat:Update()
   end
 end
 
+function Combat:Reset()
+  self.BestTarget = nil -- reset
+  self.EnemiesInMeleeRange = 0
+end
+
 function Combat:WantToRun()
   if not Behavior:HasBehavior(BehaviorType.Combat) then return false end
   if not Me then return false end
   if Me.IsMounted then return false end
 
   if (Me.UnitFlags & UnitFlags.Looting) == UnitFlags.Looting then return false end
-  return (Me.UnitFlags & UnitFlags.InCombat) == UnitFlags.InCombat
+
+  return Settings.Core.AttackOutOfCombat or (Me.UnitFlags & UnitFlags.InCombat) == UnitFlags.InCombat
 end
 
 function Combat:CollectTargets()
@@ -44,7 +50,6 @@ function Combat:CollectTargets()
   local units = wector.Game:GetObjectsByFlag(flags)
 
   -- copy unit list
-  self.Targets = {} -- ensure empty
   for k, u in pairs(units) do
     self.Targets[k] = u.ToUnit
   end
@@ -54,11 +59,11 @@ function Combat:ExclusionFilter()
   for k, u in pairs(self.Targets) do
     if not Me:CanAttack(u) then
       self.Targets[k] = nil
-    elseif not u.InCombat then
+    elseif not Settings.Core.AttackOutOfCombat and not u.InCombat then
       self.Targets[k] = nil
     elseif u.Dead or u.Health <= 0 then
       self.Targets[k] = nil
-    elseif u:GetDistance(Me.ToUnit) > 10 then
+    elseif u:GetDistance(Me.ToUnit) > 40 then
       self.Targets[k] = nil
     elseif u.IsTapDenied and (not u.Target or u.Target.Guid ~= Me.Guid) then
       self.Targets[k] = nil
@@ -87,9 +92,6 @@ function Combat:InclusionFilter()
 end
 
 function Combat:WeighFilter()
-  self.BestTarget = nil -- reset
-  self.EnemiesInMeleeRange = 0
-
   local priorityList = {}
   for _, u in pairs(self.Targets) do
     local priority = 0

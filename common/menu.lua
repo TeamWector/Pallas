@@ -2,20 +2,6 @@ Menu = {}
 ---@type ImMenu
 Menu.MainMenu = nil
 
-function Menu:OnCheckboxClick(oldValue, newValue)
-  print('State of ' .. self.Label .. ' changed from ' .. tostring(oldValue) .. ' to ' .. tostring(newValue))
-end
-
-function Menu:OnSliderValueChanged(oldValue, newValue)
-  print('State of ' .. self.Label .. ' changed from ' .. tostring(oldValue) .. ' to ' .. tostring(newValue))
-end
-
-function Menu:OnComboSelect(oldValue, oldIdx, newValue, newIdx)
-  print('State of ' .. self.Label .. ' changed from ' ..
-    tostring(oldValue) .. ' (' .. oldIdx .. ') to ' ..
-    tostring(newValue) .. ' (' .. newIdx .. ')')
-end
-
 function Menu:Initialize()
   if Menu.MainMenu then return end
 
@@ -28,6 +14,10 @@ function Menu:Initialize()
   local autotarget = ImCheckbox("Auto-target", Settings.Core.AutoTarget)
   autotarget.OnClick = function(_, _, newValue) Settings.Core.AutoTarget = newValue end
   Menu.GroupTest:Add(autotarget)
+
+  local attackooc = ImCheckbox("Attack out of combat", Settings.Core.AttackOutOfCombat)
+  attackooc.OnClick = function(_, _, newValue) Settings.Core.AttackOutOfCombat = newValue end
+  Menu.GroupTest:Add(attackooc)
 
   Menu.MainMenu:Add(Menu.GroupTest)
 end
