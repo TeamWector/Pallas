@@ -1,12 +1,16 @@
 local options = {
     -- The sub menu name
-    Name = "Warlock (Affliction)",
+    Name = "Warlock (Affli)",
 
     -- widgets
     Widgets = {
-        { "checkbox", "WandFinish", "Wand Finisher", false }
+        { "checkbox", "WandFinish", "Wand Finisher", false },
+        { "slider", "LifeTapPercent", "Life Tap %", 90, 0, 100 },
+        { "slider", "WandExecutePercent", "Wand Finish %", 30, 0, 60 },
     }
 }
+
+
 
 local spells = {
     DemonArmor = WoWSpell("Demon Armor"),
@@ -14,6 +18,7 @@ local spells = {
     CurseOfAgony = WoWSpell("Curse of Agony"),
     Corruption = WoWSpell("Corruption"),
     DrainLife = WoWSpell("Drain Life"),
+    ShadowBolt = WoWSpell("Shadow Bolt"),
     Shoot = WoWSpell("Shoot")
 }
 
@@ -35,10 +40,10 @@ local function IsDotted(unit)
     return agony and corruption
 end
 
--- Threshold for LifeTap
-local HPThresh = 600
--- Threshold for using spells
-local SpellThresh = 300
+-- Threshold % on me for LifeTap
+local HPThresh = 90
+-- Threshold % on enemy for using spells
+local SpellThresh = 30
 
 local function WarlockAfflictionCombat()
     -- buff up
@@ -51,7 +56,7 @@ local function WarlockAfflictionCombat()
     end
 
     -- Omegalul workaround
-    if Me.Health >= HPThresh and Me.PowerPct < 90 and not Me.IsCastingOrChanneling then
+    if Me:GetHealthPercent() >= HPThresh and Me.PowerPct < 90 and not Me.IsCastingOrChanneling then
         if spells.LifeTap:CanUse() then
             spells.LifeTap:Cast(Me)
         end
@@ -61,8 +66,26 @@ local function WarlockAfflictionCombat()
     local target = Combat.BestTarget
     if not target then return end
 
+    -- Only do this when pet is active
+    if Me.Pet then
+        -- PetAttack my target
+        if not Me.Pet.Target or Me.Pet.Target ~= Me.Target then
+            Me:PetAttack(target)
+        end
+
+        -- set follow if no target
+        if not target and Me.Pet.Target then
+            Me:PetFollow()
+        end
+    end
+
+    if Me:HasBuff("Shadow Trance") and spells.ShadowBolt:CanUse(target) then
+        spells.ShadowBolt:Cast(target)
+        return
+    end
+
     -- Wand finisher, convert to percentage when that is implemented
-    if target.Health <= SpellThresh then
+    if target:GetHealthPercent() <= SpellThresh then
         if not spells.Shoot.IsAutoRepeat and spells.Shoot:CanUse(target) then
             spells.Shoot:Cast(target)
         end
