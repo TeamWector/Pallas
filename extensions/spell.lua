@@ -26,3 +26,8 @@ function WoWSpell:InRange(target)
 
   return dist >= minRange and dist <= maxRange
 end
+
+function WoWSpell:CanUse(target)
+  if not target then target = wector.Game.ActivePlayer.ToUnit end
+  return self.IsReady and self:IsUsable() and self:InRange(target) and (self.CastTime == 0 or not wector.Game.ActivePlayer:IsMoving())
+end
