@@ -1,5 +1,3 @@
----@diagnostic disable: param-type-mismatch
-
 local attack_spell = WoWSpell("Attack")
 
 local function atan2(a, b)

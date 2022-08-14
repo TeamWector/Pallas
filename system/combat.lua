@@ -33,6 +33,7 @@ end
 function Combat:WantToRun()
   if not Behavior:HasBehavior(BehaviorType.Combat) then return false end
   if not Me then return false end
+  if Me.IsMounted then return false end
 
   if (Me.UnitFlags & UnitFlags.Looting) == UnitFlags.Looting then return false end
   return (Me.UnitFlags & UnitFlags.InCombat) == UnitFlags.InCombat
@@ -51,13 +52,13 @@ end
 
 function Combat:ExclusionFilter()
   for k, u in pairs(self.Targets) do
-    if not u.IsEnemy and Me:GetReaction(u) > UnitReaction.Neutral then
+    if not Me:CanAttack(u) then
       self.Targets[k] = nil
-    elseif (u.UnitFlags & UnitFlags.InCombat) ~= UnitFlags.InCombat then
+    elseif not u.InCombat then
       self.Targets[k] = nil
     elseif u.Dead or u.Health <= 0 then
       self.Targets[k] = nil
-    elseif u:Distance(Me) > 10 then
+    elseif u:GetDistance(Me.ToUnit) > 10 then
       self.Targets[k] = nil
     elseif u.IsTapDenied and (not u.Target or u.Target.Guid ~= Me.Guid) then
       self.Targets[k] = nil
