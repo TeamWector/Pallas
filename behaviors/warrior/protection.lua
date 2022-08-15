@@ -60,15 +60,12 @@ local function WarriorProtCombat()
   for _, u in pairs(Combat.Targets) do
     local castorchan = u.IsCastingOrChanneling
     local spell = u.CurrentSpell
-    if castorchan and spell and spells.ShieldBash.IsReady and spells.ShieldBash:IsUsable() and Me:InMeleeRange(u) then
-      spells.ShieldBash:Cast(u)
-      return
-    end
 
-    if castorchan and spell and spells.ConcussionBlow.IsReady and spells.ConcussionBlow:IsUsable() and Me:InMeleeRange(u) then
-      spells.ConcussionBlow:Cast(u)
-      return
-    end
+    -- Shield Bash
+    if castorchan and spell and Me:InMeleeRange(u) and spells.ShieldBash:CastEx(target) then return end
+
+    -- Concussion Blow
+    if castorchan and spell and Me:InMeleeRange(u) and spells.ConcussionBlow:CastEx(target) then return end
 
     local ut = u.Target
     if u.IsCasting and spell and ut and ut == Me.Guid then
@@ -99,44 +96,37 @@ local function WarriorProtCombat()
   -- only melee spells from here on
   if not Me:InMeleeRange(target) then return end
 
-  if spells.ShieldSlam.IsReady and spells.ShieldSlam:IsUsable() then
-    spells.ShieldSlam:Cast(target)
-  end
+  -- Shield Slam
+  if spells.ShieldSlam:CastEx(target) then return end
 
-  if spells.Revenge.IsReady and spells.Revenge:IsUsable() then
-    spells.Revenge:Cast(target)
-  end
+  -- Revenge
+  if spells.Revenge:CastEx(target) then return end
 
   -- Battle Shout
   local bs = Me:GetAura("Battle Shout")
+  -- Manual Cast here because CastEx gets fucked range.
   if not bs or bs.Remaining < 15 * 1000 and spells.BattleShout.IsReady and spells.BattleShout:IsUsable() then
     spells.BattleShout:Cast(target)
   end
 
-  if ds and spells.DemoralizingShout.IsReady and spells.DemoralizingShout:IsUsable() then
-    spells.DemoralizingShout:Cast(target)
-  end
+  -- Demoralizing Shout
+  if ds and spells.DemoralizingShout:CastEx(target) then return end
 
-  if tc and spells.ThunderClap.IsReady and spells.ThunderClap:IsUsable() then
-    spells.ThunderClap:Cast(target)
-  end
+  -- Thunder Clap
+  if tc and spells.ThunderClap:CastEx(target) then return end
 
-  if sr and Me.PowerPct > 45 and spells.SpellReflection.IsReady and spells.SpellReflection:IsUsable() then
-    spells.SpellReflection:Cast(Me.ToUnit)
-  end
+  -- Spell Reflection
+  if sr and Me.PowerPct > 45 and spells.SpellReflection:CastEx(target) then return end
 
-  if Me.PowerPct > 55 and spells.ShieldBlock.IsReady and spells.ShieldBlock:IsUsable() then
-    spells.ShieldBlock:Cast(Me.ToUnit)
-  end
+  -- Shield Block
+  if Me.PowerPct > 55 and spells.ShieldBlock:CastEx(target) then return end
 
+  -- Filler (Heroic Strike or Cleave)
   local hs_or_cleave = aoe and spells.HeroicStrike or spells.Cleave
-  if Me.PowerPct > 75 and not hs_or_cleave.IsActive and hs_or_cleave.IsReady and hs_or_cleave:IsUsable() then
-    hs_or_cleave:Cast(target)
-  end
+  if Me.PowerPct > 75 and hs_or_cleave:CastEx(target) then return end
 
-  if spells.Devastate.IsReady and spells.Devastate:IsUsable() then
-    spells.Devastate:Cast(target)
-  end
+  -- Devastate
+  if spells.Devastate:CastEx(target) then return end
 end
 
 local behaviors = {
