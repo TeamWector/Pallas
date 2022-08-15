@@ -66,7 +66,7 @@ function Combat:ExclusionFilter()
   for k, u in pairs(self.Targets) do
     if not Me:CanAttack(u) then
       self.Targets[k] = nil
-    elseif not Settings.Core.AttackOutOfCombat and not u.InCombat then
+    elseif not u.InCombat or (not Settings.Core.AttackOutOfCombat and not u.InCombat) then
       self.Targets[k] = nil
     elseif u.Dead or u.Health <= 0 then
       self.Targets[k] = nil
