@@ -20,8 +20,16 @@ function WoWUnit:HasDebuffByMe(dname)
   return false
 end
 
+local movingMask =
+  MovementFlags.Forward |
+  MovementFlags.Backward |
+  MovementFlags.StrafeLeft |
+  MovementFlags.StrafeRight |
+  MovementFlags.Falling |
+  MovementFlags.Ascending |
+  MovementFlags.Descending
 function WoWUnit:IsMoving()
-  return self.MovementFlags > 0
+  return (self.MovementFlags & movingMask) > 0
 end
 
 function WoWUnit:GetHealthPercent()
