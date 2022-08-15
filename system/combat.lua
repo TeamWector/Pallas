@@ -49,9 +49,16 @@ function Combat:CollectTargets()
   local flags = ObjectTypeFlag.Unit
   local units = wector.Game:GetObjectsByFlag(flags)
 
-  -- copy unit list
-  for k, u in pairs(units) do
-    self.Targets[k] = u.ToUnit
+  if not Me.InCombat and Settings.Core.AttackOutOfCombat then
+    local target = Me.Target
+    if target and not target.IsTapDenied then
+      table.insert(self.Targets, Me.Target)
+    end
+  else
+    -- copy unit list
+    for k, u in pairs(units) do
+      self.Targets[k] = u.ToUnit
+    end
   end
 end
 
