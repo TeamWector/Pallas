@@ -1,134 +1,103 @@
 local options = {
-    -- The sub menu name
-    Name = "Warlock (Affli)",
+  -- The sub menu name
+  Name = "Warlock (Affli)",
 
-    -- widgets
-    Widgets = {
-        { "checkbox", "WandFinish", "Wand Finisher", false },
-        { "slider", "LifeTapPercent", "Life Tap %", 90, 0, 100 },
-        { "slider", "WandExecutePercent", "Wand Finish %", 30, 0, 60 },
-    }
+  -- widgets
+  Widgets = {
+    { "checkbox", "WarlockAfflWandFinish", "Wand Finisher", false },
+    { "slider", "WarlockAfflLifeTapPercent", "Life Tap %", 90, 0, 100 },
+    { "slider", "WarlockAfflWandExecutePercent", "Wand Finish %", 30, 0, 60 },
+  }
 }
-
-
 
 local spells = {
-    DemonArmor = WoWSpell("Demon Armor"),
-    LifeTap = WoWSpell("Life Tap"),
-    CurseOfAgony = WoWSpell("Curse of Agony"),
-    Corruption = WoWSpell("Corruption"),
-    DrainLife = WoWSpell("Drain Life"),
-    ShadowBolt = WoWSpell("Shadow Bolt"),
-    Shoot = WoWSpell("Shoot")
+  DemonArmor = WoWSpell("Demon Armor"),
+  DemonSkin = WoWSpell("Demon Skin"),
+  LifeTap = WoWSpell("Life Tap"),
+  CurseOfAgony = WoWSpell("Curse of Agony"),
+  Corruption = WoWSpell("Corruption"),
+  DrainLife = WoWSpell("Drain Life"),
+  ShadowBolt = WoWSpell("Shadow Bolt"),
+  Shoot = WoWSpell("Shoot")
 }
 
-local function IsDotted(unit)
-    local agony = false
-    local corruption = false
+WarlockAfflListener = wector.FrameScript:CreateListener()
+WarlockAfflListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
 
-    local auras = unit.Auras
-    for _, aura in pairs(auras) do
-        if aura.Name == "Corruption" and aura.Caster.IsPlayer then
-            corruption = true
-        end
-
-        if aura.Name == "Curse of Agony" and aura.Caster.IsPlayer then
-            agony = true
-        end
-    end
-
-    return agony and corruption
+-- This fixes the problem of double casting corruption
+local corruptionFix = 0
+function WarlockAfflListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, _, spellID)
+  if unitTarget == Me and spellID == spells.Corruption.Id then
+    corruptionFix = wector.Game.Time + 100
+  end
 end
 
--- Threshold % on me for LifeTap
-local HPThresh = 90
--- Threshold % on enemy for using spells
-local SpellThresh = 30
-
 local function WarlockAfflictionCombat()
-    -- buff up
-    if not Me:HasBuff("Demon Armor") then
-        if spells.DemonArmor:CanUse() then
-            if spells.DemonArmor:Cast(Me) then
-                return
-            end
-        end
+  -- Threshold % on me for LifeTap
+  local HPThresh = math.tointeger(GetCharSetting("WarlockAfflLifeTapPercent"))
+  -- Threshold % on enemy for using spells
+  local SpellThresh = math.tointeger(GetCharSetting("WarlockAfflWandExecutePercent"))
+
+  -- buff up
+
+  -- fix for broken IsKnown
+  local spellDemonBuff = spells.DemonArmor.Slot >= 0 and spells.DemonArmor or spells.DemonSkin
+  --local spellDemonBuff = spells.DemonArmor.IsKnown and spells.DemonArmor or spells.DemonSkin
+
+  -- Demon Armor/Skin
+  if not Me:HasVisibleAura(spellDemonBuff.Id) and spellDemonBuff:CastEx(Me) then return end
+
+  -- Make sure we have a target before continuing
+  local target = Combat.BestTarget
+  if not target then return end
+
+  -- Only do this when pet is active
+  if Me.Pet then
+    -- Pet Attack my target
+    if not Me.Pet.Target or Me.Pet.Target ~= Me.Target then
+      Me:PetAttack(target)
     end
 
-    -- Omegalul workaround
-    if Me:GetHealthPercent() >= HPThresh and Me.PowerPct < 90 and not Me.IsCastingOrChanneling then
-        if spells.LifeTap:CanUse() then
-            spells.LifeTap:Cast(Me)
-        end
+    -- set follow if no target
+    if not target and Me.Pet.Target then
+      Me:PetFollow()
     end
+  end
 
-    -- Make sure we have a target before continuing
-    local target = Combat.BestTarget
-    if not target then return end
+  if Me:HasBuff("Shadow Trance") and spells.ShadowBolt:CastEx(target) then return end
 
-    -- Only do this when pet is active
-    if Me.Pet then
-        -- PetAttack my target
-        if not Me.Pet.Target or Me.Pet.Target ~= Me.Target then
-            Me:PetAttack(target)
-        end
+  -- Wand finisher, convert to percentage when that is implemented
+  if target:GetHealthPercent() <= SpellThresh then
+    if not spells.Shoot.IsAutoRepeat and spells.Shoot:CastEx(target) then return end
 
-        -- set follow if no target
-        if not target and Me.Pet.Target then
-            Me:PetFollow()
-        end
-    end
+    return
+  end
 
-    if Me:HasBuff("Shadow Trance") and spells.ShadowBolt:CanUse(target) then
-        spells.ShadowBolt:Cast(target)
-        return
-    end
+  if Me.IsCastingOrChanneling then return end
 
-    -- Wand finisher, convert to percentage when that is implemented
-    if target:GetHealthPercent() <= SpellThresh then
-        if not spells.Shoot.IsAutoRepeat and spells.Shoot:CanUse(target) then
-            spells.Shoot:Cast(target)
-        end
+  -- Curruption
+  local shouldCorruption = (wector.Game.Time - corruptionFix) > 0
+  if shouldCorruption and not target:HasDebuffByMe("Corruption") and spells.Corruption:CastEx(target) then return end
 
-        return
-    end
+  -- Curse of Agony
+  if not target:HasDebuffByMe("Curse of Agony") and spells.CurseOfAgony:CastEx(target) then return end
 
-    -- If target doesnt have dots, stop wand to reapply dots.
-    if not IsDotted(target) and spells.Shoot.IsAutoRepeat then
-        Me:StopCasting()
-    end
+  -- Drain Life
+  if Me.PowerPct > 70 and spells.DrainLife:CastEx(target) then return end
 
-    if Me.IsCastingOrChanneling then return end
+  -- Life Tap
+  if Me.HealthPct >= HPThresh and Me.PowerPct < 50 and not Me.IsCastingOrChanneling then
+    if spells.LifeTap:CastEx(Me) then return end
+  end
 
-    if not target:HasDebuffByMe("Curse of Agony") then
-        if spells.CurseOfAgony:CanUse(target) then
-            spells.CurseOfAgony:Cast(target)
-            return
-        end
-    end
-
-    if not target:HasDebuffByMe("Corruption") then
-        if spells.Corruption:CanUse(target) then
-            spells.Corruption:Cast(target)
-            return
-        end
-    end
-
-    if spells.DrainLife:CanUse(target) and Me.PowerPct > 70 then
-        spells.DrainLife:Cast(target)
-    end
-
-    -- Wand
-    if IsDotted(target) and Me.PowerPct <= 70 then
-        if not spells.Shoot.IsAutoRepeat and spells.Shoot:CanUse(target) then
-            spells.Shoot:Cast(target)
-            return
-        end
-    end
+  -- Wand
+  -- Only if not fully debuffed
+  if not target:HasDebuffByMe("Curse of Agony") or not target:HasDebuffByMe("Corruption") then return end
+  if not spells.Shoot.IsAutoRepeat and spells.Shoot:CastEx(target) then return end
 end
 
 local behaviors = {
-    [BehaviorType.Combat] = WarlockAfflictionCombat
+  [BehaviorType.Combat] = WarlockAfflictionCombat
 }
 
 return { Options = options, Behaviors = behaviors }
