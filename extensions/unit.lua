@@ -37,9 +37,9 @@ function WoWUnit:GetHealthPercent()
 end
 
 function WoWUnit:InCombatWithMe()
-  for k,v in pairs(self.ThreatTable) do
-    if Me.Guid == v.Guid then return true end
-  end
+  --for k,v in pairs(self.ThreatTable) do
+  --  if Me.Guid == v.Guid then return true end
+  --end
 
   return false
 end
