@@ -63,7 +63,6 @@ function Menu:AddOptionMenu(options)
     local label = string.format('%s##%s', v.text, v.uid)
     local safe_uid = v.uid:gsub("%s+", "")
 
-    print(Me.NameUnsafe)
     local value = nil
     if v.type ~= 'text' then
       if Settings[safe_uid] == nil then Settings[safe_uid] = v.default end
@@ -80,9 +79,6 @@ function Menu:AddOptionMenu(options)
       slider.OnValueChanged = function(_, _, newValue) Settings[safe_uid] = newValue end
       submenu:Add(slider)
     elseif v.type == "checkbox" then
-      print(safe_uid)
-      print(value)
-      print(type(value))
       local cb = ImCheckbox(label, value)
       cb.OnClick = function(_, _, newValue) Settings[safe_uid] = newValue end
       submenu:Add(cb)

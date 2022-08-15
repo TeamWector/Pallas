@@ -141,7 +141,6 @@ local function WarriorProtCombat()
 
   -- Battle Shout
   local shoutType = Settings.Shout
-  print(shoutType)
   if shoutType == 0 then
     local bs = Me:GetAura("Battle Shout")
     -- Manual Cast here because CastEx gets fucked range.
