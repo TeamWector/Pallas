@@ -96,7 +96,8 @@ local function WarlockAfflictionCombat()
 
   -- Lifetap anytime to gain value outside of combat also
   -- Life Tap if our health is more than what we choose and our mana deficit is more than what lifetap will return
-  if Me.HealthPct >= HPThresh and not Me.IsCastingOrChanneling and (Me.PowerMax - Me.Power >= LifetapValue()) and spells.LifeTap:CastEx(Me) then return end
+  if Me.HealthPct >= HPThresh and not Me.IsCastingOrChanneling and (Me.PowerMax - Me.Power >= LifetapValue()) and
+      spells.LifeTap:CastEx(Me) then return end
 
   -- Make sure we have a target before continuing
   local target = Combat.BestTarget
@@ -108,11 +109,18 @@ local function WarlockAfflictionCombat()
     if not Me.Pet.Target or Me.Pet.Target ~= Me.Target then
       Me:PetAttack(target)
     end
+  end
 
-    -- set follow if no target
-    if not target and Me.Pet.Target then
-      Me:PetFollow()
+  -- Drain Soul
+  if target.HealthPct < Settings.WarlockAfflDrainSoulPct then
+    local current = Me.CurrentChannel
+    if not current and spells.DrainSoul:CastEx(target) then
+      return
+    elseif current ~= spells.DrainSoul then
+      Me:StopCasting()
     end
+
+    return
   end
 
   if Me:HasBuff("Shadow Trance") and spells.ShadowBolt:CastEx(target) then return end
