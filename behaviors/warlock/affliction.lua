@@ -13,15 +13,22 @@ local options = {
     {
       type = "slider",
       uid = "WarlockAfflLifeTapPercent",
-      text = "Life Tap %",
+      text = "Life Tap hp%",
       default = 90,
     },
     {
       type = "slider",
       uid = "WarlockAfflWandExecutePercent",
-      text = "Wand Finish %",
+      text = "Wand Finish hp%",
       default = 30,
       max = 60
+    },
+    {
+      type = "slider",
+      uid = "WarlockAfflDrainSoulPct",
+      text = "Drain Soul hp% (0 to disable)",
+      default = 0,
+      max = 100
     },
   }
 }
@@ -33,6 +40,7 @@ local spells = {
   CurseOfAgony = WoWSpell("Curse of Agony"),
   Corruption = WoWSpell("Corruption"),
   DrainLife = WoWSpell("Drain Life"),
+  DrainSoul = WoWSpell("Drain Soul"),
   ShadowBolt = WoWSpell("Shadow Bolt"),
   Shoot = WoWSpell("Shoot")
 }
@@ -100,17 +108,23 @@ local function WarlockAfflictionCombat()
     if not Me.Pet.Target or Me.Pet.Target ~= Me.Target then
       Me:PetAttack(target)
     end
-  end
 
-  -- Wand Finisher if toggled and below health percentage
-  if target:GetHealthPercent() <= SpellThresh and Settings.WarlockAfflWandFinish then
-    if not spells.Shoot.IsAutoRepeat and spells.Shoot:CastEx(target) then return end
+    -- set follow if no target
+    if not target and Me.Pet.Target then
+      Me:PetFollow()
+    end
   end
-
-  -- if we are channeling or casting we should return so we dont cancel drain life/soul
-  if Me.IsCastingOrChanneling then return end
 
   if Me:HasBuff("Shadow Trance") and spells.ShadowBolt:CastEx(target) then return end
+
+  -- Wand finisher, convert to percentage when that is implemented
+  if target:GetHealthPercent() <= SpellThresh then
+    if not spells.Shoot.IsAutoRepeat and spells.Shoot:CastEx(target) then return end
+
+    return
+  end
+
+  if Me.IsCastingOrChanneling then return end
 
   -- Curruption
   local shouldCorruption = (wector.Game.Time - corruptionFix) > 0
