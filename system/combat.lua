@@ -65,7 +65,7 @@ function Combat:ExclusionFilter()
       self.Targets[k] = nil
     elseif u:GetDistance(Me.ToUnit) > 40 then
       self.Targets[k] = nil
-    elseif u.IsTapDenied and (not u.Target or u.Target.Guid ~= Me.Guid) then
+    elseif not u.IsTapDenied and (not u.Target or u.Target.Guid ~= Me.Guid) then
       self.Targets[k] = nil
     end
   end
