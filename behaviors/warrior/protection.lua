@@ -8,13 +8,15 @@ local options = {
     { "checkbox", "UseLastStand", "Use Last Stand", false },
     { "slider", "LastStandHP", "Last Stand HP%", 30, 0, 100 },
     { "checkbox", "UseShieldWall", "Use Shield Wall", false },
-    { "slider", "ShieldWallHP", "Last Stand HP%", 15, 0, 100 },
-    { "checkbox", "Taunt", "Auto-Taunt", true },
+    { "slider", "ShieldWallHP", "Shield Wall HP%", 15, 0, 100 },
+    { "checkbox", "Taunt", "Auto-Taunt", false },
     { "combobox", "Shout", "Shout", {
         "Battle Shout",
         "Commanding Shout"
       }
     },
+
+    -- !NYI
     { "groupbox", "TestGroupbox", "Hello Groupbox", {
         { "text", "TestText", "Hello Text", },
         { "slider", "TestSlider", "Hello Slider", 50, 0, 100 },
@@ -32,12 +34,15 @@ local options = {
 }
 
 local spells = {
+  BattleShout = WoWSpell("Battle Shout"),
+  CommandingShout = WoWSpell("Commanding Shout"),
+
+  ThunderClap = WoWSpell("Thunder Clap"),
+  DemoralizingShout = WoWSpell("Demoralizing Shout"),
+
   ShieldSlam = WoWSpell("Shield Slam"),
   Devastate = WoWSpell("Devastate"),
   Revenge = WoWSpell("Revenge"),
-  ThunderClap = WoWSpell("Thunder Clap"),
-  BattleShout = WoWSpell("Battle Shout"),
-  DemoralizingShout = WoWSpell("Demoralizing Shout"),
   SpellReflection = WoWSpell("Spell Reflection"),
   ShieldBlock = WoWSpell("Shield Block"),
   ShieldBash = WoWSpell("Shield Bash"),
@@ -103,10 +108,19 @@ local function WarriorProtCombat()
   if spells.Revenge:CastEx(target) then return end
 
   -- Battle Shout
-  local bs = Me:GetAura("Battle Shout")
-  -- Manual Cast here because CastEx gets fucked range.
-  if not bs or bs.Remaining < 15 * 1000 and spells.BattleShout.IsReady and spells.BattleShout:IsUsable() then
-    spells.BattleShout:Cast(target)
+  local shoutType = math.tointeger(GetCharSetting("Shout"))
+  if shoutType == 0 then
+    local bs = Me:GetAura("Battle Shout")
+    -- Manual Cast here because CastEx gets fucked range.
+    if not bs or bs.Remaining < 15 * 1000 and spells.BattleShout.IsReady and spells.BattleShout:IsUsable() then
+      spells.BattleShout:Cast(target)
+    end
+  elseif shoutType == 1 then
+    local cs = Me:GetAura("Commanding Shout")
+    -- Manual Cast here because CastEx gets fucked range.
+    if not cs or cs.Remaining < 15 * 1000 and spells.CommandingShout.IsReady and spells.CommandingShout:IsUsable() then
+      spells.CommandingShout:Cast(target)
+    end
   end
 
   -- Demoralizing Shout
