@@ -13,15 +13,22 @@ local options = {
     {
       type = "slider",
       uid = "WarlockAfflLifeTapPercent",
-      text = "Life Tap %",
+      text = "Life Tap hp%",
       default = 90,
     },
     {
       type = "slider",
       uid = "WarlockAfflWandExecutePercent",
-      text = "Wand Finish %",
+      text = "Wand Finish hp%",
       default = 30,
       max = 60
+    },
+    {
+      type = "slider",
+      uid = "WarlockAfflDrainSoulPct",
+      text = "Drain Soul hp% (0 to disable)",
+      default = 0,
+      max = 100
     },
   }
 }
@@ -33,6 +40,7 @@ local spells = {
   CurseOfAgony = WoWSpell("Curse of Agony"),
   Corruption = WoWSpell("Corruption"),
   DrainLife = WoWSpell("Drain Life"),
+  DrainSoul = WoWSpell("Drain Soul"),
   ShadowBolt = WoWSpell("Shadow Bolt"),
   Shoot = WoWSpell("Shoot")
 }
@@ -78,6 +86,18 @@ local function WarlockAfflictionCombat()
     if not target and Me.Pet.Target then
       Me:PetFollow()
     end
+  end
+
+  -- Drain Soul
+  if target.HealthPct < Settings.WarlockAfflDrainSoulPct then
+    local current = Me.CurrentChannel
+    if not current and spells.DrainSoul:CastEx(target) then
+      return
+    elseif current ~= spells.DrainSoul then
+      Me:StopCasting()
+    end
+
+    return
   end
 
   if Me:HasBuff("Shadow Trance") and spells.ShadowBolt:CastEx(target) then return end
