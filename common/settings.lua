@@ -37,7 +37,7 @@ Settings = setmetatable({
     local char = rawget(tbl, 'Character')
     if not char then return end
     local mine = rawget(char, me.NameUnsafe)
-    if next(mine) == nil then
+    if not mine then
       mine = rawset(char, me.NameUnsafe, {})
     end
 
