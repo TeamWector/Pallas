@@ -1,18 +1,12 @@
 Pallas = {}
 Pallas.EventListener = wector.FrameScript:CreateListener()
 Pallas.EventListener:RegisterEvent('PLAYER_ENTERING_WORLD')
-Pallas.EventListener:RegisterEvent('PLAYER_LEAVING_WORLD')
 
----@type WoWActivePlayer
-Me = {}
+---@type WoWActivePlayer?
+Me = nil
 
-function Pallas.EventListener:PLAYER_ENTERING_WORLD(_, isReloadingUi)
-  Me = wector.Game.ActivePlayer
-  Behavior:Initialize(isReloadingUi)
-end
-
-function Pallas.EventListener:PLAYER_LEAVING_WORLD()
-  Me = {}
+function Pallas.EventListener:PLAYER_ENTERING_WORLD(_, _)
+  Pallas:Initialize()
 end
 
 function Pallas:Initialize()
@@ -23,12 +17,6 @@ function Pallas:Initialize()
 
   print('Initialize Pallas')
   Behavior:Initialize()
-end
-
-function Pallas:Shutdown()
-  if not Pallas.initialized then return end
-
-  print('Shutdown Pallas')
 end
 
 function Pallas:OnUpdate()
@@ -49,5 +37,5 @@ function Pallas:OnUpdate()
 end
 
 RegisterEvent('OnLoad', Pallas.Initialize)
-RegisterEvent('OnUnload', Pallas.Shutdown)
+--RegisterEvent('OnUnload', Pallas.Shutdown)
 RegisterEvent('OnUpdate', Pallas.OnUpdate)

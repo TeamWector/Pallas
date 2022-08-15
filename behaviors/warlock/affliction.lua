@@ -4,9 +4,25 @@ local options = {
 
   -- widgets
   Widgets = {
-    { "checkbox", "WarlockAfflWandFinish", "Wand Finisher", false },
-    { "slider", "WarlockAfflLifeTapPercent", "Life Tap %", 90, 0, 100 },
-    { "slider", "WarlockAfflWandExecutePercent", "Wand Finish %", 30, 0, 60 },
+    {
+      type = "checkbox",
+      uid = "WarlockAfflWandFinish",
+      text = "Wand Finisher",
+      default = false
+    },
+    {
+      type = "slider",
+      uid = "WarlockAfflLifeTapPercent",
+      text = "Life Tap %",
+      default = 90,
+    },
+    {
+      type = "slider",
+      uid = "WarlockAfflWandExecutePercent",
+      text = "Wand Finish %",
+      default = 30,
+      max = 60
+    },
   }
 }
 
@@ -34,9 +50,9 @@ end
 
 local function WarlockAfflictionCombat()
   -- Threshold % on me for LifeTap
-  local HPThresh = math.tointeger(GetCharSetting("WarlockAfflLifeTapPercent"))
+  local HPThresh = Settings.WarlockAfflLifeTapPercent
   -- Threshold % on enemy for using spells
-  local SpellThresh = math.tointeger(GetCharSetting("WarlockAfflWandExecutePercent"))
+  local SpellThresh = Settings.WarlockAfflWandExecutePercent
 
   -- buff up
 

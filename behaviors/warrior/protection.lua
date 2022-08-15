@@ -4,19 +4,50 @@ local options = {
 
   -- widgets
   Widgets = {
-    --{ "text", "TestText", "Hello Text", },
-    { "checkbox", "UseLastStand", "Use Last Stand", false },
-    { "slider", "LastStandHP", "Last Stand HP%", 30, 0, 100 },
-    { "checkbox", "UseShieldWall", "Use Shield Wall", false },
-    { "slider", "ShieldWallHP", "Shield Wall HP%", 15, 0, 100 },
-    { "checkbox", "Taunt", "Auto-Taunt", false },
-    { "combobox", "Shout", "Shout", {
-        "Battle Shout",
-        "Commanding Shout"
-      }
+    {
+      type = "checkbox",
+      uid = "UseLastStand",
+      text = "Use Last Stand",
+      default = false
+    },
+    {
+      type = "slider",
+      uid = "LastStandHP",
+      text = "Last Stand HP%",
+      default = 30,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "checkbox",
+      uid = "UseShieldWall",
+      text = "Use Shield Wall",
+      default = false
+    },
+    {
+      type = "slider",
+      uid = "ShieldWallHP",
+      text = "Shield Wall HP%",
+      default = 15,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "checkbox",
+      uid = "Taunt",
+      text = "Auto-Taunt",
+      default = false
+    },
+    {
+      type = "combobox",
+      uid = "Shout",
+      text = "Shout",
+      default = 0,
+      options = { "Battle Shout", "Commanding Shout" }
     },
 
     -- !NYI
+    --[[
     { "groupbox", "TestGroupbox", "Hello Groupbox", {
         { "text", "TestText", "Hello Text", },
         { "slider", "TestSlider", "Hello Slider", 50, 0, 100 },
@@ -30,6 +61,7 @@ local options = {
         }
       }
     }
+    ]]
   }
 }
 
@@ -108,7 +140,8 @@ local function WarriorProtCombat()
   if spells.Revenge:CastEx(target) then return end
 
   -- Battle Shout
-  local shoutType = math.tointeger(GetCharSetting("Shout"))
+  local shoutType = Settings.Shout
+  print(shoutType)
   if shoutType == 0 then
     local bs = Me:GetAura("Battle Shout")
     -- Manual Cast here because CastEx gets fucked range.
