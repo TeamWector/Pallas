@@ -165,10 +165,13 @@ function Behavior:AddBehaviorOptions(options)
       local max = v[6] and v[6] or 100
 
       if stored_val then
-        val = stored_val
+        ---@diagnostic disable-next-line: cast-local-type
+        val = math.tointeger(stored_val)
+      else
+        SetCharSetting(safe_id, val)
       end
 
-      local slider = ImSlider(label, math.tointeger(val), min, max)
+      local slider = ImSlider(label, val, min, max)
       slider.OnValueChanged = function(_, _, newValue) SetCharSetting(safe_id, newValue) end
       submenu:Add(slider)
     elseif type == "checkbox" then
@@ -176,6 +179,8 @@ function Behavior:AddBehaviorOptions(options)
 
       if stored_val then
         val = stored_val
+      else
+        SetCharSetting(safe_id, val)
       end
 
       local cb = ImCheckbox(label, val)
@@ -187,6 +192,8 @@ function Behavior:AddBehaviorOptions(options)
 
       if stored_val then
         selected = stored_val
+      else
+        SetCharSetting(safe_id, selected)
       end
 
       if _G.type(val) ~= "table" then
