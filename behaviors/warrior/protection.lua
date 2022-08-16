@@ -168,11 +168,11 @@ local function WarriorProtCombat()
   if Me.PowerPct > 55 and spells.ShieldBlock:CastEx(target) then return end
 
   -- Filler (Heroic Strike or Cleave)
-  local hs_or_cleave = aoe and spells.HeroicStrike or spells.Cleave
-  if Me.PowerPct > 75 and hs_or_cleave:CastEx(target) then return end
+  if Me.PowerPct > 75 and spells.HeroicStrike:CastEx(target) then return end
 
   -- Devastate
-  if spells.Devastate:CastEx(target) then return end
+  local sunders = target:GetAura("Sunder Armor")
+  if ((not sunders or (sunders.Stacks < 5 or sunders.Remaining < 4000)) or Me.PowerPct > 35) and spells.Devastate:CastEx(target) then return end
 end
 
 local behaviors = {
