@@ -167,7 +167,7 @@ local function WarriorProtCombat()
   -- Shield Block
   if Me.PowerPct > 55 and spells.ShieldBlock:CastEx(target) then return end
 
-  -- Filler (Heroic Strike or Cleave)
+  -- Heroic Strike Filler
   if Me.PowerPct > 75 and spells.HeroicStrike:CastEx(target) then return end
 
   -- Devastate

@@ -4,43 +4,51 @@ local options = {
 
   -- widgets
   Widgets = {
-    { "text", "TestText", "Hello Text", },
-    { "slider", "TestSlider", "Hello Slider", 50, 0, 100 },
-    { "checkbox", "TestCheckbox", "Hello Checkbox", true },
-    { "combobox", "TestCombobox", "Hello Combobox", {
-        "Hello Option 1",
-        "Hello Option 2",
-        "Hello Option 3",
-        "Hello Option 4",
-      }
+    {
+      type = "checkbox",
+      uid = "WarriorFurySweeping",
+      text = "Use Sweeping Strikes",
+      default = true
     },
-    { "groupbox", "TestGroupbox", "Hello Groupbox", {
-        { "text", "TestText", "Hello Text", },
-        { "slider", "TestSlider", "Hello Slider", 50, 0, 100 },
-        { "checkbox", "TestCheckbox", "Hello Checkbox" },
-        { "combobox", "TestCombobox", {
-            "Hello Option 1",
-            "Hello Option 2",
-            "Hello Option 3",
-            "Hello Option 4",
-          }
-        }
-      }
-    }
+    {
+      type = "checkbox",
+      uid = "WarriorFuryExecute",
+      text = "Use Execute",
+      default = false
+    },
+    {
+      type = "combobox",
+      uid = "WarriorFuryShout",
+      text = "Select shout",
+      default = 0,
+      options = { "Battle Shout", "Commanding Shout" }
+    },
+    {
+      type = "slider",
+      uid = "WarriorFuryFiller",
+      text = "Use filler (HS/Cleave) Rage%",
+      default = 65,
+      min = 0,
+      max = 100
+    },
   }
 }
 
 local spells = {
+  BattleShout = WoWSpell("Battle Shout"),
+  CommandingShout = WoWSpell("Commanding Shout"),
+  DemoralizingShout = WoWSpell("Demoralizing Shout"),
+
   BloodThirst = WoWSpell("Bloodthirst"),
   Whirlwind = WoWSpell("Whirlwind"),
   Execute = WoWSpell("Execute"),
   Rampage = WoWSpell("Rampage"),
   HeroicStrike = WoWSpell("Heroic Strike"),
   Cleave = WoWSpell("Cleave"),
-  BattleShout = WoWSpell("Battle Shout"),
   VictoryRush = WoWSpell("Victory Rush"),
-  BerserkerStance = WoWSpell("Berserker Stance"),
   SweepingStrikes = WoWSpell("Sweeping Strikes"),
+
+  Pummel = WoWSpell("Pummel"),
 
   -- racial
   Berserking = WoWSpell("Berserking")
@@ -52,59 +60,57 @@ local function WarriorFuryCombat()
 
   local aoe = Combat.EnemiesInMeleeRange > 1
 
-  -- buff
-  local bs = false
-  local ramp = false
-  local stance = 0
-  local auras = Me.Auras
-  for _, v in pairs(auras) do
-    if (v.Name == "Battle Shout") then
-      bs = true
+  -- interrupt
+  for _, u in pairs(Combat.Targets) do
+    local castorchan = u.IsCastingOrChanneling
+    local spell = u.CurrentSpell
+
+    -- Pummel
+    if castorchan and spell and Me:InMeleeRange(u) and spells.Pummel:CastEx(target) then return end
+  end
+
+  -- Battle Shout
+  local shoutType = Settings.WarriorFuryShout
+  if shoutType == 0 then
+    local bs = Me:GetAura("Battle Shout")
+    -- Manual Cast here because CastEx gets fucked range.
+    if not bs or bs.Remaining < 15 * 1000 and spells.BattleShout.IsReady and spells.BattleShout:IsUsable() then
+      spells.BattleShout:Cast(target)
     end
-    if (v.Name == "Rampage") and v.Remaining > 5000 then
-      ramp = true
-    end
-    if v.Name == "Battle Stance" then
-      stance = 1
-    elseif v.Name == "Defensive Stance" then
-      stance = 2
-    elseif v.Name == "Berserker Stance" then
-      stance = 3
+  elseif shoutType == 1 then
+    local cs = Me:GetAura("Commanding Shout")
+    -- Manual Cast here because CastEx gets fucked range.
+    if not cs or cs.Remaining < 15 * 1000 and spells.CommandingShout.IsReady and spells.CommandingShout:IsUsable() then
+      spells.CommandingShout:Cast(target)
     end
   end
 
-  if not bs and spells.BattleShout.IsReady and spells.BattleShout:IsUsable() then
-    spells.BattleShout:Cast(target)
-  end
+  -- only melee spells from here on
+  if not Me:InMeleeRange(target) then return end
 
-  if aoe and Me:InMeleeRange(target) and spells.SweepingStrikes.IsReady and spells.SweepingStrikes:IsUsable() then
-    spells.SweepingStrikes:Cast(target)
-  end
+  -- Victory Rush
+  if spells.VictoryRush:CastEx(target) then return end
 
-  if spells.VictoryRush:InRange(target) and spells.VictoryRush.IsReady and spells.VictoryRush:IsUsable() then
-    spells.VictoryRush:Cast(target)
-  end
+  -- pool rage
+  if Me.PowerPct < 30 then return end
 
-  if spells.BloodThirst:InRange(target) and spells.BloodThirst.IsReady and spells.BloodThirst:IsUsable() then
-    spells.BloodThirst:Cast(target)
-  end
+  -- Rampage
+  if not Me:HasBuff("Rampage") and spells.Rampage:CastEx(target) then return end
 
-  if spells.Whirlwind:InRange(target) and spells.Whirlwind.IsReady and spells.Whirlwind:IsUsable() then
-    spells.Whirlwind:Cast(target)
-  end
+  -- Sweeping Strikes
+  if aoe and Settings.WarriorFurySweeping and spells.SweepingStrikes:CastEx(target) then return end
 
-  --if spells.Execute:InRange(target) and spells.Execute.IsReady and spells.Execute:IsUsable() then
-  --  spells.Execute:Cast(target)
-  --end
+  -- Blood Thirst, make sure we cast blood thirst if ready before continuing
+  if spells.BloodThirst:CastEx(target) then return end
 
-  if not ramp and spells.Rampage:InRange(target) and spells.Rampage.IsReady and spells.Rampage:IsUsable() then
-    spells.Rampage:Cast(target)
-  end
+  -- Whirlwind
+  if spells.Whirlwind:CastEx(target) then return end
 
-  local hs_or_cleave = aoe and spells.HeroicStrike or spells.Cleave
-  if Me:GetPowerPctByType(PowerType.Rage) > 75 and hs_or_cleave:InRange(target) and hs_or_cleave.IsReady and hs_or_cleave:IsUsable() then
-    hs_or_cleave:Cast(target)
-  end
+  -- Execute
+  if Settings.WarriorFuryExecute and spells.Execute:CastEx(target) then return end
+
+  local hs_or_cleave = aoe and spells.Cleave or spells.HeroicStrike
+  if Me.PowerPct > Settings.WarriorFuryFiller and hs_or_cleave:CastEx(target) then return end
 end
 
 local behaviors = {
