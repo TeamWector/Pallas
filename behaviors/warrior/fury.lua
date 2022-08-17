@@ -66,7 +66,7 @@ local function WarriorFuryCombat()
     local spell = u.CurrentSpell
 
     -- Pummel
-    if castorchan and spell and Me:InMeleeRange(u) and spells.Pummel:CastEx(target) then return end
+    if castorchan and spell and Me:InMeleeRange(u) and spells.Pummel:CastEx(u) then return end
   end
 
   -- Battle Shout
