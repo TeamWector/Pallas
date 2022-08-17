@@ -72,8 +72,8 @@ function Combat:ExclusionFilter()
       self.Targets[k] = nil
     elseif u:GetDistance(Me.ToUnit) > 40 then
       self.Targets[k] = nil
-    --elseif not u:InCombatWithMe() and (not u.Target or u.Target.Guid ~= Me.Guid) then
-    --  self.Targets[k] = nil
+    elseif u.IsTapDenied and (not u.Target or u.Target ~= Me) then
+      self.Targets[k] = nil
     end
   end
 end
@@ -108,7 +108,7 @@ function Combat:WeighFilter()
     end
 
     -- our only priority right now, current target
-    if Me.Target and Me.Target.Guid == u.Guid then
+    if Me.Target and Me.Target == u then
       priority = priority + 50
     end
 
