@@ -10,12 +10,9 @@ Settings = setmetatable({
     local raw = rawget(tbl, key)
     if raw ~= nil then return raw end
 
-    local me = wector.Game.ActivePlayer
-    if not me or me.NameUnsafe == "Unknown" then return end
-
     local char = rawget(tbl, 'Character')
     if not char then return end
-    local mine = rawget(char, me.NameUnsafe)
+    local mine = rawget(char, string.format('player%d', Me.Guid.Low))
     if not mine then return end
 
     local value = rawget(mine, key)
@@ -31,14 +28,11 @@ Settings = setmetatable({
     local raw = rawget(tbl, key)
     if raw ~= nil then return raw end
 
-    local me = wector.Game.ActivePlayer
-    if not me or me.NameUnsafe == "Unknown" then return end
-
     local char = rawget(tbl, 'Character')
     if not char then return end
-    local mine = rawget(char, me.NameUnsafe)
+    local mine = rawget(char, string.format('player%d', Me.Guid.Low))
     if not mine then
-      mine = rawset(char, me.NameUnsafe, {})
+      mine = rawset(char, string.format('player%d', Me.Guid.Low), {})
     end
 
     rawset(mine, key, value)
