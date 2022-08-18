@@ -31,6 +31,14 @@ local options = {
       min = 0,
       max = 100
     },
+    {
+      type = "slider",
+      uid = "WarriorFuryPool",
+      text = "Pool rage%",
+      default = 35,
+      min = 0,
+      max = 100
+    },
   }
 }
 
@@ -71,18 +79,11 @@ local function WarriorFuryCombat()
 
   -- Battle Shout
   local shoutType = Settings.WarriorFuryShout
-  if shoutType == 0 then
-    local bs = Me:GetAura("Battle Shout")
-    -- Manual Cast here because CastEx gets fucked range.
-    if not bs or bs.Remaining < 15 * 1000 and spells.BattleShout.IsReady and spells.BattleShout:IsUsable() then
-      spells.BattleShout:Cast(target)
-    end
-  elseif shoutType == 1 then
-    local cs = Me:GetAura("Commanding Shout")
-    -- Manual Cast here because CastEx gets fucked range.
-    if not cs or cs.Remaining < 15 * 1000 and spells.CommandingShout.IsReady and spells.CommandingShout:IsUsable() then
-      spells.CommandingShout:Cast(target)
-    end
+  local shoutAura = shoutType == 0 and Me:GetAura("Battle Shout") or Me:GetAura("Commanding Shout")
+  local shoutSpell = shoutType == 0 and spells.BattleShout or spells.CommandingShout
+  -- Manual Cast here because CastEx gets fucked range.
+  if not shoutAura or shoutAura.Remaining < 15 * 1000 and shoutSpell.IsReady and shoutSpell:IsUsable() then
+    shoutSpell:Cast(target)
   end
 
   -- only melee spells from here on
@@ -92,13 +93,14 @@ local function WarriorFuryCombat()
   if spells.VictoryRush:CastEx(target) then return end
 
   -- pool rage
-  if Me.PowerPct < 30 then return end
+  if Me.PowerPct < Settings.WarriorFuryPool then return end
 
   -- Rampage
-  if not Me:HasBuff("Rampage") and spells.Rampage:CastEx(target) then return end
+  local rampage = Me:GetVisibleAura("Rampage")
+  if (not rampage or rampage.Remaining < 5000) and spells.Rampage:CastEx(target) then return end
 
   -- Sweeping Strikes
-  if aoe and Settings.WarriorFurySweeping and spells.SweepingStrikes:CastEx(target) then return end
+  if aoe and Settings.WarriorFurySweeping and spells.SweepingStrikes:CastEx(Me) then return end
 
   -- Blood Thirst, make sure we cast blood thirst if ready before continuing
   if spells.BloodThirst:CastEx(target) then return end
@@ -106,11 +108,12 @@ local function WarriorFuryCombat()
   -- Whirlwind
   if spells.Whirlwind:CastEx(target) then return end
 
-  -- Execute
-  if Settings.WarriorFuryExecute and spells.Execute:CastEx(target) then return end
-
+  -- Heroic Strike/Cleave
   local hs_or_cleave = aoe and spells.Cleave or spells.HeroicStrike
   if Me.PowerPct > Settings.WarriorFuryFiller and hs_or_cleave:CastEx(target) then return end
+
+  -- Execute
+  if Me.PowerPct > Settings.WarriorFuryFiller and spells.Execute:CastEx(target) then return end
 end
 
 local behaviors = {
