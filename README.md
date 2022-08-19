@@ -24,7 +24,7 @@ After installation the path to Pallas will be `<Wector root>/scripts/Pallas`
 |-------------------|:--------------------:|-------------------|:--------------------:|-------------------|:--------------------:|
 | **Death Knight**  |                      | **Mage**          |                      | **Rogue**         |                      |
 | Blood             |         :x:          | Arcane            |         :x:          | Assassination     |         :x:          |
-| Frost             |         :x:          | Fire              |         :x:          | Combat            |         :x:          |
+| Frost             |         :x:          | Fire              |         :x:          | Combat            | :large_blue_diamond: |
 | Unholy            |         :x:          | Frost             |         :x:          | Sublety           |         :x:          |
 | **Druid**         |                      | **Paladin**       |                      | **Shaman**        |                      |
 | Balance           |         :x:          | Holy              |         :x:          | Restoration       |         :x:          |
@@ -36,7 +36,7 @@ After installation the path to Pallas will be `<Wector root>/scripts/Pallas`
 | Survival          |         :x:          | Shadow            |         :x:          | Destruction       |         :x:          |
 | **Warrior**       |                      |                   |                      |                   |                      |
 | Arms              |         :x:          |                   |                      |                   |                      |
-| Fury              | :large_blue_diamond: |                   |                      |                   |                      |
+| Fury              |  :heavy_check_mark:  |                   |                      |                   |                      |
 | Protection        |  :heavy_check_mark:  |                   |                      |                   |                      |
 
 ## Contribute
