@@ -1,3 +1,5 @@
+local common = require('behaviors.warrior.common')
+
 local options = {
   -- The sub menu name
   Name = "Warrior (Prot)",
@@ -38,13 +40,7 @@ local options = {
       text = "Auto-Taunt",
       default = false
     },
-    {
-      type = "combobox",
-      uid = "Shout",
-      text = "Shout",
-      default = 0,
-      options = { "Battle Shout", "Commanding Shout" }
-    },
+    common.widgets
 
     -- !NYI
     --[[
@@ -66,8 +62,6 @@ local options = {
 }
 
 local spells = {
-  BattleShout = WoWSpell("Battle Shout"),
-  CommandingShout = WoWSpell("Commanding Shout"),
 
   ThunderClap = WoWSpell("Thunder Clap"),
   DemoralizingShout = WoWSpell("Demoralizing Shout"),
@@ -77,7 +71,6 @@ local spells = {
   Revenge = WoWSpell("Revenge"),
   SpellReflection = WoWSpell("Spell Reflection"),
   ShieldBlock = WoWSpell("Shield Block"),
-  ShieldBash = WoWSpell("Shield Bash"),
   ConcussionBlow = WoWSpell("Concussion Blow"),
 
   HeroicStrike = WoWSpell("Heroic Strike"),
@@ -93,22 +86,7 @@ local function WarriorProtCombat()
 
   local aoe = Combat.EnemiesInMeleeRange > 1
 
-  local sr = false
-  for _, u in pairs(Combat.Targets) do
-    local castorchan = u.IsCastingOrChanneling
-    local spell = u.CurrentSpell
-
-    -- Shield Bash
-    if castorchan and spell and Me:InMeleeRange(u) and spells.ShieldBash:CastEx(target) then return end
-
-    -- Concussion Blow
-    if castorchan and spell and Me:InMeleeRange(u) and spells.ConcussionBlow:CastEx(target) then return end
-
-    local ut = u.Target
-    if u.IsCasting and spell and ut and ut == Me.Guid then
-      sr = true
-    end
-  end
+  local sr = common:DoInterrupt()
 
   -- debuff
   local ds = true
@@ -139,21 +117,8 @@ local function WarriorProtCombat()
   -- Revenge
   if spells.Revenge:CastEx(target) then return end
 
-  -- Battle Shout
-  local shoutType = Settings.Shout
-  if shoutType == 0 then
-    local bs = Me:GetAura("Battle Shout")
-    -- Manual Cast here because CastEx gets fucked range.
-    if not bs or bs.Remaining < 15 * 1000 and spells.BattleShout.IsReady and spells.BattleShout:IsUsable() then
-      spells.BattleShout:Cast(target)
-    end
-  elseif shoutType == 1 then
-    local cs = Me:GetAura("Commanding Shout")
-    -- Manual Cast here because CastEx gets fucked range.
-    if not cs or cs.Remaining < 15 * 1000 and spells.CommandingShout.IsReady and spells.CommandingShout:IsUsable() then
-      spells.CommandingShout:Cast(target)
-    end
-  end
+  -- Shout
+  common:DoShout()
 
   -- Demoralizing Shout
   if ds and spells.DemoralizingShout:CastEx(target) then return end

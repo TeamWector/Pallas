@@ -1,3 +1,5 @@
+local common = require('behaviors.warrior.common')
+
 local options = {
   -- The sub menu name
   Name = "Warrior (Fury)",
@@ -17,13 +19,6 @@ local options = {
       default = false
     },
     {
-      type = "combobox",
-      uid = "WarriorFuryShout",
-      text = "Select shout",
-      default = 0,
-      options = { "Battle Shout", "Commanding Shout" }
-    },
-    {
       type = "slider",
       uid = "WarriorFuryFiller",
       text = "Use filler (HS/Cleave) Rage%",
@@ -39,12 +34,16 @@ local options = {
       min = 0,
       max = 100
     },
+
+    -- import common widgets
+    common.widgets,
   }
 }
+for k, v in pairs(common.widgets) do
+  table.insert(options.Widgets, v)
+end
 
 local spells = {
-  BattleShout = WoWSpell("Battle Shout"),
-  CommandingShout = WoWSpell("Commanding Shout"),
   DemoralizingShout = WoWSpell("Demoralizing Shout"),
 
   BloodThirst = WoWSpell("Bloodthirst"),
@@ -56,8 +55,6 @@ local spells = {
   VictoryRush = WoWSpell("Victory Rush"),
   SweepingStrikes = WoWSpell("Sweeping Strikes"),
 
-  Pummel = WoWSpell("Pummel"),
-
   -- racial
   Berserking = WoWSpell("Berserking")
 }
@@ -68,23 +65,8 @@ local function WarriorFuryCombat()
 
   local aoe = Combat.EnemiesInMeleeRange > 1
 
-  -- interrupt
-  for _, u in pairs(Combat.Targets) do
-    local castorchan = u.IsCastingOrChanneling
-    local spell = u.CurrentSpell
-
-    -- Pummel
-    if castorchan and spell and Me:InMeleeRange(u) and spells.Pummel:CastEx(u) then return end
-  end
-
-  -- Battle Shout
-  local shoutType = Settings.WarriorFuryShout
-  local shoutAura = shoutType == 0 and Me:GetAura("Battle Shout") or Me:GetAura("Commanding Shout")
-  local shoutSpell = shoutType == 0 and spells.BattleShout or spells.CommandingShout
-  -- Manual Cast here because CastEx gets fucked range.
-  if not shoutAura or shoutAura.Remaining < 15 * 1000 and shoutSpell.IsReady and shoutSpell:IsUsable() then
-    shoutSpell:Cast(target)
-  end
+  common:DoInterrupt()
+  common:DoShout()
 
   -- only melee spells from here on
   if not Me:InMeleeRange(target) then return end
@@ -113,7 +95,7 @@ local function WarriorFuryCombat()
   if Me.PowerPct > Settings.WarriorFuryFiller and hs_or_cleave:CastEx(target) then return end
 
   -- Execute
-  if Me.PowerPct > Settings.WarriorFuryFiller and spells.Execute:CastEx(target) then return end
+  if Settings.WarriorFuryExecute and spells.Execute:CastEx(target) then return end
 end
 
 local behaviors = {
