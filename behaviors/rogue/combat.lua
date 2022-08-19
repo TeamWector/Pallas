@@ -4,47 +4,80 @@ local options = {
 
   -- widgets
   Widgets = {
-    { "text", "TestText", "Hello Text", },
-    { "slider", "TestSlider", "Hello Slider", 50, 0, 100 },
-    { "checkbox", "TestCheckbox", "Hello Checkbox", true },
-    { "combobox", "TestCombobox", "Hello Combobox", {
-        "Hello Option 1",
-        "Hello Option 2",
-        "Hello Option 3",
-        "Hello Option 4",
-      }
+    {
+      type = "checkbox",
+      uid = "RogueCommonInStealth",
+      text = "Attack in stealth",
+      default = false
     },
-    { "groupbox", "TestGroupbox", "Hello Groupbox", {
-        { "text", "TestText", "Hello Text", },
-        { "slider", "TestSlider", "Hello Slider", 50, 0, 100 },
-        { "checkbox", "TestCheckbox", "Hello Checkbox" },
-        { "combobox", "TestCombobox", {
-            "Hello Option 1",
-            "Hello Option 2",
-            "Hello Option 3",
-            "Hello Option 4",
-          }
-        }
-      }
-    }
   }
 }
 
+local spells = {
+  -- general
+  Kick = WoWSpell("Kick"),
+
+  -- generators
+  SinisterStrike = WoWSpell("Sinister Strike"),
+
+  -- spenders
+  SliceAndDice = WoWSpell("Slice and Dice"),
+  Eviscerate = WoWSpell("Eviscerate"),
+  KidneyShot = WoWSpell("Kidney Shot"),
+
+  -- talents
+  Riposte = WoWSpell("Riposte"),
+
+  -- Stealth only
+  CheapShot = WoWSpell("Cheap Shot"),
+}
+
+local function StealthRotation(target)
+  if spells.CheapShot:CastEx(target) then return end
+end
+
+local function interrupt()
+  local target = Combat.BestTarget
+  if not target then return false end
+  local comboPoints = Me:GetPowerByType(PowerType.Obsolete)
+
+  for _, u in pairs(Combat.Targets) do
+    local castorchan = u.IsCastingOrChanneling
+    local spell = u.CurrentSpell
+
+    -- Kick
+    if castorchan and spell and Me:InMeleeRange(u) and spells.Kick:CastEx(target) then return false end
+
+    -- Kidney Shot
+    if castorchan and spell and Me:InMeleeRange(u) and spells.KidneyShot:CastEx(target) then return false end
+  end
+
+  return false
+end
+
 local function RogueCombatCombat()
-  -- these are all things that should be handled by Combat module
-  local me = wector.Game.ActivePlayer
-  if not me then return end
-  local target = me.Target
+  local target = Combat.BestTarget
   if not target then return end
-  if not target.IsEnemy then return end
 
   -- Start combat behaviors
 
   -- only attack melee
-  if not me:InMeleeRange(target) then return end
+  if not Me:InMeleeRange(target) then return end
 
-  local ss = WoWSpell("Sinister Strike")
-  if me.PowerPct > 40 and ss.IsUsable and ss:Cast(target) then return end
+  interrupt()
+
+  -- Stealth rotation
+  if Settings.RogueCombatInStealth and (Me.ShapeshiftForm & ShapeshiftForm.Stealth) then
+    StealthRotation(target)
+    return
+  end
+
+  local comboPoints = Me:GetPowerByType(PowerType.Obsolete)
+  if not Me:HasAura("Slice and Dice") and comboPoints > 2 and spells.SliceAndDice:CastEx(target) then return end
+
+  if spells.Riposte:CastEx(target) then return end
+
+  if spells.SinisterStrike:CastEx(target) then return end
 end
 
 local behaviors = {
