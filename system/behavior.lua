@@ -6,7 +6,8 @@ BehaviorType = {
   Heal = 1,
   Tank = 2,
   Combat = 3,
-  Rest = 4
+  Rest = 4,
+  Extra = 5
 }
 
 local behavior_map = {
@@ -104,6 +105,13 @@ function Behavior:Initialize(isReload)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Heal)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Combat)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Rest)
+
+  -- extras
+  local fisherman = require('extra.fisherman')
+  if fisherman.Options then
+    Menu:AddOptionMenu(fisherman.Options)
+  end
+  self:AddBehaviorFunction(fisherman.Behaviors, BehaviorType.Extra)
 
   local loaded_behaviors = 0
   for _, v in pairs(BehaviorType) do
