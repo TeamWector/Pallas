@@ -82,7 +82,7 @@ function Behavior:Initialize(isReload)
   class_trim = class_trim:lower()
 
   local specid = self:DecideBestSpecialization()
-  local specname = behavior_map[classname:lower()][specid]
+  local specname = behavior_map[class_trim:lower()][specid]
 
   -- remove spaces and makes it all lower-case
   local specname_trim = specname:gsub("%s+", "")
