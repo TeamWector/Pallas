@@ -4,12 +4,40 @@ commonWarrior.spells = {
   -- interrupts
   Pummel = WoWSpell("Pummel"),
   ShieldBash = WoWSpell("Shield Bash"),
-  ConcussionBlow = WoWSpell("Concussion Blow"),
 
   -- shouts
   BattleShout = WoWSpell("Battle Shout"),
   CommandingShout = WoWSpell("Commanding Shout"),
   DemoralizingShout = WoWSpell("Demoralizing Shout"),
+
+  -- shared
+  HeroicStrike = WoWSpell("Heroic Strike"),
+  Cleave = WoWSpell("Cleave"),
+  Whirlwind = WoWSpell("Whirlwind"),
+  Execute = WoWSpell("Execute"),
+  VictoryRush = WoWSpell("Victory Rush"),
+  Hamstring = WoWSpell("Hamstring"),
+  Overpower = WoWSpell("Overpower"),
+
+  -- arms
+  MortalStrike = WoWSpell("Mortal Strike"),
+
+  -- fury
+  BloodThirst = WoWSpell("Bloodthirst"),
+  SweepingStrikes = WoWSpell("Sweeping Strikes"),
+  Rampage = WoWSpell("Rampage"),
+
+  -- protection
+  ConcussionBlow = WoWSpell("Concussion Blow"),
+  Devastate = WoWSpell("Devastate"),
+  ShieldSlam = WoWSpell("Shield Slam"),
+  SpellReflection = WoWSpell("Spell Reflection"),
+  ShieldBlock = WoWSpell("Shield Block"),
+  Revenge = WoWSpell("Revenge"),
+  ThunderClap = WoWSpell("Thunder Clap"),
+
+  -- racial
+  Berserking = WoWSpell("Berserking")
 }
 
 commonWarrior.widgets = {

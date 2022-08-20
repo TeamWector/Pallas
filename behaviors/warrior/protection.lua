@@ -40,7 +40,6 @@ local options = {
       text = "Auto-Taunt",
       default = false
     },
-    common.widgets
 
     -- !NYI
     --[[
@@ -60,25 +59,11 @@ local options = {
     ]]
   }
 }
+for k, v in pairs(common.widgets) do
+  table.insert(options.Widgets, v)
+end
 
-local spells = {
-
-  ThunderClap = WoWSpell("Thunder Clap"),
-  DemoralizingShout = WoWSpell("Demoralizing Shout"),
-
-  ShieldSlam = WoWSpell("Shield Slam"),
-  Devastate = WoWSpell("Devastate"),
-  Revenge = WoWSpell("Revenge"),
-  SpellReflection = WoWSpell("Spell Reflection"),
-  ShieldBlock = WoWSpell("Shield Block"),
-  ConcussionBlow = WoWSpell("Concussion Blow"),
-
-  HeroicStrike = WoWSpell("Heroic Strike"),
-  Cleave = WoWSpell("Cleave"),
-
-  -- racial
-  Berserking = WoWSpell("Berserking")
-}
+local spells = common.spells
 
 local function WarriorProtCombat()
   local target = Combat.BestTarget

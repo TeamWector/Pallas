@@ -34,30 +34,13 @@ local options = {
       min = 0,
       max = 100
     },
-
-    -- import common widgets
-    common.widgets,
   }
 }
 for k, v in pairs(common.widgets) do
   table.insert(options.Widgets, v)
 end
 
-local spells = {
-  DemoralizingShout = WoWSpell("Demoralizing Shout"),
-
-  BloodThirst = WoWSpell("Bloodthirst"),
-  Whirlwind = WoWSpell("Whirlwind"),
-  Execute = WoWSpell("Execute"),
-  Rampage = WoWSpell("Rampage"),
-  HeroicStrike = WoWSpell("Heroic Strike"),
-  Cleave = WoWSpell("Cleave"),
-  VictoryRush = WoWSpell("Victory Rush"),
-  SweepingStrikes = WoWSpell("Sweeping Strikes"),
-
-  -- racial
-  Berserking = WoWSpell("Berserking")
-}
+local spells = common.spells
 
 local function WarriorFuryCombat()
   local target = Combat.BestTarget
