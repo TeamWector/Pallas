@@ -11,6 +11,12 @@ BehaviorType = {
 }
 
 local behavior_map = {
+  deathknight = {
+    [398] = 'Blood',
+    [399] = 'Frost',
+    [400] = 'Unholy'
+  },
+
   druid = {
     [283] = 'Balance',
     [281] = 'Feral',
@@ -128,14 +134,17 @@ function Behavior:Update()
   -- Call all behaviors in whatever order they are in
   -- Could sort to call them in a specific order
   for _, k in pairs(BehaviorType) do
+    if not self[k] then goto continue end
     for _, v in ipairs(self[k]) do
       v()
     end
+    ::continue::
   end
 end
 
 ---@param type BehaviorType
 function Behavior:HasBehavior(type)
+  if not self[type] then return false end
   if next(self[type]) ~= nil then
     return true
   end
