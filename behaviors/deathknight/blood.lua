@@ -35,9 +35,6 @@ local function DeathknightBlood()
   if not target then return end
 
   local aoe = Combat.EnemiesInMeleeRange > 1
-  
-    -- only melee spells from here on
-  if not Me:InMeleeRange(target) then return end
 
   -- frost fever and icy touch
   local frostFever = target:GetAura("Frost Fever")
@@ -47,16 +44,21 @@ local function DeathknightBlood()
     return
   end
 
+  if Me.Power > 50 and spells.DeathCoil:CastEx(target) then return end
+
+
+  
+    -- only melee spells from here on
+  if not Me:InMeleeRange(target) then return end
+
   -- blood plague and plague strike
   local bloodPlague = target:GetAura("Blood Plague") 
 
   if not bloodPlague or bloodPlague.Remaining < 2 * 1000 then
-    print('bloodPlague ending, castingerrooo')
     spells.PlagueStrike:CastEx(target)
     return
   end
 
-  if Me:GetPowerByType(PowerType.RunicPower) > 50 and spells.DeathCoil:CastEx(target) then return end
 
   -- blood strike spam red runes away
   if spells.BloodStrike:CastEx(target) then return end
