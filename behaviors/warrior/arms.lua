@@ -44,16 +44,25 @@ local function WarriorArmsCombat()
 
   local aoe = Combat.EnemiesInMeleeRange > 1
 
+  if target:HasVisibleAura("Blessing of Protection") or target:HasVisibleAura("Divine Shield") then
+    return
+  end
+
+  --if not Me:IsAttacking(target) then
+  --  Me:StartAttack(target)
+  --end
+
   common:DoInterrupt()
+
+  -- Execute
+  if spells.Execute:CastEx(target) then return end
 
   -- Overpower
   if spells.Overpower:CastEx(target) then return end
 
   local hamstring = target:GetAura("Hamstring")
-  if target.IsPlayer and not hamstring and spells.Hamstring:CastEx(target) then return end
-
-  -- Execute
-  if spells.Execute:CastEx(target) then return end
+  local freedom = target:GetAura("Blessing of Freedom")
+  if target.IsPlayer and not hamstring and not freedom and spells.Hamstring:CastEx(target) then return end
 
   -- Mortal Strike, make sure we cast blood thirst if ready before continuing
   if spells.MortalStrike:CastEx(target) then return end
