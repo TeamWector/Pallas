@@ -25,7 +25,7 @@ function WoWSpell:CastEx(a1, ...)
     -- are we in range of unit?
     if self:HasRange(unit) and not self:InRange(unit) then return false end
 
-    -- TODO: Add line of sight check here!
+    if not Me:WithinLineOfSight(unit) then return false end
 
     return self:Cast(arg1.ToUnit)
   else
