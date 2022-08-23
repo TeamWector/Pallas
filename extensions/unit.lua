@@ -49,7 +49,7 @@ function WoWUnit:WithinLineOfSight(target)
   from.z = from.z + Me.DisplayHeight
 
   local to = target.Position
-  from.z = from.z + target.DisplayHeight
+  to.z = to.z + target.DisplayHeight
 
   local flags = TraceLineHitFlags.SpellLineOfSightMask
 
