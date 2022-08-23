@@ -95,3 +95,32 @@ function WoWUnit:IsFacing(target)
   local angle = Me:AngleTo(target)
   return math.abs(angle) < 90
 end
+
+local ttdHistory = {}
+--- Very simple TTD, lot of room for improvements here!
+---@return number timeToDeath Time until death in seconds
+function WoWUnit:TimeToDeath()
+  local uid = self.Guid.Low
+  local t = wector.Game.Time
+  local curhp = self.HealthPct
+
+  if ttdHistory[uid] then
+    -- uid is in the list update the TTD
+    local o = ttdHistory[uid]
+    local hpdiff = o.inithp - curhp
+    local tdiff = t - o.inittime
+
+    local hps = hpdiff / (tdiff / 1000)
+
+    if hps > 0 then
+      o.ttd = curhp / hps
+    end
+
+    return o.ttd
+  else
+    -- first time seeing this uid, add it to list
+    ttdHistory[uid] = { inittime = t, inithp = curhp, ttd = 9999 }
+  end
+
+  return 9999
+end
