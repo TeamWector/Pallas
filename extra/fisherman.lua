@@ -61,11 +61,14 @@ local function Fisherman()
   end
 
   local bobber = nil
-  local objects = wector.Game.GameObjects
-  for _, obj in pairs(objects) do
-    -- using distance to find out if this is our bobber, because there is no 'owner' field yet :)
-    if obj.Name == "Fishing Bobber" and Me.Position:DistanceSq(obj.Position) < 30 then
-      bobber = obj
+  local spell = Me.CurrentChannel
+  if spell and spell.Name == "Fishing" then
+    local objects = wector.Game.GameObjects
+    for _, obj in pairs(objects) do
+      -- using distance to find out if this is our bobber, because there is no 'owner' field yet :)
+      if obj.Name == "Fishing Bobber" and Me.Position:DistanceSq(obj.Position) < 30 then
+        bobber = obj
+      end
     end
   end
 
