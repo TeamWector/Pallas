@@ -14,6 +14,7 @@ end
 
 local function BalanceCombat()
   if Me.IsCastingOrChanneling then return end
+  if Me.StandStance == StandStance.Sit then return end
 
   -- to many forms!
   local form = Me.ShapeshiftForm
@@ -27,11 +28,13 @@ local function BalanceCombat()
   local target = Combat.BestTarget
   if not target then return end
 
-  if not target:HasVisibleAura("Insect Swarm") and spells.InsectSwarm:CastEx(target) then return end
-  if Me.PowerPct > 20 and not target:HasVisibleAura("Moonfire") and spells.Moonfire:CastEx(target) then return end
+  if target:TimeToDeath() > 5 then
+    if Me:IsFacing(target) and not target:HasVisibleAura("Insect Swarm") and spells.InsectSwarm:CastEx(target) then return end
+    if Me:IsFacing(target) and not target:HasVisibleAura("Moonfire") and spells.Moonfire:CastEx(target) then return end
+  end
 
   if Me:IsMoving() then return end
-  if spells.Starfire:CastEx(target) then return end
+  if Me:IsFacing(target) and spells.Starfire:CastEx(target) then return end
 end
 
 return {
