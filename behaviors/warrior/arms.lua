@@ -44,7 +44,7 @@ local function WarriorArmsCombat()
 
   local aoe = Combat.EnemiesInMeleeRange > 1
 
-  if target:HasVisibleAura("Blessing of Protection") or target:HasVisibleAura("Divine Shield") then
+  if target:HasVisibleAura("Blessing of Protection") or target:HasVisibleAura("Divine Shield") or target:HasVisibleAura("Ice Block") then
     return
   end
 
@@ -54,29 +54,37 @@ local function WarriorArmsCombat()
 
   common:DoInterrupt()
 
-  -- Execute
-  if spells.Execute:CastEx(target) then return end
+  if Me:IsFacing(target) then
+    -- Execute
+    if spells.Execute:CastEx(target) then return end
 
-  -- Overpower
-  if spells.Overpower:CastEx(target) then return end
+    -- Overpower
+    if spells.Overpower:CastEx(target) then return end
 
-  local hamstring = target:GetAura("Hamstring")
-  local freedom = target:GetAura("Blessing of Freedom")
-  if target.IsPlayer and not hamstring and not freedom and spells.Hamstring:CastEx(target) then return end
+    local hamstring = target:GetAura("Hamstring")
+    local freedom = target:GetAura("Blessing of Freedom")
+    local crip = target:GetAura("Crippling Poison")
+    if target.IsPlayer and not hamstring and not freedom and not crip and spells.Hamstring:CastEx(target) then return end
 
-  -- Mortal Strike, make sure we cast blood thirst if ready before continuing
-  if spells.MortalStrike:CastEx(target) then return end
+    -- Mortal Strike, make sure we cast blood thirst if ready before continuing
+    if spells.MortalStrike:CastEx(target) then return end
 
-  common:DoShout()
+    common:DoShout()
 
-  -- Victory Rush
-  if spells.VictoryRush:CastEx(target) then return end
+    if not target:HasDebuffByMe("Rend") and spells.Rend:CastEx(target) then return end
 
-  -- Whirlwind
-  if spells.Whirlwind:CastEx(target) then return end
+    -- Sweeping Strikes
+    if aoe and spells.SweepingStrikes:CastEx(Me) then return end
 
-  -- Heroic Strike/Cleave
-  if Me.PowerPct > Settings.WarriorArmsFiller and spells.HeroicStrike:CastEx(target) then return end
+    -- Victory Rush
+    if spells.VictoryRush:CastEx(target) then return end
+
+    -- Whirlwind
+    if spells.Whirlwind:CastEx(target) then return end
+
+    -- Heroic Strike/Cleave
+    if Me.PowerPct > Settings.WarriorArmsFiller and spells.HeroicStrike:CastEx(target) then return end
+  end
 end
 
 local behaviors = {

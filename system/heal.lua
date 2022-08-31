@@ -1,8 +1,7 @@
 ---@diagnostic disable: param-type-mismatch
-
 Heal = Heal or Targeting:New()
 
----@type WoWUnit[]
+---@type table<WoWUnit[], number>
 Heal.PriorityList = {}
 
 function Heal:Update()
@@ -50,12 +49,34 @@ function Heal:InclusionFilter()
 end
 
 function Heal:WeighFilter()
+  wector.Console:Clear()
+
+  local manaMulti = 30
+  local group = WoWGroup(GroupType.Auto)
+  wector.Console:Log(string.format('Group members: %d', group.MemberCount))
   for _, u in pairs(self.Targets) do
+    -- only heal group members for now
+    if Me.Guid ~= u.Guid then
+      local member = group:GetMemberByGuid(u.Guid)
+      if not member then goto continue end
+    end
+
     local priority = 0
 
-    priority = 0 - u.HealthPct
+    priority = priority + (100 - u.HealthPct)
 
-    table.insert(self.PriorityList, { Unit = u, Priority = priority })
+    if not Me:HasAura("Innervate") then
+      priority = priority - ((100 - Me.PowerPct) * (manaMulti / 100))
+    else
+      priority = priority + 40
+    end
+
+    if priority > 0 or u.InCombat then
+      table.insert(self.PriorityList, { Unit = u, Priority = priority })
+      wector.Console:Log(string.format('%.4f: %s', priority, u.NameUnsafe))
+    end
+
+    ::continue::
   end
 
   table.sort(self.PriorityList, function(a, b)
