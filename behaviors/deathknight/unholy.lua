@@ -24,7 +24,8 @@ local spells = {
   UnholyPresence = WoWSpell("Unholy Presence"),
   BloodPresence = WoWSpell("Blood Presence"),
   BloodBoil = WoWSpell("Blood Boil"),
-  Pestilence = WoWSpell("Pestilence")
+  Pestilence = WoWSpell("Pestilence"),
+  PetAttack = WoWSpell("Attack")
 }
 
 local RuneTypes = {
@@ -57,21 +58,21 @@ local function DeathknightUnholy()
   if (not Me.Pet or Me.Pet.Dead) and spells.RaiseDead:CastEx(Me) then return end
 
   -- Only do this when pet is active
-  if Me.Pet then
-    -- Pet Attack my target
-    --if Me.Pet.Target ~= Me.Target then
-      Me:PetAttack(target)
-    --end
-  end
+  -- if Me.Pet then
+  --   -- Pet Attack my target
+  --   --if Me.Pet.Target ~= Me.Target then
+  --     Me:PetAttack(target)
+  --   --end
+  -- end
 
   if not Me:HasBuff("Blood Presence") and spells.BloodPresence:CastEx(Me) then return end
 
-  -- local hornOfWinter = Me:GetAura("Horn of Winter")
+  --  local hornOfWinter = Me:GetAura("Horn of Winter")
 
-  -- if not hornOfWinter or hornOfWinter.Remaining < 10000 then
-  --   spells.HornOfWinter:CastEx(Me)
-  --   return
-  -- end
+  --  if not hornOfWinter or hornOfWinter.Remaining < 10000 then
+  --    spells.HornOfWinter:CastEx(Me)
+  --    return
+  --  end
 
   if spells.BloodTap:CastEx(Me) then return end
 
@@ -94,14 +95,9 @@ local function DeathknightUnholy()
   local bloodPlague = target:GetAura("Blood Plague")
   if (not bloodPlague or bloodPlague.Remaining < 2 * 1000) then spells.PlagueStrike:CastEx(target) return end
 
-  -- local desolation = Me:GetAura("Desolation")
-
-  --if not desolation or desolation.Remaining < 2*1000 then
-  -- if not desolation then
-  --   print(desolation.Remaining)
-  --   spells.BloodStrike:CastEx(target)
-  --   return
-  -- end
+  -- desolation
+  local desolation = Me:GetVisibleAura("Desolation")
+  if not desolation or desolation.Remaining < 2 * 1000 then spells.BloodStrike:CastEx(target) return end
 
   if aoe and spells.Pestilence:CastEx(target) then return end
 
