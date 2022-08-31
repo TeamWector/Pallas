@@ -55,6 +55,8 @@ local function WarriorArmsCombat()
   common:DoInterrupt()
 
   if Me:IsFacing(target) then
+    if Me:HasVisibleAura("Bladestorm") then return end
+
     -- Execute
     if spells.Execute:CastEx(target) then return end
 
@@ -66,15 +68,18 @@ local function WarriorArmsCombat()
     local crip = target:GetAura("Crippling Poison")
     if target.IsPlayer and not hamstring and not freedom and not crip and spells.Hamstring:CastEx(target) then return end
 
+    -- Sweeping Strikes
+    if aoe and spells.SweepingStrikes:CastEx(Me) then return end
+
+    -- Bladestorm
+    if Me:HasBuffByMe("Sweeping Strikes") and spells.Bladestorm:CastEx(Me) then return end
+
     -- Mortal Strike, make sure we cast blood thirst if ready before continuing
     if spells.MortalStrike:CastEx(target) then return end
 
     common:DoShout()
 
     if not target:HasDebuffByMe("Rend") and spells.Rend:CastEx(target) then return end
-
-    -- Sweeping Strikes
-    if aoe and spells.SweepingStrikes:CastEx(Me) then return end
 
     -- Victory Rush
     if spells.VictoryRush:CastEx(target) then return end
@@ -83,7 +88,8 @@ local function WarriorArmsCombat()
     if spells.Whirlwind:CastEx(target) then return end
 
     -- Heroic Strike/Cleave
-    if Me.PowerPct > Settings.WarriorArmsFiller and spells.HeroicStrike:CastEx(target) then return end
+    local hs_or_cleave = aoe and spells.Cleave or spells.HeroicStrike
+    if Me.PowerPct > Settings.WarriorFuryFiller and hs_or_cleave:CastEx(target) then return end
   end
 end
 

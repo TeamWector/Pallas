@@ -60,14 +60,10 @@ local function WarriorFuryCombat()
   -- pool rage
   if Me.PowerPct < Settings.WarriorFuryPool then return end
 
-  -- Rampage
-  local rampage = Me:GetVisibleAura("Rampage")
-  if (not rampage or rampage.Remaining < 5000) and spells.Rampage:CastEx(target) then return end
-
   -- Sweeping Strikes
   if aoe and Settings.WarriorFurySweeping and spells.SweepingStrikes:CastEx(Me) then return end
 
-  if Me:IsFacing(target) then
+  --if Me:IsFacing(target) then
     -- Blood Thirst, make sure we cast blood thirst if ready before continuing
     if spells.BloodThirst:CastEx(target) then return end
 
@@ -80,7 +76,7 @@ local function WarriorFuryCombat()
 
     -- Execute
     if Settings.WarriorFuryExecute and spells.Execute:CastEx(target) then return end
-  end
+  --end
 end
 
 local behaviors = {

@@ -19,6 +19,7 @@ commonWarrior.spells = {
   Hamstring = WoWSpell("Hamstring"),
   Overpower = WoWSpell("Overpower"),
   Rend = WoWSpell("Rend"),
+  Bladestorm = WoWSpell("Bladestorm"),
 
   -- arms
   MortalStrike = WoWSpell("Mortal Strike"),
@@ -66,7 +67,7 @@ function commonWarrior:DoShout()
   local shoutAura = shoutType == 0 and Me:GetAura("Battle Shout") or Me:GetAura("Commanding Shout")
   local shoutSpell = shoutType == 0 and self.spells.BattleShout or self.spells.CommandingShout
   -- Manual Cast here because CastEx gets fucked range.
-  if not shoutAura or shoutAura.Remaining < 15 * 1000 and shoutSpell.IsReady and shoutSpell:IsUsable() then
+  if not Me:HasAura("Greater Blessing of Might") and not Me:HasAura("Blessing of Might") and (not shoutAura or shoutAura.Remaining < 15 * 1000) and shoutSpell.IsReady and shoutSpell:IsUsable() then
     shoutSpell:Cast(target)
   end
 
