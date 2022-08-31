@@ -18,6 +18,7 @@ commonWarrior.spells = {
   VictoryRush = WoWSpell("Victory Rush"),
   Hamstring = WoWSpell("Hamstring"),
   Overpower = WoWSpell("Overpower"),
+  Rend = WoWSpell("Rend"),
 
   -- arms
   MortalStrike = WoWSpell("Mortal Strike"),
@@ -90,14 +91,16 @@ function commonWarrior:DoInterrupt()
     local castorchan = u.IsCastingOrChanneling
     local spell = u.CurrentSpell
 
-    -- Shield Bash
-    if castorchan and spell and Me:InMeleeRange(u) and self.spells.ShieldBash:CastEx(target) then return false end
+    if castorchan and spell and Me:InMeleeRange(u) and Me:IsFacing(u) then
+      -- Shield Bash
+      if self.spells.ShieldBash:CastEx(target) then return false end
 
-    -- Concussion Blow
-    if castorchan and spell and Me:InMeleeRange(u) and self.spells.ConcussionBlow:CastEx(target) then return false end
+      -- Concussion Blow
+      if self.spells.ConcussionBlow:CastEx(target) then return false end
 
-    -- Pummel
-    if castorchan and spell and Me:InMeleeRange(u) and self.spells.Pummel:CastEx(u) then return false end
+      -- Pummel
+      if self.spells.Pummel:CastEx(u) then return false end
+    end
 
     local ut = u.Target
     if u.IsCasting and spell and ut and ut == Me.Guid then

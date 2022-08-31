@@ -55,7 +55,7 @@ local function WarriorFuryCombat()
   if not Me:InMeleeRange(target) then return end
 
   -- Victory Rush
-  if spells.VictoryRush:CastEx(target) then return end
+  if Me:IsFacing(target) and spells.VictoryRush:CastEx(target) then return end
 
   -- pool rage
   if Me.PowerPct < Settings.WarriorFuryPool then return end
@@ -67,18 +67,20 @@ local function WarriorFuryCombat()
   -- Sweeping Strikes
   if aoe and Settings.WarriorFurySweeping and spells.SweepingStrikes:CastEx(Me) then return end
 
-  -- Blood Thirst, make sure we cast blood thirst if ready before continuing
-  if spells.BloodThirst:CastEx(target) then return end
+  if Me:IsFacing(target) then
+    -- Blood Thirst, make sure we cast blood thirst if ready before continuing
+    if spells.BloodThirst:CastEx(target) then return end
 
-  -- Whirlwind
-  if spells.Whirlwind:CastEx(target) then return end
+    -- Whirlwind
+    if spells.Whirlwind:CastEx(target) then return end
 
-  -- Heroic Strike/Cleave
-  local hs_or_cleave = aoe and spells.Cleave or spells.HeroicStrike
-  if Me.PowerPct > Settings.WarriorFuryFiller and hs_or_cleave:CastEx(target) then return end
+    -- Heroic Strike/Cleave
+    local hs_or_cleave = aoe and spells.Cleave or spells.HeroicStrike
+    if Me.PowerPct > Settings.WarriorFuryFiller and hs_or_cleave:CastEx(target) then return end
 
-  -- Execute
-  if Settings.WarriorFuryExecute and spells.Execute:CastEx(target) then return end
+    -- Execute
+    if Settings.WarriorFuryExecute and spells.Execute:CastEx(target) then return end
+  end
 end
 
 local behaviors = {
