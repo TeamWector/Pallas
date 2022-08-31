@@ -49,11 +49,9 @@ function Heal:InclusionFilter()
 end
 
 function Heal:WeighFilter()
-  wector.Console:Clear()
-
   local manaMulti = 30
   local group = WoWGroup(GroupType.Auto)
-  wector.Console:Log(string.format('Group members: %d', group.MemberCount))
+
   for _, u in pairs(self.Targets) do
     -- only heal group members for now
     if Me.Guid ~= u.Guid then
@@ -73,7 +71,6 @@ function Heal:WeighFilter()
 
     if priority > 0 or u.InCombat then
       table.insert(self.PriorityList, { Unit = u, Priority = priority })
-      wector.Console:Log(string.format('%.4f: %s', priority, u.NameUnsafe))
     end
 
     ::continue::
