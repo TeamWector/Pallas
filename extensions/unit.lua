@@ -9,6 +9,17 @@ function WoWUnit:HasBuff(buffname)
   return false
 end
 
+function WoWUnit:HasBuffByMe(name)
+  local auras = self.Auras
+  for _, aura in pairs(auras) do
+    if aura.Name == name and aura.HasCaster and aura.Caster == wector.Game.ActivePlayer.ToUnit then
+        return true
+    end
+  end
+
+  return false
+end
+
 function WoWUnit:HasDebuffByMe(dname)
   local auras = self.Auras
   for _, aura in pairs(auras) do
