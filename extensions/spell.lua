@@ -1,3 +1,8 @@
+---@enum SpellCastExFlags
+SpellCastExFlags = {
+  NoUsable = 0x1
+}
+
 function WoWSpell:CastEx(a1, ...)
   local arg1, arg2, arg3 = a1, ...
   if not arg1 then return false end
@@ -10,15 +15,16 @@ function WoWSpell:CastEx(a1, ...)
   -- are we already casting (i.e. actionbar button is highlighted)?
   if self.IsActive then return false end
 
-  -- is spell usable?
-  if not self:IsUsable() then return false end
-
   -- if spell has cast time, are we moving?
   if self.CastTime > 0 and Me:IsMoving() then return false end
 
   if type(arg1) == 'userdata' and type(arg1.ToUnit) ~= 'nil' then
     -- cast at unit
     local unit = arg1.ToUnit
+    local flags = arg2 and arg2 or 0x0
+
+    -- is spell usable?
+    if (flags & SpellCastExFlags.NoUsable) == 0 and not self:IsUsable() then return false end
 
     -- unit specific checks
 
@@ -32,6 +38,10 @@ function WoWSpell:CastEx(a1, ...)
     -- cast at position
     local x, y, z = 0, 0, 0
     if type(arg1) == 'userdata' and type(arg1.z) ~= 'nil' then
+
+      -- is spell usable?
+      if not self:IsUsable() then return false end
+
       -- Vec3 input
       x, y, z = arg1.x, arg1.y, arg1.z
     elseif arg2 and arg3 then
