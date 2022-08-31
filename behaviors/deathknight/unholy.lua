@@ -54,10 +54,7 @@ local function DeathknightUnholy()
   --   spells.UnholyPresence:CastEx(Me)
   -- end
 
-  if not Me.Pet or Me.Pet.Dead then
-    spells.RaiseDead:CastEx(Me)
-    return
-  end
+  if (not Me.Pet or Me.Pet.Dead) and spells.RaiseDead:CastEx(Me) then return end
 
   -- Only do this when pet is active
   if Me.Pet then
@@ -67,9 +64,7 @@ local function DeathknightUnholy()
     --end
   end
 
-  if not Me:HasBuff("Blood Presence") then
-    spells.BloodPresence:CastEx(Me)
-  end
+  if not Me:HasBuff("Blood Presence") and spells.BloodPresence:CastEx(Me) then return end
 
   -- local hornOfWinter = Me:GetAura("Horn of Winter")
 
@@ -80,9 +75,7 @@ local function DeathknightUnholy()
 
   if spells.BloodTap:CastEx(Me) then return end
 
-  if not Me:HasBuff("Bone Shield") then
-    spells.BoneShield:CastEx(Me)
-  end
+  if not Me:HasBuff("Bone Shield") and spells.BoneShield:CastEx(Me) then return end
 
   -- BURST for laziness both gargoyle and empower rune wep
   if spells.SummonGargoyle:CastEx(target) then return end
@@ -92,26 +85,17 @@ local function DeathknightUnholy()
 
   -- frost fever and icy touch
   local frostFever = target:GetAura("Frost Fever")
-
-  if not frostFever or frostFever.Remaining < 2 * 1000 then
-    spells.IcyTouch:CastEx(target)
-    return
-  end
-
+  if (not frostFever or frostFever.Remaining < 2 * 1000) and spells.IcyTouch:CastEx(target) then return end
 
   -- only melee spells from here on
   if not Me:InMeleeRange(target) then return end
 
   -- blood plague and plague strike
   local bloodPlague = target:GetAura("Blood Plague")
-
-  if not bloodPlague or bloodPlague.Remaining < 2 * 1000 then
-    spells.PlagueStrike:CastEx(target)
-    return
-  end
+  if (not bloodPlague or bloodPlague.Remaining < 2 * 1000) then spells.PlagueStrike:CastEx(target) return end
 
   -- local desolation = Me:GetAura("Desolation")
-  
+
   --if not desolation or desolation.Remaining < 2*1000 then
   -- if not desolation then
   --   print(desolation.Remaining)
@@ -123,17 +107,13 @@ local function DeathknightUnholy()
 
   if spells.BloodTap:CastEx(Me) then return end
 
-  if spells.DeathAndDecay:CastEx(Me.position) then return end
-  
+  if spells.DeathAndDecay:CastEx(Me.Position) then return end
 
-  local petGhoulFrenzy = Me.Pet:GetAura("Ghoul Frenzy")
-
-  if not petGhoulFrenzy or petGhoulFrenzy.Remaining < 10000 then
-    spells.GhoulFrenzy:CastEx(target)
-    return
+  if Me.Pet then
+    local petGhoulFrenzy = Me.Pet:GetAura("Ghoul Frenzy")
+    if not petGhoulFrenzy or petGhoulFrenzy.Remaining < 10000 and spells.GhoulFrenzy:CastEx(target) then return end
   end
 
-  
   if spells.IcyTouch:CastEx(target) then return end
 
   if spells.PlagueStrike:CastEx(target) then return end
