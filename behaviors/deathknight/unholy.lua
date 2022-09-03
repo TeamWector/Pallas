@@ -55,7 +55,15 @@ local function DeathknightUnholy()
   --   spells.UnholyPresence:CastEx(Me)
   -- end
 
-  if (not Me.Pet or Me.Pet.Dead) and spells.RaiseDead:CastEx(Me) then return end
+  if (not Me.Pet or Me.Pet.Dead) then
+    for _, item in pairs(wector.Game.Items) do
+      if item.Name == "Corpse Dust" and spells.RaiseDead:CastEx(Me) then return end
+    end
+
+    for _, u in pairs(wector.Game.Units) do
+      if u.Dead and u.Level > Me.Level - 9 and u.IsEnemy and spells.RaiseDead:CastEx(u) then return end
+    end
+  end
 
   -- Only do this when pet is active
   -- if Me.Pet then
