@@ -61,17 +61,18 @@ local function DeathknightUnholy()
     end
 
     for _, u in pairs(wector.Game.Units) do
-      if u.Dead and u.Level > Me.Level - 9 and u.IsEnemy and spells.RaiseDead:CastEx(u) then return end
+      if u.Dead and u.Level > Me.Level - 9 and u.IsEnemy and Me:IsFacing(target) then
+        spells.RaiseDead:CastEx(u)
+        return
+      end
     end
   end
 
   -- Only do this when pet is active
-  -- if Me.Pet then
-  --   -- Pet Attack my target
-  --   --if Me.Pet.Target ~= Me.Target then
-  --     Me:PetAttack(target)
-  --   --end
-  -- end
+  if Me.Pet and Me.Pet.Target ~= target then
+    -- Pet Attack my target
+    Me:PetAttack(target)
+  end
 
   if not Me:HasBuff("Blood Presence") and spells.BloodPresence:CastEx(Me) then return end
 
@@ -89,6 +90,8 @@ local function DeathknightUnholy()
   -- BURST for laziness both gargoyle and empower rune wep
   if spells.SummonGargoyle:CastEx(target) then return end
   if spells.EmpowerRuneWeapon:CastEx(Me) then return end
+
+  if not Me:IsFacing(target) then return end
 
   if Me.Power > 50 and spells.DeathCoil:CastEx(target) then return end
 
