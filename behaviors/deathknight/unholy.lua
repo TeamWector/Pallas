@@ -25,7 +25,7 @@ local spells = {
   BloodPresence = WoWSpell("Blood Presence"),
   BloodBoil = WoWSpell("Blood Boil"),
   Pestilence = WoWSpell("Pestilence"),
-  PetAttack = WoWSpell("Attack")
+  MindFreeze = WoWSpell("Mind Freeze")
 }
 
 local RuneTypes = {
@@ -68,20 +68,30 @@ local function DeathknightUnholy()
     end
   end
 
+
   -- Only do this when pet is active
   if Me.Pet and Me.Pet.Target ~= target then
     -- Pet Attack my target
     Me:PetAttack(target)
   end
 
+  for _, u in pairs(Combat.Targets) do
+    local castorchan = u.IsCastingOrChanneling
+    local spell = u.CurrentSpell
+    if castorchan and spell and Me:InMeleeRange(u) and Me:IsFacing(u) then
+      -- Shield Bash
+      if spells.MindFreeze:CastEx(target) then return end
+    end
+  end
+
   if not Me:HasBuff("Blood Presence") and spells.BloodPresence:CastEx(Me) then return end
 
-  --  local hornOfWinter = Me:GetAura("Horn of Winter")
+  local hornOfWinter = Me:GetAura("Horn of Winter")
 
-  --  if not hornOfWinter or hornOfWinter.Remaining < 10000 then
-  --    spells.HornOfWinter:CastEx(Me)
-  --    return
-  --  end
+  if not hornOfWinter or hornOfWinter.Remaining < 10000 then
+    spells.HornOfWinter:CastEx(Me)
+    return
+  end
 
   if spells.BloodTap:CastEx(Me) then return end
 
@@ -96,15 +106,21 @@ local function DeathknightUnholy()
   if Me.Power > 50 and spells.DeathCoil:CastEx(target) then return end
 
   -- frost fever and icy touch
-  local frostFever = target:GetAura("Frost Fever")
-  if (not frostFever or frostFever.Remaining < 2 * 1000) and spells.IcyTouch:CastEx(target) then return end
+  local frostFever = target:GetVisibleAura("Frost Fever")
+  if not frostFever or frostFever.Remaining < 2 * 1000 then
+    spells.IcyTouch:CastEx(target)
+    return
+  end
 
   -- only melee spells from here on
   if not Me:InMeleeRange(target) then return end
 
   -- blood plague and plague strike
-  local bloodPlague = target:GetAura("Blood Plague")
-  if (not bloodPlague or bloodPlague.Remaining < 2 * 1000) then spells.PlagueStrike:CastEx(target) return end
+  local bloodPlague = target:GetVisibleAura("Blood Plague")
+  if not bloodPlague or bloodPlague.Remaining < 2 * 1000 then
+    spells.PlagueStrike:CastEx(target)
+    return
+  end
 
   -- desolation
   local desolation = Me:GetVisibleAura("Desolation")
@@ -117,8 +133,11 @@ local function DeathknightUnholy()
   if spells.DeathAndDecay:CastEx(Me.Position) then return end
 
   if Me.Pet then
-    local petGhoulFrenzy = Me.Pet:GetAura("Ghoul Frenzy")
-    if not petGhoulFrenzy or petGhoulFrenzy.Remaining < 10000 and spells.GhoulFrenzy:CastEx(target) then return end
+    local petGhoulFrenzy = Me.Pet:GetVisibleAura("Ghoul Frenzy")
+    if not petGhoulFrenzy or petGhoulFrenzy.Remaining < 10000 then
+      spells.GhoulFrenzy:CastEx(target)
+      return
+    end
   end
 
   if spells.IcyTouch:CastEx(target) then return end
