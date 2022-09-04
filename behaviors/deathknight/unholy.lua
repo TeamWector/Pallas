@@ -24,8 +24,7 @@ local spells = {
   UnholyPresence = WoWSpell("Unholy Presence"),
   BloodPresence = WoWSpell("Blood Presence"),
   BloodBoil = WoWSpell("Blood Boil"),
-  Pestilence = WoWSpell("Pestilence"),
-  PetAttack = WoWSpell("Attack")
+  Pestilence = WoWSpell("Pestilence")
 }
 
 local RuneTypes = {
@@ -108,7 +107,7 @@ local function DeathknightUnholy()
 
   -- desolation
   local desolation = Me:GetVisibleAura("Desolation")
-  if not desolation or desolation.Remaining < 2 * 1000 then spells.BloodStrike:CastEx(target) return end
+  if (not desolation or desolation.Remaining < 2 * 1000) then spells.BloodStrike:CastEx(target) return end
 
   if aoe and spells.Pestilence:CastEx(target) then return end
 
@@ -118,7 +117,7 @@ local function DeathknightUnholy()
 
   if Me.Pet then
     local petGhoulFrenzy = Me.Pet:GetAura("Ghoul Frenzy")
-    if not petGhoulFrenzy or petGhoulFrenzy.Remaining < 10000 and spells.GhoulFrenzy:CastEx(target) then return end
+    if (not petGhoulFrenzy or petGhoulFrenzy.Remaining < 10000) and spells.GhoulFrenzy:CastEx(target) then return end
   end
 
   if spells.IcyTouch:CastEx(target) then return end
@@ -130,7 +129,6 @@ local function DeathknightUnholy()
   else
     if spells.BloodBoil:CastEx(target) then return end
   end
-
 end
 
 local behaviors = {
