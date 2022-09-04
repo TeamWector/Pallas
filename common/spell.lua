@@ -22,14 +22,14 @@ function Spell:UpdateCache()
   for _, spell in pairs(wector.SpellBook.PlayerSpells) do
     -- format key
     local key = spell.Name:gsub("(%a)([%w_'-]*)", tchelper):gsub("([%s_'-]+)", "")
-    Spell.Cache[key] = spell
+    Spell.Cache[key] = WoWSpell(spell.Id)
   end
 
   -- pet spells
   for _, spell in pairs(wector.SpellBook.PetSpells) do
     -- format key
     local key = spell.Name:gsub("(%a)([%w_'-]*)", tchelper):gsub("([%s_'-]+)", "")
-    Spell.Cache[key] = spell
+    Spell.Cache[key] = WoWSpell(spell.Id)
   end
 
   print(string.format('Cached %d spells', table.length(Spell.Cache)))
