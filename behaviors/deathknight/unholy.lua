@@ -24,7 +24,8 @@ local spells = {
   UnholyPresence = WoWSpell("Unholy Presence"),
   BloodPresence = WoWSpell("Blood Presence"),
   BloodBoil = WoWSpell("Blood Boil"),
-  Pestilence = WoWSpell("Pestilence")
+  Pestilence = WoWSpell("Pestilence"),
+  MindFreeze = WoWSpell("Mind Freeze")
 }
 
 local RuneTypes = {
@@ -71,6 +72,15 @@ local function DeathknightUnholy()
   if Me.Pet and Me.Pet.Target ~= target then
     -- Pet Attack my target
     Me:PetAttack(target)
+  end
+
+  for _, u in pairs(Combat.Targets) do
+    local castorchan = u.IsCastingOrChanneling
+    local spell = u.CurrentSpell
+    if castorchan and spell and Me:InMeleeRange(u) and Me:IsFacing(u) then
+      -- Mind Freeze
+      if spells.MindFreeze:CastEx(target) then return end
+    end
   end
 
   if not Me:HasBuff("Blood Presence") and spells.BloodPresence:CastEx(Me) then return end
