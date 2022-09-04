@@ -92,7 +92,7 @@ function commonWarrior:DoInterrupt()
     local castorchan = u.IsCastingOrChanneling
     local spell = u.CurrentSpell
 
-    if castorchan and spell and Me:InMeleeRange(u) and Me:IsFacing(u) then
+    if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:InMeleeRange(u) and Me:IsFacing(u) then
       -- Shield Bash
       if self.spells.ShieldBash:CastEx(target) then return false end
 
