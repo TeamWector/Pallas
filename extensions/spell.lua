@@ -3,11 +3,16 @@ SpellCastExFlags = {
   NoUsable = 0x1
 }
 
+local spellDelay = {}
+
 function WoWSpell:CastEx(a1, ...)
   local arg1, arg2, arg3 = a1, ...
   if not arg1 then return false end
 
   -- generic checks
+
+  -- delay
+  if spellDelay[self.Id] and spellDelay[self.Id] > wector.Game.Time then return false end
 
   -- is spell ready?
   if not self.IsReady then return false end
@@ -33,6 +38,8 @@ function WoWSpell:CastEx(a1, ...)
 
     if not Me:WithinLineOfSight(unit) then return false end
 
+    wector.Console:Log('Cast ' .. self.Name)
+    spellDelay[self.Id] = wector.Game.Time + math.random(150, 500)
     return self:Cast(arg1.ToUnit)
   else
     -- cast at position
@@ -54,6 +61,7 @@ function WoWSpell:CastEx(a1, ...)
 
     -- position specific checks
 
+    spellDelay[self.Id] = wector.Game.Time + math.random(150, 500)
     return self:Cast(x, y, z)
   end
 end
