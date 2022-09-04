@@ -6,6 +6,7 @@ files:
   - pallas.lua
   - common\menu.lua
   - common\settings.lua
+  - common\spell.lua
   - common\targeting.lua
   - system\behavior.lua
   - system\combat.lua
