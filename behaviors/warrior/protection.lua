@@ -63,8 +63,6 @@ for k, v in pairs(common.widgets) do
   table.insert(options.Widgets, v)
 end
 
-local spells = common.spells
-
 local function WarriorProtCombat()
   local target = Combat.BestTarget
   if not target then return end
@@ -78,7 +76,7 @@ local function WarriorProtCombat()
   local tc = true
   local units = wector.Game.Units
   for _, u in pairs(units) do
-    if spells.ThunderClap:InRange(u) then
+    if Spell.ThunderClap:InRange(u) then
       if u:HasAura("Polymorph") or u:HasAura("Sap") or u:HasAura("Blind") or u:HasAura("Shackle Undead") then
         tc = false
         aoe = false
@@ -97,32 +95,32 @@ local function WarriorProtCombat()
   if not Me:InMeleeRange(target) then return end
 
   -- Shield Slam
-  if spells.ShieldSlam:CastEx(target) then return end
+  if Spell.ShieldSlam:CastEx(target) then return end
 
   -- Revenge
-  if spells.Revenge:CastEx(target) then return end
+  if Spell.Revenge:CastEx(target) then return end
 
   -- Shout
   common:DoShout()
 
   -- Demoralizing Shout
-  if ds and spells.DemoralizingShout:CastEx(target) then return end
+  if ds and Spell.DemoralizingShout:CastEx(target) then return end
 
   -- Thunder Clap
-  if tc and spells.ThunderClap:CastEx(target) then return end
+  if tc and Spell.ThunderClap:CastEx(target) then return end
 
   -- Spell Reflection
-  if sr and Me.PowerPct > 45 and spells.SpellReflection:CastEx(target) then return end
+  if sr and Me.PowerPct > 45 and Spell.SpellReflection:CastEx(target) then return end
 
   -- Shield Block
-  if Me.PowerPct > 55 and spells.ShieldBlock:CastEx(target) then return end
+  if Me.PowerPct > 55 and Spell.ShieldBlock:CastEx(target) then return end
 
   -- Heroic Strike Filler
-  if Me.PowerPct > 75 and spells.HeroicStrike:CastEx(target) then return end
+  if Me.PowerPct > 75 and Spell.HeroicStrike:CastEx(target) then return end
 
   -- Devastate
   local sunders = target:GetAura("Sunder Armor")
-  if ((not sunders or (sunders.Stacks < 5 or sunders.Remaining < 4000)) or Me.PowerPct > 35) and spells.Devastate:CastEx(target) then return end
+  if ((not sunders or (sunders.Stacks < 5 or sunders.Remaining < 4000)) or Me.PowerPct > 35) and Spell.Devastate:CastEx(target) then return end
 end
 
 local behaviors = {

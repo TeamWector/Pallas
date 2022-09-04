@@ -40,8 +40,6 @@ for k, v in pairs(common.widgets) do
   table.insert(options.Widgets, v)
 end
 
-local spells = common.spells
-
 local function WarriorFuryCombat()
   local target = Combat.BestTarget
   if not target then return end
@@ -55,28 +53,30 @@ local function WarriorFuryCombat()
   if not Me:InMeleeRange(target) then return end
 
   -- Victory Rush
-  if Me:IsFacing(target) and spells.VictoryRush:CastEx(target) then return end
+  if Me:IsFacing(target) and Spell.VictoryRush:CastEx(target) then return end
+
+  if Me.Level < 40 and not target:HasVisibleAura("Rend") and Spell.Rend:CastEx(target) then return end
 
   -- pool rage
   if Me.PowerPct < Settings.WarriorFuryPool then return end
 
   -- Sweeping Strikes
-  if aoe and Settings.WarriorFurySweeping and spells.SweepingStrikes:CastEx(Me) then return end
+  if aoe and Settings.WarriorFurySweeping and Spell.SweepingStrikes:CastEx(Me) then return end
 
-  --if Me:IsFacing(target) then
+  if Me:IsFacing(target) then
     -- Blood Thirst, make sure we cast blood thirst if ready before continuing
-    if spells.BloodThirst:CastEx(target) then return end
+    if Spell.Bloodthirst:CastEx(target) then return end
 
     -- Whirlwind
-    if spells.Whirlwind:CastEx(target) then return end
+    if Spell.Whirlwind:CastEx(target) then return end
 
     -- Heroic Strike/Cleave
-    local hs_or_cleave = aoe and spells.Cleave or spells.HeroicStrike
+    local hs_or_cleave = aoe and Spell.Cleave or Spell.HeroicStrike
     if Me.PowerPct > Settings.WarriorFuryFiller and hs_or_cleave:CastEx(target) then return end
 
     -- Execute
-    if Settings.WarriorFuryExecute and spells.Execute:CastEx(target) then return end
-  --end
+    if Settings.WarriorFuryExecute and Spell.Execute:CastEx(target) then return end
+  end
 end
 
 local behaviors = {

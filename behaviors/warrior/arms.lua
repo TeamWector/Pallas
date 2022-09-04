@@ -34,8 +34,6 @@ for k, v in pairs(common.widgets) do
   table.insert(options.Widgets, v)
 end
 
-local spells = common.spells
-
 local function WarriorArmsCombat()
   local target = Combat.BestTarget
   if not target then return end
@@ -58,38 +56,42 @@ local function WarriorArmsCombat()
     if Me:HasVisibleAura("Bladestorm") then return end
 
     -- Execute
-    if spells.Execute:CastEx(target) then return end
+    if Spell.Execute:CastEx(target) then return end
 
     -- Overpower
-    if spells.Overpower:CastEx(target) then return end
+    if Spell.Overpower:CastEx(target) then return end
 
     local hamstring = target:GetAura("Hamstring")
     local freedom = target:GetAura("Blessing of Freedom")
     local crip = target:GetAura("Crippling Poison")
-    if target.IsPlayer and not hamstring and not freedom and not crip and spells.Hamstring:CastEx(target) then return end
+    if target.IsPlayer and not hamstring and not freedom and not crip and Spell.Hamstring:CastEx(target) then return end
 
     -- Sweeping Strikes
-    if aoe and spells.SweepingStrikes:CastEx(Me) then return end
+    if aoe and Spell.SweepingStrikes:CastEx(Me) then return end
 
     -- Bladestorm
-    if Me:HasBuffByMe("Sweeping Strikes") and spells.Bladestorm:CastEx(Me) then return end
+    if Me:HasBuffByMe("Sweeping Strikes") and Spell.Bladestorm:CastEx(Me) then return end
 
     -- Mortal Strike, make sure we cast blood thirst if ready before continuing
-    if spells.MortalStrike:CastEx(target) then return end
+    if Spell.MortalStrike:CastEx(target) then return end
 
     common:DoShout()
 
-    if not target:HasDebuffByMe("Rend") and spells.Rend:CastEx(target) then return end
+    if not target:HasDebuffByMe("Rend") and Spell.Rend:CastEx(target) then return end
 
     -- Victory Rush
-    if spells.VictoryRush:CastEx(target) then return end
+    if Spell.VictoryRush:CastEx(target) then return end
 
     -- Whirlwind
-    if spells.Whirlwind:CastEx(target) then return end
+    if Spell.Whirlwind:CastEx(target) then return end
 
     -- Heroic Strike/Cleave
-    local hs_or_cleave = aoe and spells.Cleave or spells.HeroicStrike
-    if Me.PowerPct > Settings.WarriorFuryFiller and hs_or_cleave:CastEx(target) then return end
+    if Spell.Cleave.IsKnown then
+      local hs_or_cleave = aoe and Spell.Cleave or Spell.HeroicStrike
+      if Me.PowerPct > Settings.WarriorArmsFiller and hs_or_cleave:CastEx(target) then return end
+    else
+      if Me.PowerPct > Settings.WarriorArmsFiller and Spell.HeroicStrike:CastEx(target) then return end
+    end
   end
 end
 

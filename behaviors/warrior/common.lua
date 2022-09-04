@@ -1,47 +1,5 @@
 local commonWarrior = {}
 
-commonWarrior.spells = {
-  -- interrupts
-  Pummel = WoWSpell("Pummel"),
-  ShieldBash = WoWSpell("Shield Bash"),
-
-  -- shouts
-  BattleShout = WoWSpell("Battle Shout"),
-  CommandingShout = WoWSpell("Commanding Shout"),
-  DemoralizingShout = WoWSpell("Demoralizing Shout"),
-
-  -- shared
-  HeroicStrike = WoWSpell("Heroic Strike"),
-  Cleave = WoWSpell("Cleave"),
-  Whirlwind = WoWSpell("Whirlwind"),
-  Execute = WoWSpell("Execute"),
-  VictoryRush = WoWSpell("Victory Rush"),
-  Hamstring = WoWSpell("Hamstring"),
-  Overpower = WoWSpell("Overpower"),
-  Rend = WoWSpell("Rend"),
-  Bladestorm = WoWSpell("Bladestorm"),
-
-  -- arms
-  MortalStrike = WoWSpell("Mortal Strike"),
-
-  -- fury
-  BloodThirst = WoWSpell("Bloodthirst"),
-  SweepingStrikes = WoWSpell("Sweeping Strikes"),
-  Rampage = WoWSpell("Rampage"),
-
-  -- protection
-  ConcussionBlow = WoWSpell("Concussion Blow"),
-  Devastate = WoWSpell("Devastate"),
-  ShieldSlam = WoWSpell("Shield Slam"),
-  SpellReflection = WoWSpell("Spell Reflection"),
-  ShieldBlock = WoWSpell("Shield Block"),
-  Revenge = WoWSpell("Revenge"),
-  ThunderClap = WoWSpell("Thunder Clap"),
-
-  -- racial
-  Berserking = WoWSpell("Berserking")
-}
-
 commonWarrior.widgets = {
   {
     type = "checkbox",
@@ -65,13 +23,13 @@ function commonWarrior:DoShout()
   -- Battle Shout
   local shoutType = Settings.WarriorCommonShout
   local shoutAura = shoutType == 0 and Me:GetAura("Battle Shout") or Me:GetAura("Commanding Shout")
-  local shoutSpell = shoutType == 0 and self.spells.BattleShout or self.spells.CommandingShout
+  local shoutSpell = shoutType == 0 and Spell.BattleShout or Spell.CommandingShout
   -- Manual Cast here because CastEx gets fucked range.
   if not Me:HasAura("Greater Blessing of Might") and not Me:HasAura("Blessing of Might") and (not shoutAura or shoutAura.Remaining < 15 * 1000) and shoutSpell.IsReady and shoutSpell:IsUsable() then
     shoutSpell:Cast(target)
   end
 
-  local demo = self.spells.DemoralizingShout
+  local demo = Spell.DemoralizingShout
   if Settings.WarriorCommonDemo and
       target:InMeleeRange(Me.ToUnit) and
       not target:HasVisibleAura("Demoralizing Shout") and
@@ -94,13 +52,13 @@ function commonWarrior:DoInterrupt()
 
     if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:InMeleeRange(u) and Me:IsFacing(u) then
       -- Shield Bash
-      if self.spells.ShieldBash:CastEx(target) then return false end
+      if Spell.ShieldBash:CastEx(target) then return false end
 
       -- Concussion Blow
-      if self.spells.ConcussionBlow:CastEx(target) then return false end
+      if Spell.ConcussionBlow:CastEx(target) then return false end
 
       -- Pummel
-      if self.spells.Pummel:CastEx(u) then return false end
+      if Spell.Pummel:CastEx(u) then return false end
     end
 
     local ut = u.Target
