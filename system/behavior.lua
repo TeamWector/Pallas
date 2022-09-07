@@ -1,5 +1,6 @@
 Behavior = {}
 Behavior.LoadedClass = ''
+Behavior.Behaviors = {}
 
 ---@enum BehaviorType
 BehaviorType = {
@@ -96,10 +97,8 @@ function Behavior:Initialize(isReload)
 
   -- reset behaviors
   for k, v in pairs(BehaviorType) do
-    print('Reset ' .. k .. ' behaviors')
     self[v] = {}
   end
-
 
   print('Load ' .. specname .. ' ' .. classname .. ' Behaviors')
   local behavior = require('behaviors.' .. class_trim .. '.' .. specname_trim)
@@ -147,10 +146,10 @@ end
 function Behavior:DecideBestSpecialization()
   local bestspec = -1
   local bestspecpoints = -1
-  for _, v in pairs(Me.TalentTabs) do
-    if v.PointsUsed > bestspecpoints then
+  for _, v in pairs(Me.Talents.ActiveTalentGroup.Tabs) do
+    if v.Points > bestspecpoints then
       bestspec = v.Id
-      bestspecpoints = v.PointsUsed
+      bestspecpoints = v.Points
     end
   end
   return bestspec
