@@ -3,7 +3,24 @@ local options = {
   Name = "Deathknight (Unholy)",
   -- widgets
   Widgets = {
-
+    {
+      type = "checkbox",
+      uid = "UnholyMindFreezeInterrupt",
+      text = "Use Mind Freeze (Ban in PVP)",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "UnholyHaveDesolation",
+      text = "Do you have the Desolation talent?",
+      default = false
+    },
+    {
+      type = "slider",
+      uid = "UnholyDeathStrikePercent",
+      text = "Use Death Strike at %",
+      default = 35,
+    }
   }
 }
 
@@ -25,7 +42,9 @@ local spells = {
   BloodPresence = WoWSpell("Blood Presence"),
   BloodBoil = WoWSpell("Blood Boil"),
   Pestilence = WoWSpell("Pestilence"),
-  MindFreeze = WoWSpell("Mind Freeze")
+  MindFreeze = WoWSpell("Mind Freeze"),
+  ScourgeStrike = WoWSpell("Scourge Strike"),
+  DeathStrike = WoWSpell("Death Strike")
 }
 
 local RuneTypes = {
@@ -45,15 +64,18 @@ local function getRuneCount(runeType)
 end
 
 local function DeathknightUnholy()
+
+  -- Use Interrupt
+  local UseInterrupt = Settings.UnholyMindFreezeInterrupt
+  -- Have Desolation TODO THIS SHOULD BE FROM TALENTS
+  local HaveDesolationTalent = Settings.UnholyHaveDesolation
+  -- Death Strike percent
+  local DeathStrikePercent = Settings.UnholyDeathStrikePercent
+
   local target = Combat.BestTarget
   if not target then return end
 
   local aoe = Combat.EnemiesInMeleeRange > 1
-
-  -- TBC UNTESTED - I'll come back to this at 70 and optimisation
-  -- if Me:HasBuff("Unholy Presence") then
-  --   spells.UnholyPresence:CastEx(Me)
-  -- end
 
   if (not Me.Pet or Me.Pet.Dead) then
     for _, item in pairs(wector.Game.Items) do
@@ -74,16 +96,18 @@ local function DeathknightUnholy()
     Me:PetAttack(target)
   end
 
-  for _, u in pairs(Combat.Targets) do
-    local castorchan = u.IsCastingOrChanneling
-    local spell = u.CurrentSpell
-    if castorchan and spell and Me:InMeleeRange(u) and Me:IsFacing(u) then
-      -- Mind Freeze
-      if spells.MindFreeze:CastEx(target) then return end
+  if (UseInterrupt) then
+    for _, u in pairs(Combat.Targets) do
+      local castorchan = u.IsCastingOrChanneling
+      local spell = u.CurrentSpell
+      if castorchan and spell and Me:InMeleeRange(u) and Me:IsFacing(u) then
+        -- Mind Freeze
+        if spells.MindFreeze:CastEx(target) then return end
+      end
     end
   end
 
-  if not Me:HasBuff("Blood Presence") and spells.BloodPresence:CastEx(Me) then return end
+  if not Me:HasBuff("Unholy Presence") and spells.UnholyPresence:CastEx(Me) then return end
 
   local hornOfWinter = Me:GetAura("Horn of Winter")
 
@@ -92,7 +116,8 @@ local function DeathknightUnholy()
     return
   end
 
-  if spells.BloodTap:CastEx(Me) then return end
+
+  if Me:GetHealthPercent() > 75 and spells.BloodTap:CastEx(Me) then return end
 
   if not Me:HasBuff("Bone Shield") and spells.BoneShield:CastEx(Me) then return end
 
@@ -103,6 +128,22 @@ local function DeathknightUnholy()
   if not Me:IsFacing(target) then return end
 
   if Me.Power > 50 and spells.DeathCoil:CastEx(target) then return end
+
+  -- if aoe do pestilence logic
+  if aoe then
+    for _, u in pairs(Combat.Targets) do
+      -- find a target that has both diseases
+      if u:HasVisibleAura("Frost Fever") and u:HasVisibleAura("Blood Plague") then
+        for _, tar in pairs(Combat.Targets) do
+          -- if at least one other target does not have the diseases, cast the pestilence at the one with disease to spread it.
+          if (not tar:HasVisibleAura("Frost Fever")) or (not tar:HasVisibleAura("Blood Plague")) then
+            spells.Pestilence:CastEx(u)
+            return
+          end
+        end
+      end
+    end
+  end
 
   -- frost fever and icy touch
   local frostFever = target:GetVisibleAura("Frost Fever")
@@ -116,12 +157,14 @@ local function DeathknightUnholy()
   if (not bloodPlague or bloodPlague.Remaining < 2 * 1000) then spells.PlagueStrike:CastEx(target) return end
 
   -- desolation
-  local desolation = Me:GetVisibleAura("Desolation")
-  if (not desolation or desolation.Remaining < 2 * 1000) then spells.BloodStrike:CastEx(target) return end
+  if (HaveDesolationTalent) then
+    local desolation = Me:GetVisibleAura("Desolation")
+    if (not desolation or desolation.Remaining < 2 * 1000) then spells.BloodStrike:CastEx(target) return end
+  end
 
   if aoe and spells.Pestilence:CastEx(target) then return end
 
-  if spells.BloodTap:CastEx(Me) then return end
+  if Me:GetHealthPercent() > 75 and spells.BloodTap:CastEx(Me) then return end
 
   if spells.DeathAndDecay:CastEx(Me.Position) then return end
 
@@ -130,9 +173,11 @@ local function DeathknightUnholy()
     if (not petGhoulFrenzy or petGhoulFrenzy.Remaining < 10000) and spells.GhoulFrenzy:CastEx(target) then return end
   end
 
-  if spells.IcyTouch:CastEx(target) then return end
-
-  if spells.PlagueStrike:CastEx(target) then return end
+  if Me:GetHealthPercent() < DeathStrikePercent then
+    if spells.DeathStrike:CastEx(target) then return end
+  else
+    if spells.ScourgeStrike:CastEx(target) then return end
+  end
 
   if aoe then
     if spells.Pestilence:CastEx(target) then return end
