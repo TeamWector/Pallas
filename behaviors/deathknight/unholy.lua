@@ -133,7 +133,7 @@ local function DeathknightUnholy()
   if aoe then
     for _, u in pairs(Combat.Targets) do
       -- find a target that has both diseases
-      if u:HasVisibleAura("Frost Fever") and u:HasVisibleAura("Blood Plague") then
+      if u:HasVisibleAura("Frost Fever") and u:HasVisibleAura("Blood Plague") and Me:InMeleeRange(u) then
         for _, tar in pairs(Combat.Targets) do
           -- if at least one other target does not have the diseases, cast the pestilence at the one with disease to spread it.
           if (not tar:HasVisibleAura("Frost Fever")) or (not tar:HasVisibleAura("Blood Plague")) then
