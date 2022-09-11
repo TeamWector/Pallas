@@ -8,7 +8,7 @@ local options = {
       uid = "UsePainSuppression",
       text = "Use Pain Suppresion",
       default = false
-    },
+    }
   }
 }
 
@@ -64,7 +64,7 @@ local function PriestDiscDamage()
   if Me.IsMounted then return end
   if Me.StandStance == StandStance.Sit then return end
 
-  local target = Combat.BestTarget
+  local target = Me.Target
   if (not target) or (not target.IsEnemy) or Me.PowerPct < 50 then return end
 
   local shadowWordPain = target:GetVisibleAura("Shadow Word: Pain")
@@ -81,5 +81,4 @@ local behaviors = {
   [BehaviorType.Combat] = PriestDiscDamage
 }
 
---return { Options = options, Behaviors = behaviors }
-return { Behaviors = behaviors }
+return { Options = options, Behaviors = behaviors }
