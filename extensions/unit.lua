@@ -13,7 +13,7 @@ function WoWUnit:HasBuffByMe(name)
   local auras = self.Auras
   for _, aura in pairs(auras) do
     if aura.Name == name and aura.HasCaster and aura.Caster == wector.Game.ActivePlayer.ToUnit then
-        return true
+      return true
     end
   end
 
@@ -24,7 +24,7 @@ function WoWUnit:HasDebuffByMe(dname)
   local auras = self.Auras
   for _, aura in pairs(auras) do
     if aura.Name == dname and aura.HasCaster and aura.Caster == wector.Game.ActivePlayer.ToUnit then
-        return true
+      return true
     end
   end
 
@@ -32,13 +32,13 @@ function WoWUnit:HasDebuffByMe(dname)
 end
 
 local movingMask =
-  MovementFlags.Forward |
-  MovementFlags.Backward |
-  MovementFlags.StrafeLeft |
-  MovementFlags.StrafeRight |
-  MovementFlags.Falling |
-  MovementFlags.Ascending |
-  MovementFlags.Descending
+MovementFlags.Forward |
+    MovementFlags.Backward |
+    MovementFlags.StrafeLeft |
+    MovementFlags.StrafeRight |
+    MovementFlags.Falling |
+    MovementFlags.Ascending |
+    MovementFlags.Descending
 function WoWUnit:IsMoving()
   return (self.MovementFlags & movingMask) > 0
 end
@@ -48,9 +48,9 @@ function WoWUnit:GetHealthPercent()
 end
 
 function WoWUnit:InCombatWithMe()
-  --for k,v in pairs(self.ThreatTable) do
-  --  if Me.Guid == v.Guid then return true end
-  --end
+  for k, v in pairs(self.ThreatTable) do
+    if Me.Guid == v.Guid then return true end
+  end
 
   return false
 end
@@ -77,12 +77,12 @@ function WoWUnit:AngleToXY(x1, y1, x2, y2)
 
   -- make angle be 0 -> rad
   if angle < 0 then
-    angle = angle + math.pi*2
+    angle = angle + math.pi * 2
   end
 
   -- make difference be 0 -> rad
   if diff < 0 then
-    diff = diff + math.pi*2
+    diff = diff + math.pi * 2
   end
 
   -- make diff be between -rad/2 -> rad*2
@@ -134,4 +134,32 @@ function WoWUnit:TimeToDeath()
   end
 
   return 9999
+end
+
+
+---@return integer
+---@param target WoWUnit The target of the unit, pet, me, another player?
+function WoWUnit:GetThreatPct(target)
+  local threat = self.ThreatTable
+  for _, v in pairs(threat) do
+    if v.Guid == target.Guid then
+      return v.RawPct
+    end
+  end
+
+  return 0
+end
+
+---@return WoWUnit[]
+---@param dist integer Distance from unit to check for other attackable units
+function WoWUnit:GetUnitsAround(dist)
+  local units = wector.Game.Units
+  local collected = {}
+  for _, u in pairs(units) do
+    if self:GetDistance(u) < dist and Me:CanAttack(u) and not u.Dead then
+      table.insert(collected, u)
+    end
+  end
+
+  return collected
 end

@@ -3,7 +3,22 @@ SpellCastExFlags = {
   NoUsable = 0x1
 }
 
+local CastTarget = nil
+---@return WoWUnit
+function WoWSpell:GetCastTarget()
+  return CastTarget
+end
+
 local spellDelay = {}
+
+SpellListener = wector.FrameScript:CreateListener()
+SpellListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
+
+function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, _, spellID)
+  if unitTarget == Me then
+    CastTarget = nil
+  end
+end
 
 function WoWSpell:CastEx(a1, ...)
   local arg1, arg2, arg3 = a1, ...
@@ -40,6 +55,7 @@ function WoWSpell:CastEx(a1, ...)
 
     wector.Console:Log('Cast ' .. self.Name)
     spellDelay[self.Id] = wector.Game.Time + math.random(150, 500)
+    CastTarget = arg1.ToUnit
     return self:Cast(arg1.ToUnit)
   else
     -- cast at position
@@ -64,6 +80,15 @@ function WoWSpell:CastEx(a1, ...)
     spellDelay[self.Id] = wector.Game.Time + math.random(150, 500)
     return self:Cast(x, y, z)
   end
+end
+
+function WoWSpell:CooldownRemaining()
+  local start, dur, enabled, modrate = self:GetCooldown()
+  if enabled == 0 then
+    return start + dur - wector.Game.Time
+  end
+
+  return 0
 end
 
 function WoWSpell:HasRange(target)
