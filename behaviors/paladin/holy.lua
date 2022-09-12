@@ -71,8 +71,6 @@ local function IsCastingHeal()
 end
 
 local function PaladinHolyHeal()
-    local focus = Me.FocusTarget
-
     common:DoAura()
 
     if Me.StandStance == StandStance.Sit then return end
@@ -83,13 +81,12 @@ local function PaladinHolyHeal()
         common:DoBuff()
     end
 
+    local focus = Me.FocusTarget
+
     if focus and focus.InCombat then
         if not focus:HasBuffByMe(Spell.BeaconOfLight.Name) and Spell.BeaconOfLight:CastEx(focus) then return end
         if focus.HealthPct <= Settings.HandOfSacrificePct and Spell.HandOfSacrifice:CastEx(focus) then return end
     end
-
-    if focus and focus.InCombat and not focus:HasVisibleAura(Spell.BeaconOfLight.Name) and
-        Spell.BeaconOfLight:CastEx(focus) then return end
 
     local spelltarget = WoWSpell:GetCastTarget()
     if Me.IsCasting and IsCastingHeal() and spelltarget then
