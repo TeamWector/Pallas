@@ -111,11 +111,11 @@ local function DeathknightUnholy()
 
   local hornOfWinter = Me:GetAura("Horn of Winter")
 
-  if not hornOfWinter or hornOfWinter.Remaining < 10000 then
-    spells.HornOfWinter:CastEx(Me)
-    return
+  if (not hornOfWinter or hornOfWinter.Remaining < 10000) then
+    if spells.HornOfWinter:CastEx(Me) then return end
   end
 
+  if Me:GetHealthPercent() < DeathStrikePercent and spells.DeathStrike:CastEx(target) then return end
 
   if Me:GetHealthPercent() > 75 and spells.BloodTap:CastEx(Me) then return end
 
@@ -129,21 +129,7 @@ local function DeathknightUnholy()
 
   if Me.Power > 50 and spells.DeathCoil:CastEx(target) then return end
 
-  -- if aoe do pestilence logic
-  if aoe then
-    for _, u in pairs(Combat.Targets) do
-      -- find a target that has both diseases
-      if u:HasVisibleAura("Frost Fever") and u:HasVisibleAura("Blood Plague") and Me:InMeleeRange(u) then
-        for _, tar in pairs(Combat.Targets) do
-          -- if at least one other target does not have the diseases, cast the pestilence at the one with disease to spread it.
-          if (not tar:HasVisibleAura("Frost Fever")) or (not tar:HasVisibleAura("Blood Plague")) then
-            spells.Pestilence:CastEx(u)
-            return
-          end
-        end
-      end
-    end
-  end
+
 
   -- frost fever and icy touch
   local frostFever = target:GetVisibleAura("Frost Fever")
@@ -162,8 +148,6 @@ local function DeathknightUnholy()
     if (not desolation or desolation.Remaining < 2 * 1000) then spells.BloodStrike:CastEx(target) return end
   end
 
-  if aoe and spells.Pestilence:CastEx(target) then return end
-
   if Me:GetHealthPercent() > 75 and spells.BloodTap:CastEx(Me) then return end
 
   if spells.DeathAndDecay:CastEx(Me.Position) then return end
@@ -173,17 +157,30 @@ local function DeathknightUnholy()
     if (not petGhoulFrenzy or petGhoulFrenzy.Remaining < 10000) and spells.GhoulFrenzy:CastEx(target) then return end
   end
 
-  if Me:GetHealthPercent() < DeathStrikePercent then
-    if spells.DeathStrike:CastEx(target) then return end
-  else
-    if spells.ScourgeStrike:CastEx(target) then return end
+  if spells.ScourgeStrike:CastEx(target) then return end
+
+  -- if aoe do pestilence logic
+  if aoe then
+    for _, u in pairs(Combat.Targets) do
+      -- find a target that has both diseases
+      if u:HasVisibleAura("Frost Fever") and u:HasVisibleAura("Blood Plague") and Me:InMeleeRange(u) then
+        for _, tar in pairs(Combat.Targets) do
+          -- if at least one other target does not have the diseases, cast the pestilence at the one with disease to spread it.
+          if (not tar:HasVisibleAura("Frost Fever")) or (not tar:HasVisibleAura("Blood Plague")) then
+            if spells.Pestilence:CastEx(u) then return end
+          end
+        end
+      end
+    end
   end
 
+
   if aoe then
-    if spells.Pestilence:CastEx(target) then return end
-  else
     if spells.BloodBoil:CastEx(target) then return end
+  else
+    if spells.BloodStrike:CastEx(target) then return end
   end
+
 end
 
 local behaviors = {
