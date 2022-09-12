@@ -81,4 +81,16 @@ function Heal:WeighFilter()
   end)
 end
 
+function Heal:GetLowestMember()
+  local lowest
+  for _, v in pairs(Heal.PriorityList) do
+    local u = v.Unit
+    if not lowest or lowest.HealthPct > u.HealthPct then
+      lowest = u
+    end
+  end
+
+  return lowest
+end
+
 return Heal
