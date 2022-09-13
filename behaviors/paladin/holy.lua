@@ -99,15 +99,15 @@ local function PaladinHolyHeal()
         local hpct = u.HealthPct
         local hlost = u.HealthMax - u.Health
 
-        if hlost >= Settings.HolyShockAmt and Spell.HolyShock:CastEx(u) then return end
-        if hlost >= Settings.HolyLightAmt and Spell.HolyLight:CastEx(u) and
-            u:TimeToDeath() + 3 >= Spell.HolyLight.CastTime / 1000 then return end
-        if hlost >= Settings.FlashOfLightAmt and Spell.FlashOfLight:CastEx(u) then return end
-
         if u.InCombat then
             if hpct <= Settings.LayOnHandsPct and Spell.LayOnHands:CastEx(u) then return end
             if hpct <= Settings.HandOfProtectionPct and Spell.HandOfProtection:CastEx(u) then return end
         end
+
+        if hlost >= Settings.HolyShockAmt and Spell.HolyShock:CastEx(u) then return end
+        if hlost >= Settings.HolyLightAmt and Spell.HolyLight:CastEx(u) and
+            u:TimeToDeath() + 3 >= Spell.HolyLight.CastTime / 1000 then return end
+        if hlost >= Settings.FlashOfLightAmt and Spell.FlashOfLight:CastEx(u) then return end
     end
 end
 
@@ -122,7 +122,7 @@ local function PaladinHolyDamage()
     local aoe = #Me:GetUnitsAround(8) > 2
 
     -- Only continue if the lowest group member is above this percent
-    if lowest and lowest.HealthPct <= Settings.DPSHpct then return end
+    if not lowest or lowest and lowest.HealthPct <= Settings.DPSHpct then return end
     if Spell.HammerOfWrath:CastEx(target) then return end
     if not target:HasDebuffByMe(Spell.JudgementOfLight.Name) and Spell.JudgementOfLight:CastEx(target) then return end
     if Spell.Exorcism:CastEx(target) then return end
