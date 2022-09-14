@@ -28,7 +28,7 @@ end
 
 function commonShaman:Ghostwolf()
     if Settings.Ghostwolf and Me:IsMoving() then
-        if not Me:HasVisibleAura(Spell.Ghostwolf.Name) and Spell.Ghostwolf:CastEx(Me) then return end
+        if not Me:HasVisibleAura(Spell.GhostWolf.Name) and Spell.GhostWolf:CastEx(Me) then return end
     end
 end
 
