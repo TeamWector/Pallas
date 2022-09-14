@@ -53,9 +53,17 @@ local options = {
         },
         {
             type = "slider",
-            uid = "DPSHpct",
+            uid = "DPSHealthPct",
             text = "Damage Above Health Percent",
             default = 95,
+            min = 0,
+            max = 99
+        },
+        {
+            type = "slider",
+            uid = "DPSManaPct",
+            text = "Damage Above Mana Percent",
+            default = 70,
             min = 0,
             max = 99
         }
@@ -94,14 +102,19 @@ local function PaladinHolyHeal()
         if hlost < Settings.FlashOfLightAmt * 0.7 then Me:StopCasting() end
     end
 
+    if Me.IsCasting and not IsCastingHeal() then
+        local lowest = Heal:GetLowestMember()
+        if lowest and lowest.HealthPct < Settings.DPSHealthPct then Me:StopCasting() end
+    end
+
     for _, v in pairs(Heal.PriorityList) do
         local u = v.Unit
         local hpct = u.HealthPct
         local hlost = u.HealthMax - u.Health
 
         if u.InCombat then
-            if hpct <= Settings.LayOnHandsPct and Spell.LayOnHands:CastEx(u) then return end
-            if hpct <= Settings.HandOfProtectionPct and Spell.HandOfProtection:CastEx(u) then return end
+            if hpct <= Settings.LayOnHandsPct and u:GetUnitsAround(10) > 0 and Spell.LayOnHands:CastEx(u) then return end
+            if hpct <= Settings.HandOfProtectionPct and u:GetUnitsAround(10) > 0 and Spell.HandOfProtection:CastEx(u) then return end
         end
 
         if hlost >= Settings.HolyShockAmt and Spell.HolyShock:CastEx(u) then return end
@@ -121,8 +134,8 @@ local function PaladinHolyDamage()
     if not target or not Me:CanAttack(target) or target.Dead then return end
     local aoe = #Me:GetUnitsAround(8) > 2
 
-    -- Only continue if the lowest group member is above this percent
-    if not lowest or lowest and lowest.HealthPct <= Settings.DPSHpct then return end
+    -- Only continue if the lowest group member is above this percent (Mana Health)
+    if Me.PowerPct < Settings.DPSManaPct or (not lowest or lowest and lowest.HealthPct <= Settings.DPSHealthPct) then return end
     if Spell.HammerOfWrath:CastEx(target) then return end
     if not target:HasDebuffByMe(Spell.JudgementOfLight.Name) and Spell.JudgementOfLight:CastEx(target) then return end
     if Spell.Exorcism:CastEx(target) then return end

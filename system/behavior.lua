@@ -111,6 +111,13 @@ function Behavior:Initialize(isReload)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Combat)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Rest)
 
+  -- extra stuff
+  local autoloot = require('extra.autoloot')
+  if autoloot.Options then
+    Menu:AddOptionMenu(autoloot.Options)
+  end
+  self:AddBehaviorFunction(autoloot.Behaviors, BehaviorType.Extra)
+
   local loaded_behaviors = 0
   for _, v in pairs(BehaviorType) do
     if #self[v] > 0 then
