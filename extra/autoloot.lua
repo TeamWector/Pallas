@@ -43,7 +43,7 @@ local lastloot = 0
 local function Autoloot()
   local units = wector.Game.Units
 
-  if Me:IsMoving() or Me.IsCastingOrChanneling or #Me:GetUnitsAround(10) > 0 or not Me.InCombat then return end
+  if Me:IsMoving() or Me.IsCastingOrChanneling or (#Me:GetUnitsAround(10) > 0 and Me.InCombat) then return end
 
   -- clean up looted cache
   local timesince = wector.Game.Time - lastloot

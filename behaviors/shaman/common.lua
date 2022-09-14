@@ -51,6 +51,7 @@ function commonShaman:Interrupt()
             if u:InCombatWithMe() and u.IsCastingOrChanneling then
                 local cast = u.CurrentCast
                 local timeLeft
+                local random = math.random(0, 100)
 
                 if cast then
                     timeLeft = cast.CastEnd - wector.Game.Time
@@ -58,7 +59,7 @@ function commonShaman:Interrupt()
                     timeLeft = 0
                 end
 
-                if (timeLeft <= Settings.InterruptTime or u.IsChanneling) and Spell.WindShear:CastEx(u) then return end
+                if (timeLeft <= Settings.InterruptTime + random or u.IsChanneling) and Spell.WindShear:CastEx(u) then return end
             end
         end
     end
