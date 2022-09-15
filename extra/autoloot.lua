@@ -41,6 +41,8 @@ end
 local looted = {}
 local lastloot = 0
 local function Autoloot()
+  if not Settings.ExtraAutoloot then return end
+
   local units = wector.Game.Units
 
   if Me:IsMoving() or Me.IsCastingOrChanneling or (#Me:GetUnitsAround(10) > 0 and Me.InCombat) then return end

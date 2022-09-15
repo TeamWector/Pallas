@@ -64,6 +64,8 @@ local function WarriorFuryCombat()
   if aoe and Settings.WarriorFurySweeping and Spell.SweepingStrikes:CastEx(Me) then return end
 
   if Me:IsFacing(target) then
+    if Me:HasVisibleAura("Slam!") and Spell.Slam:CastEx(target) then return end
+
     -- Blood Thirst, make sure we cast blood thirst if ready before continuing
     if Spell.Bloodthirst:CastEx(target) then return end
 
