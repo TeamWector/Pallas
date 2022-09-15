@@ -94,6 +94,12 @@ local function WarriorProtCombat()
   -- only melee spells from here on
   if not Me:InMeleeRange(target) then return end
 
+  -- Demoralizing Shout
+  if ds and Spell.DemoralizingShout:CastEx(target) then return end
+
+  -- Thunder Clap
+  if (tc or aoe) and Spell.ThunderClap:CastEx(target) then return end
+
   -- Shield Slam
   if Spell.ShieldSlam:CastEx(target) then return end
 
@@ -102,12 +108,6 @@ local function WarriorProtCombat()
 
   -- Shout
   common:DoShout()
-
-  -- Demoralizing Shout
-  if ds and Spell.DemoralizingShout:CastEx(target) then return end
-
-  -- Thunder Clap
-  if tc and Spell.ThunderClap:CastEx(target) then return end
 
   -- Spell Reflection
   if sr and Me.PowerPct > 45 and Spell.SpellReflection:CastEx(target) then return end
