@@ -53,9 +53,17 @@ local options = {
         },
         {
             type = "slider",
-            uid = "DPSHpct",
+            uid = "DPSHealthPct",
             text = "Damage Above Health Percent",
             default = 95,
+            min = 0,
+            max = 99
+        },
+        {
+            type = "slider",
+            uid = "DPSManaPct",
+            text = "Damage Above Mana Percent",
+            default = 70,
             min = 0,
             max = 99
         }
@@ -71,8 +79,6 @@ local function IsCastingHeal()
 end
 
 local function PaladinHolyHeal()
-    local focus = Me.FocusTarget
-
     common:DoAura()
 
     if Me.StandStance == StandStance.Sit then return end
@@ -83,13 +89,12 @@ local function PaladinHolyHeal()
         common:DoBuff()
     end
 
+    local focus = Me.FocusTarget
+
     if focus and focus.InCombat then
         if not focus:HasBuffByMe(Spell.BeaconOfLight.Name) and Spell.BeaconOfLight:CastEx(focus) then return end
         if focus.HealthPct <= Settings.HandOfSacrificePct and Spell.HandOfSacrifice:CastEx(focus) then return end
     end
-
-    if focus and focus.InCombat and not focus:HasVisibleAura(Spell.BeaconOfLight.Name) and
-        Spell.BeaconOfLight:CastEx(focus) then return end
 
     local spelltarget = WoWSpell:GetCastTarget()
     if Me.IsCasting and IsCastingHeal() and spelltarget then
@@ -97,20 +102,25 @@ local function PaladinHolyHeal()
         if hlost < Settings.FlashOfLightAmt * 0.7 then Me:StopCasting() end
     end
 
+    if Me.IsCasting and not IsCastingHeal() then
+        local lowest = Heal:GetLowestMember()
+        if lowest and lowest.HealthPct < Settings.DPSHealthPct then Me:StopCasting() end
+    end
+
     for _, v in pairs(Heal.PriorityList) do
         local u = v.Unit
         local hpct = u.HealthPct
         local hlost = u.HealthMax - u.Health
 
+        if u.InCombat then
+            if hpct <= Settings.LayOnHandsPct and u:GetUnitsAround(10) > 0 and Spell.LayOnHands:CastEx(u) then return end
+            if hpct <= Settings.HandOfProtectionPct and u:GetUnitsAround(10) > 0 and Spell.HandOfProtection:CastEx(u) then return end
+        end
+
         if hlost >= Settings.HolyShockAmt and Spell.HolyShock:CastEx(u) then return end
         if hlost >= Settings.HolyLightAmt and Spell.HolyLight:CastEx(u) and
             u:TimeToDeath() + 3 >= Spell.HolyLight.CastTime / 1000 then return end
         if hlost >= Settings.FlashOfLightAmt and Spell.FlashOfLight:CastEx(u) then return end
-
-        if u.InCombat then
-            if hpct <= Settings.LayOnHandsPct and Spell.LayOnHands:CastEx(u) then return end
-            if hpct <= Settings.HandOfProtectionPct and Spell.HandOfProtection:CastEx(u) then return end
-        end
     end
 end
 
@@ -124,8 +134,8 @@ local function PaladinHolyDamage()
     if not target or not Me:CanAttack(target) or target.Dead then return end
     local aoe = #Me:GetUnitsAround(8) > 2
 
-    -- Only continue if the lowest group member is above this percent
-    if lowest and lowest.HealthPct <= Settings.DPSHpct then return end
+    -- Only continue if the lowest group member is above this percent (Mana Health)
+    if Me.PowerPct < Settings.DPSManaPct or (not lowest or lowest and lowest.HealthPct <= Settings.DPSHealthPct) then return end
     if Spell.HammerOfWrath:CastEx(target) then return end
     if not target:HasDebuffByMe(Spell.JudgementOfLight.Name) and Spell.JudgementOfLight:CastEx(target) then return end
     if Spell.Exorcism:CastEx(target) then return end
