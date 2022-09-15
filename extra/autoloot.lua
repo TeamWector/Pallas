@@ -41,7 +41,7 @@ end
 local looted = {}
 local lastloot = 0
 local function Autoloot()
-  if not Settings.ExtraAutoLoot then return end
+  if not Settings.ExtraAutoloot then return end
 
   local units = wector.Game.Units
 
