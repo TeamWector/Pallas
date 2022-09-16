@@ -66,7 +66,9 @@ function commonDeathKnight:GetRuneCount(type)
 end
 
 function commonDeathKnight:HornOfWinter()
-    if Settings.HornOfWinter and Spell.HornOfWinter:CastEx(Me) then return end
+    local hornofWinter = Me:GetAura(Spell.HornOfWinter.Name)
+
+    return Settings.HornOfWinter and (not hornofWinter or hornofWinter.Remaining < 30000) and Spell.HornOfWinter:CastEx(Me)
 end
 
 --- Uses blood tap if we dont have any blood runes at all left.
@@ -101,7 +103,7 @@ function commonDeathKnight:ShouldPestilence()
     local avgdeath = Combat:TargetsAverageDeathTime()
     local alldiseased = self:EveryoneDiseased(15)
 
-    return not alldiseased and avgdeath > 15
+    return not alldiseased and avgdeath > 10
 end
 
 function commonDeathKnight:BloodBoil()
@@ -113,15 +115,43 @@ end
 
 --- Gets a unit with either plague or fever for optimal plague delivery.
 function commonDeathKnight:GetDiseaseTarget()
+    local targets = {}
+    local defaults = {}
+
     for _, u in pairs(Combat.Targets) do
         local plague = u:GetAuraByMe(self.auras.bloodplague.Name)
         local fever = u:GetAuraByMe(self.auras.frostfever.Name)
 
-        if Me:InMeleeRange(u) and (plague or fever) then return u end
+        if Me:InMeleeRange(u) and (plague and plague.Remaining > 3000 or fever and fever.Remaining > 3000) then
+            table.insert(targets, u)
+        end
     end
 
-    -- Disease target default to bestTarget
-    return Combat.BestTarget
+    if table.length(targets) > 1 then
+        table.sort(targets, function(x, y)
+            return x:TimeToDeath() > y:TimeToDeath()
+        end)
+    end
+
+    if targets[1] then
+        return targets[1]
+    end
+
+    for _, u in pairs(Combat.Targets) do
+        if Me:InMeleeRange(u) then
+            table.insert(defaults, u)
+        end
+    end
+
+    table.sort(defaults, function(x, y)
+        return x.HealthPct > y.HealthPct
+    end)
+
+    if defaults[1] then
+        return defaults[1]
+    end
+
+    return Combat.Targets[1]
 end
 
 function commonDeathKnight:DoDiseases(target)

@@ -76,6 +76,7 @@ local function UnholyDamage(target)
   local fever = target:GetAuraByMe(common.auras.frostfever.Name)
   local plague = target:GetAuraByMe(common.auras.bloodplague.Name)
   local desolation = Me:GetVisibleAura(common.auras.desolation.Name)
+  local diseaseTarget = common:GetDiseaseTarget()
 
   if Combat.EnemiesInMeleeRange > 1 then
     -- if this returns true, we are forcing the multi target routine.
@@ -93,13 +94,15 @@ local function UnholyDamage(target)
   -- Death coil spam if we dont have gargoyle ready.
   if (Me.PowerPct > 70 or Spell.SummonGargoyle:CooldownRemaining() > 4000) and Spell.DeathCoil:CastEx(target) then return end
 
-  if target:TimeToDeath() > 5 and (not fever or fever.Remaining < 3000) then
+  if (not diseaseTarget or diseaseTarget == target) and target:TimeToDeath() > 5 and
+      (not fever or fever.Remaining < 3000) then
     if Spell.IcyTouch:CastEx(target) then return end
   end
 
   if Settings.Desolation and (not desolation or desolation.Remaining < 3000) and Spell.BloodStrike:CastEx(target) then return end
 
-  if target:TimeToDeath() > 5 and (not plague or plague.Remaining < 3000) then
+  if (not diseaseTarget or diseaseTarget == target) and target:TimeToDeath() > 5 and
+      (not plague or plague.Remaining < 3000) then
     if Spell.PlagueStrike:CastEx(target) then return end
   end
 
@@ -119,8 +122,8 @@ local function DeathknightUnholy()
   if Me.IsMounted then return end
 
   common:Interrupt()
-  common:HornOfWinter()
-
+  if not Me.InCombat and common:HornOfWinter() then return end
+  
   if not Me.Pet then
     -- Get Glyph of Raise Dead, it's bis :)
     if Spell.RaiseDead:CastEx(Me) then return end
