@@ -16,6 +16,12 @@ local options = {
       default = false
     },
     {
+      type = "checkbox",
+      uid = "ExtraBreakStealth",
+      text = "Break Stealth",
+      default = false
+    },
+    {
       type = "slider",
       uid = "LootCacheReset",
       text = "Cache Reset (MS)",
@@ -38,10 +44,17 @@ local function tableContains(tbl, val)
   return false
 end
 
+local function isInStealth()
+  local stealth = Me.ShapeshiftForm == ShapeshiftForm.Stealth
+  local prowl = Me.ShapeshiftForm == ShapeshiftForm.Cat and Me:HasAura("Prowl")
+  return stealth or prowl
+end
+
 local looted = {}
 local lastloot = 0
 local function Autoloot()
   if not Settings.ExtraAutoloot then return end
+  if not Settings.ExtraBreakStealth and isInStealth() then return end
 
   local units = wector.Game.Units
 
