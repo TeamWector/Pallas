@@ -53,21 +53,29 @@ commonDeathKnight.widgets = {
     },
 }
 
+function commonDeathKnight:GetRuneCount(type)
+    local count = 0
+
+    for i = 0, 5 do
+        if Me:GetRuneType(i) == type and Me:GetRuneCooldown(i) == 0 then
+            count = count + 1
+        end
+    end
+
+    return count
+end
+
 function commonDeathKnight:HornOfWinter()
     if Settings.HornOfWinter and Spell.HornOfWinter:CastEx(Me) then return end
 end
 
-function commonDeathKnight:DeathAndDecay(target)
-    local unitcount = table.length(Combat.Targets)
-    local seconds = 0
+--- Uses blood tap if we dont have any blood runes at all left.
+function commonDeathKnight:BloodTap()
+    return self:GetRuneCount(RuneType.Blood) == 0 and Spell.BloodTap:CastEx(Me)
+end
 
-    if unitcount < 3 then return end
-
-    for _, u in pairs(Combat.Targets) do
-        seconds = seconds + u:TimeToDeath()
-    end
-
-    local avgdeath = seconds / unitcount
+function commonDeathKnight:DeathAndDecay()
+    local avgdeath = Combat:TargetsAverageDeathTime()
 
     -- avgdeath needed to make most of our death and decay.
     return avgdeath > 15 and Spell.DeathAndDecay:CastEx(Me.Position)
@@ -77,21 +85,54 @@ function commonDeathKnight:PathOfFrost()
     return Settings.PathOfFrost and not Me:HasVisibleAura(Spell.PathOfFrost.Name) and Spell.PathOfFrost:CastEx(Me)
 end
 
-function commonDeathKnight:BloodBoil()
-    local unitcount = table.length(Combat.Targets)
-    local allcancer = true
-
-    if unitcount < 3 then return end
-
+---@param range integer The range around me to check for diseases
+---@return boolean EveryoneDisesased All Targets within range yards have disesases on them.
+function commonDeathKnight:EveryoneDiseased(range)
     for _, u in pairs(Combat.Targets) do
-        if Me:GetDistance(u) <= 10 and not self:TargetHasDiseases(u) then
-            allcancer = false
+        if Me:GetDistance(u) < range and not self:TargetHasDiseases(u) then
+            return false
         end
     end
 
-    return allcancer and Spell.BloodBoil:CastEx(Me)
+    return true
 end
 
+function commonDeathKnight:ShouldPestilence()
+    local avgdeath = Combat:TargetsAverageDeathTime()
+    local alldiseased = self:EveryoneDiseased(15)
+
+    return not alldiseased and avgdeath > 15
+end
+
+function commonDeathKnight:BloodBoil()
+    local allcancer = self:EveryoneDiseased(10)
+    local dndcd = Spell.DeathAndDecay:CooldownRemaining() > 2500
+
+    return dndcd and allcancer and Spell.BloodBoil:CastEx(Me)
+end
+
+--- Gets a unit with either plague or fever for optimal plague delivery.
+function commonDeathKnight:GetDiseaseTarget()
+    for _, u in pairs(Combat.Targets) do
+        local plague = u:GetAuraByMe(self.auras.bloodplague.Name)
+        local fever = u:GetAuraByMe(self.auras.frostfever.Name)
+
+        if Me:InMeleeRange(u) and (plague or fever) then return u end
+    end
+
+    -- Disease target default to bestTarget
+    return Combat.BestTarget
+end
+
+function commonDeathKnight:DoDiseases(target)
+    local plague = target:GetAuraByMe(self.auras.bloodplague.Name)
+    local fever = target:GetAuraByMe(self.auras.frostfever.Name)
+
+    if not plague and Spell.PlagueStrike:CastEx(target) then return true end
+    if not fever and Spell.IcyTouch:CastEx(target) then return true end
+end
+
+--- Returns a target on which we can use pestilence on.
 function commonDeathKnight:GetPestilenceTarget()
     if Me.Target and self:TargetHasDiseases(Me.Target) then
         return Me.Target
@@ -119,13 +160,21 @@ function commonDeathKnight:TargetHasDiseases(unit)
     return plague and plague.Remaining > 3000 and fever and fever.Remaining > 3000
 end
 
+---@return boolean shouldpest this both does pestilence and checks if we should
 function commonDeathKnight:Pestilence()
-    local pestilencetarget = self:GetPestilenceTarget()
-    for _, u in pairs(Combat.Targets) do
-        if Me:GetDistance(u) <= 15 and not self:TargetHasDiseases(u) and pestilencetarget then
-            if Spell.Pestilence:CastEx(pestilencetarget) then return end
-        end
+    local pestTarget = self:GetPestilenceTarget()
+    local shouldPest = self:ShouldPestilence()
+
+    if not shouldPest then return false end
+
+    if pestTarget then
+        if Spell.Pestilence:CastEx(pestTarget) then return true end
+    else
+        local diseaseTarget = self:GetDiseaseTarget()
+        if diseaseTarget and self:DoDiseases(diseaseTarget) then return true end
     end
+
+    return true
 end
 
 local random = math.random(100, 200)

@@ -52,6 +52,21 @@ local function SummonGargoyle(target)
   return Me.PowerPct >= 60 and Spell.SummonGargoyle:CastEx(target)
 end
 
+local function UnholyMulti(target)
+  -- Force multi target waiting for runes if we are fighting more than 3 units.
+  if Combat.EnemiesInMeleeRange > 3 then
+    -- Force pestilence because Wandering Plague talent is imba.
+    if common:Pestilence() then return true end
+    common:DeathAndDecay()
+    common:BloodBoil()
+    return true
+  end
+
+  if common:Pestilence() then return end
+  if common:DeathAndDecay() then return end
+  if common:BloodBoil() then return end
+end
+
 local GCD = WoWSpell(61304)
 local function UnholyDamage(target)
   if not Me:IsAttacking(target) then Me:StartAttack(target) end
@@ -63,9 +78,8 @@ local function UnholyDamage(target)
   local desolation = Me:GetVisibleAura(common.auras.desolation.Name)
 
   if Combat.EnemiesInMeleeRange > 1 then
-    common:Pestilence()
-    common:DeathAndDecay(target)
-    common:BloodBoil()
+    -- if this returns true, we are forcing the multi target routine.
+    if UnholyMulti(target) then return end
   end
 
   -- We swapping presence to maximize gargoyle damage (It's based on haste.)
@@ -89,9 +103,14 @@ local function UnholyDamage(target)
     if Spell.PlagueStrike:CastEx(target) then return end
   end
 
+  -- Death strike will only happen if target has both diseases.
   if common:DeathStrike(target) then return end
+
+  -- Let's make sure we have all prereqs for max damage before using ScourgeStrike
   if common:TargetHasDiseases(target) and desolation and Spell.ScourgeStrike:CastEx(target) then return end
-  if target:TimeToDeath() < 5 and Spell.BloodStrike:CastEx(target) then return end
+
+  -- Slap target with bloodstrike if he's soon dead or we are capped on blood runes. Mostly to trigger desolation but also works as a good finisher.
+  if (target:TimeToDeath() < 5 or common:GetRuneCount(RuneType.Blood) == 2) and Spell.BloodStrike:CastEx(target) then return end
 end
 
 local Desolation = WoWSpell(66803)
@@ -116,6 +135,8 @@ local function DeathknightUnholy()
   local target = Combat.BestTarget
   if not target then return end
 
+  if common:BloodTap() then return end
+
   if Me.Pet then
     PetAttack(target)
   end
@@ -127,6 +148,7 @@ end
 local function Ascii()
   wector.Console:Log("------------------------------------------------")
   wector.Console:Log("UNHOLY DEATHKNIGHT FUCKING LOADED")
+  wector.Console:Log("GET:GLYPH OF DISEASE AND MINOR GLYPH OF RAISE DEAD")
   wector.Console:Log("DISABLE AUTOCAST ON ALL PET SPELLS EXCEPT LEAP")
   wector.Console:Log("SET YOUR FUCKING PET TO PASSIVE")
   wector.Console:Log("MAKE SURE TO VERIFY ALL SETTINGS IN THE GUI!")
