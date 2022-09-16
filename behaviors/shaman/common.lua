@@ -29,6 +29,13 @@ commonShaman.widgets = {
         min = 0,
         max = 5000
     },
+    {
+        type = "combobox",
+        uid = "ShamanShield",
+        text = "Select Shield",
+        default = 0,
+        options = { "Lightning Shield", "Water Shield" }
+    },
 }
 
 ShamanListener = wector.FrameScript:CreateListener()
@@ -44,22 +51,21 @@ function ShamanListener:PLAYER_STOPPED_MOVING()
     start = 0
 end
 
+local random = math.random(100, 200)
 function commonShaman:Interrupt()
     if Settings.ShamanInterrupt then
         local units = wector.Game.Units
         for _, u in pairs(units) do
-            if u:InCombatWithMe() and u.IsCastingOrChanneling then
+            if u:InCombatWithMe() and u.CurrentSpell then
                 local cast = u.CurrentCast
-                local timeLeft
-                local random = math.random(0, 100)
+                local timeLeft = 0
+                local channel = u.CurrentChannel
 
                 if cast then
                     timeLeft = cast.CastEnd - wector.Game.Time
-                else
-                    timeLeft = 0
                 end
 
-                if (timeLeft <= Settings.InterruptTime + random or u.IsChanneling) and Spell.WindShear:CastEx(u) then return end
+                if (timeLeft <= Settings.InterruptTime + random or channel) and Spell.WindShear:CastEx(u) then return end
             end
         end
     end
@@ -74,6 +80,21 @@ function commonShaman:Ghostwolf()
 
     if Settings.Ghostwolf and timespentmoving > Settings.GhostwolfTime and not Me.InCombat then
         if not Me:HasVisibleAura(Spell.GhostWolf.Name) and Spell.GhostWolf:CastEx(Me) then return end
+    end
+end
+
+function commonShaman:Shield()
+    local option = Settings.ShamanShield
+    if option == 0 then
+        local lightningshield = Me:GetVisibleAura(Spell.LightningShield.Name)
+        if not lightningshield or lightningshield.Stacks < 3 and not Me.InCombat then
+            if Spell.LightningShield:CastEx(Me) then return end
+        end
+    else
+        local watershield = Me:GetVisibleAura(Spell.WaterShield.Name)
+        if not watershield or watershield.Stacks < 3 and not Me.InCombat then
+            if Spell.WaterShield:CastEx(Me) then return end
+        end
     end
 end
 

@@ -135,4 +135,17 @@ function Combat:WeighFilter()
   end
 end
 
+---@return number deathtime seconds until all targets we are in combat with die.
+function Combat:TargetsAverageDeathTime()
+  local count = table.length(self.Targets)
+  local seconds = 0
+
+  for _, u in pairs(self.Targets) do
+    local ttd = u:TimeToDeath()
+    seconds = seconds + ttd
+  end
+
+  return seconds / count
+end
+
 return Combat
