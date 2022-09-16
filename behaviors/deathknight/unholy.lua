@@ -116,8 +116,8 @@ local function UnholyDamage(target)
   if (target:TimeToDeath() < 5 or common:GetRuneCount(RuneType.Blood) == 2) and Spell.BloodStrike:CastEx(target) then return end
 end
 
-local Desolation = WoWSpell(66803)
 local function DeathknightUnholy()
+  if Me.IsCastingOrChanneling then return end
   if not Me.InCombat and common:PathOfFrost() then return end
   if Me.IsMounted then return end
 
