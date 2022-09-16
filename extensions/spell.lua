@@ -23,7 +23,6 @@ end
 function WoWSpell:CastEx(a1, ...)
   local arg1, arg2, arg3 = a1, ...
   if not arg1 then return false end
-
   -- generic checks
 
   -- delay
@@ -84,7 +83,7 @@ end
 
 function WoWSpell:CooldownRemaining()
   local start, dur, enabled, modrate = self:GetCooldown()
-  if enabled == 0 then
+  if dur ~= 0 then
     return start + dur - wector.Game.Time
   end
 

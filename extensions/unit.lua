@@ -1,7 +1,9 @@
-function WoWUnit:HasBuff(buffname)
+---@return boolean HasDebuff
+---@param bname string buff name
+function WoWUnit:HasBuffByMe(bname)
   local auras = self.Auras
   for _, aura in pairs(auras) do
-    if aura.Name == buffname then
+    if aura.Name == bname and aura.HasCaster and aura.Caster == Me.ToUnit then
       return true
     end
   end
@@ -9,26 +11,31 @@ function WoWUnit:HasBuff(buffname)
   return false
 end
 
-function WoWUnit:HasBuffByMe(name)
-  local auras = self.Auras
-  for _, aura in pairs(auras) do
-    if aura.Name == name and aura.HasCaster and aura.Caster == wector.Game.ActivePlayer.ToUnit then
-      return true
-    end
-  end
-
-  return false
-end
-
+---@return boolean HasDebuff
+---@param dname string debuff name
 function WoWUnit:HasDebuffByMe(dname)
   local auras = self.Auras
   for _, aura in pairs(auras) do
-    if aura.Name == dname and aura.HasCaster and aura.Caster == wector.Game.ActivePlayer.ToUnit then
+    if aura.Name == dname and aura.HasCaster and aura.Caster == Me.ToUnit then
       return true
     end
   end
 
   return false
+end
+
+---@return WoWAura
+---@param aname string aura name
+function WoWUnit:GetAuraByMe(aname)
+  local auras = self.Auras
+
+  for _, aura in pairs(auras) do
+    if aura.Name == aname and aura.HasCaster and aura.Caster == Me.ToUnit then
+      return aura
+    end
+  end
+
+  return auras[999]
 end
 
 local movingMask =

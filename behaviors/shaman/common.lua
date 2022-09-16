@@ -34,7 +34,7 @@ commonShaman.widgets = {
         uid = "ShamanShield",
         text = "Select Shield",
         default = 0,
-        options = { "Lightning Shield", "Water Shield"}
+        options = { "Lightning Shield", "Water Shield" }
     },
 }
 
@@ -51,22 +51,21 @@ function ShamanListener:PLAYER_STOPPED_MOVING()
     start = 0
 end
 
+local random = math.random(100, 200)
 function commonShaman:Interrupt()
     if Settings.ShamanInterrupt then
         local units = wector.Game.Units
         for _, u in pairs(units) do
-            if u:InCombatWithMe() and u.IsCastingOrChanneling then
+            if u:InCombatWithMe() and u.CurrentSpell then
                 local cast = u.CurrentCast
-                local timeLeft
-                local random = math.random(0, 100)
+                local timeLeft = 0
+                local channel = u.CurrentChannel
 
                 if cast then
                     timeLeft = cast.CastEnd - wector.Game.Time
-                else
-                    timeLeft = 0
                 end
 
-                if (timeLeft <= Settings.InterruptTime + random or u.IsChanneling) and Spell.WindShear:CastEx(u) then return end
+                if (timeLeft <= Settings.InterruptTime + random or channel) and Spell.WindShear:CastEx(u) then return end
             end
         end
     end
