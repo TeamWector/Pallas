@@ -31,11 +31,11 @@ After installation the path to Pallas will be `<Wector root>/scripts/Pallas`
 | Feral             |         :x:          | Protection        | :large_blue_diamond: | Enhancement       |         :x:          |
 | Restoration       |         :x:          | Restribution      |         :x:          | Elemental         |         :x:          |
 | **Hunter**        |                      | **Priest**        |                      | **Warlock**       |                      |
-| Beast Mastery     |         :x:          | Discipline        |         :x:          | Affliction        |         :x:          |
-| Masksmanship      |         :x:          | Holy              |         :x:          | Demonology        |         :x:          |
+| Beast Mastery     |         :x:          | Discipline        | :large_blue_diamond: | Affliction        | :large_blue_diamond: |
+| Masksmanship      |         :x:          | Holy              | :large_blue_diamond: | Demonology        |         :x:          |
 | Survival          |         :x:          | Shadow            |         :x:          | Destruction       |         :x:          |
 | **Warrior**       |                      |                   |                      |                   |                      |
-| Arms              |         :x:          |                   |                      |                   |                      |
+| Arms              |  :heavy_check_mark:  |                   |                      |                   |                      |
 | Fury              |  :heavy_check_mark:  |                   |                      |                   |                      |
 | Protection        |  :heavy_check_mark:  |                   |                      |                   |                      |
 
