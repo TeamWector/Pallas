@@ -10,7 +10,7 @@ local function DruidFeralCombat()
   if not Me.InCombat then
     -- to many forms!
     local form = Me.ShapeshiftForm
-    if form ~= ShapeshiftForm.Cat and form ~= ShapeshiftForm.Bear and form ~= ShapeshiftForm.Aqua and form ~= ShapeshiftForm.DireBear and form ~= ShapeshiftForm.EpicFlightForm and form ~= ShapeshiftForm.Travel then
+    if (Me.MovementFlags & MovementFlags.Flying == 0) and form ~= ShapeshiftForm.Cat and form ~= ShapeshiftForm.Bear and form ~= ShapeshiftForm.Aqua and form ~= ShapeshiftForm.DireBear and form ~= ShapeshiftForm.EpicFlightForm and form ~= ShapeshiftForm.Travel then
       if not Me:HasVisibleAura("Mark of the Wild") and  not Me:HasVisibleAura("Gift of the Wild") and Spell.MarkOfTheWild:CastEx(Me) then return end
       if not Me:HasVisibleAura("Thorns") and Spell.Thorns:CastEx(Me) then return end
     end
