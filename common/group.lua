@@ -1,0 +1,6 @@
+GroupRole = {
+  None = 0x0,
+  Tank = 0x2,
+  Healer = 0x4,
+  Damage = 0x8
+}

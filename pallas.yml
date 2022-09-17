@@ -4,6 +4,7 @@ game: wow
 
 files:
   - pallas.lua
+  - common\group.lua
   - common\menu.lua
   - common\settings.lua
   - common\spell.lua
