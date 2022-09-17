@@ -31,7 +31,8 @@ function WoWUnit:GetAuraByMe(aname)
 
   for _, aura in pairs(auras) do
     if aura.Name == aname and aura.HasCaster and aura.Caster == Me.ToUnit then
-      return aura
+      -- Undocumented copy-constructor
+      return WoWAura(aura)
     end
   end
 
