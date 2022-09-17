@@ -190,7 +190,7 @@ function commonDeathKnight:DeathStrike(target)
 end
 
 function commonDeathKnight:DeathPact()
-    return Me.HealthPct <= Settings.DeathPactPct and Spell.DeathPact:CastEx(Me)
+    return Me.HealthPct <= Settings.DeathPactPct and Me.Pet and Spell.DeathPact:CastEx(Me)
 end
 
 ---@param unit WoWUnit
