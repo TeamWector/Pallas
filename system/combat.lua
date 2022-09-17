@@ -140,6 +140,8 @@ function Combat:TargetsAverageDeathTime()
   local count = table.length(self.Targets)
   local seconds = 0
 
+  if count == 0 then return 0 end
+
   for _, u in pairs(self.Targets) do
     local ttd = u:TimeToDeath()
     seconds = seconds + ttd

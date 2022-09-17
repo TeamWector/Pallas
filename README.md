@@ -25,10 +25,10 @@ After installation the path to Pallas will be `<Wector root>/scripts/Pallas`
 | **Death Knight**  |                      | **Mage**          |                      | **Rogue**         |                      |
 | Blood             |         :x:          | Arcane            |         :x:          | Assassination     |         :x:          |
 | Frost             |         :x:          | Fire              |         :x:          | Combat            | :large_blue_diamond: |
-| Unholy            |         :x:          | Frost             |         :x:          | Sublety           |         :x:          |
+| Unholy            |  :heavy_check_mark:  | Frost             |         :x:          | Sublety           |         :x:          |
 | **Druid**         |                      | **Paladin**       |                      | **Shaman**        |                      |
-| Balance           |         :x:          | Holy              |         :x:          | Restoration       |         :x:          |
-| Feral             |         :x:          | Protection        |         :x:          | Enhancement       |         :x:          |
+| Balance           |         :x:          | Holy              |  :heavy_check_mark:  | Restoration       |         :x:          |
+| Feral             |         :x:          | Protection        | :large_blue_diamond: | Enhancement       |         :x:          |
 | Restoration       |         :x:          | Restribution      |         :x:          | Elemental         |         :x:          |
 | **Hunter**        |                      | **Priest**        |                      | **Warlock**       |                      |
 | Beast Mastery     |         :x:          | Discipline        |         :x:          | Affliction        |         :x:          |
