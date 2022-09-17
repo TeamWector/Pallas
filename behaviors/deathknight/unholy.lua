@@ -57,14 +57,14 @@ local function UnholyMulti(target)
   if Combat.EnemiesInMeleeRange > 3 then
     -- Force pestilence because Wandering Plague talent is imba.
     if common:Pestilence() then return true end
-    common:DeathAndDecay()
-    if Spell.DeathAndDecay:CooldownRemaining() > 2000 and common:BloodBoil() then return end
+    if common:DeathAndDecay() then return end
+    if common:BloodBoil() then return end
     return true
   end
 
   if common:Pestilence() then return end
   if common:DeathAndDecay() then return end
-  if Spell.DeathAndDecay:CooldownRemaining() > 2000 and common:BloodBoil() then return end
+  if common:BloodBoil() then return end
 end
 
 local GCD = WoWSpell(61304)
@@ -78,7 +78,10 @@ local function UnholyDamage(target)
   local desolation = Me:GetVisibleAura(common.auras.desolation.Name)
   local diseaseTarget = common:GetDiseaseTarget()
 
-  common:DeathPact()
+  -- Death pact if we have pet up and hp lower than settings hp
+  if common:DeathPact() then return end
+  -- Death strike will only happen if target has both diseases.
+  if common:DeathStrike(target) then return end
 
   -- Death coil spam if we dont have gargoyle ready.
   if (Me.PowerPct > 70 or Spell.SummonGargoyle:CooldownRemaining() > 4000) and Spell.DeathCoil:CastEx(target) then return end
@@ -108,9 +111,6 @@ local function UnholyDamage(target)
     if Spell.PlagueStrike:CastEx(target) then return end
   end
 
-  -- Death strike will only happen if target has both diseases.
-  if common:DeathStrike(target) then return end
-
   -- Let's make sure we have all prereqs for max damage before using ScourgeStrike
   if common:TargetHasDiseases(target) and desolation and Spell.ScourgeStrike:CastEx(target) then return end
 
@@ -125,7 +125,7 @@ local function DeathknightUnholy()
 
   common:Interrupt()
   if not Me.InCombat and common:HornOfWinter() then return end
-  
+
   if not Me.Pet then
     -- Get Glyph of Raise Dead, it's bis :)
     if Spell.RaiseDead:CastEx(Me) then return end
