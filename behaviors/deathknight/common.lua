@@ -144,7 +144,7 @@ function commonDeathKnight:GetDiseaseTarget()
     end
 
     table.sort(defaults, function(x, y)
-        return x.HealthPct > y.HealthPct
+        return x.Health > y.Health
     end)
 
     if defaults[1] then
