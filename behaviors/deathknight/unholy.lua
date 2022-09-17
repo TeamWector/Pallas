@@ -58,13 +58,13 @@ local function UnholyMulti(target)
     -- Force pestilence because Wandering Plague talent is imba.
     if common:Pestilence() then return true end
     common:DeathAndDecay()
-    common:BloodBoil()
+    if Spell.DeathAndDecay:CooldownRemaining() > 2000 and common:BloodBoil() then return end
     return true
   end
 
   if common:Pestilence() then return end
   if common:DeathAndDecay() then return end
-  if common:BloodBoil() then return end
+  if Spell.DeathAndDecay:CooldownRemaining() > 2000 and common:BloodBoil() then return end
 end
 
 local GCD = WoWSpell(61304)
@@ -78,6 +78,11 @@ local function UnholyDamage(target)
   local desolation = Me:GetVisibleAura(common.auras.desolation.Name)
   local diseaseTarget = common:GetDiseaseTarget()
 
+  common:DeathPact()
+
+  -- Death coil spam if we dont have gargoyle ready.
+  if (Me.PowerPct > 70 or Spell.SummonGargoyle:CooldownRemaining() > 4000) and Spell.DeathCoil:CastEx(target) then return end
+
   if Combat.EnemiesInMeleeRange > 1 then
     -- if this returns true, we are forcing the multi target routine.
     if UnholyMulti(target) then return end
@@ -90,9 +95,6 @@ local function UnholyDamage(target)
       Spell.BloodPresence:CastEx(Me) then return end
 
   if Settings.GargoyleCD and Me:HasVisibleAura(common.auras.unholypresence.Name) and SummonGargoyle(target) then return end
-
-  -- Death coil spam if we dont have gargoyle ready.
-  if (Me.PowerPct > 70 or Spell.SummonGargoyle:CooldownRemaining() > 4000) and Spell.DeathCoil:CastEx(target) then return end
 
   if (not diseaseTarget or diseaseTarget == target) and target:TimeToDeath() > 5 and
       (not fever or fever.Remaining < 3000) then
@@ -129,7 +131,7 @@ local function DeathknightUnholy()
     if Spell.RaiseDead:CastEx(Me) then return end
   else
     -- follow on pet if we deselect target and we are out of combat.
-    if Me.Pet.Target and not Me.Target and not Me.InCombat then Me:PetFollow() end
+    if Me.Pet.Target and (not Me.Target or Me.Target ~= Me.Pet.Target) and not Me.InCombat then Me:PetFollow() end
   end
 
   -- Bone shield for that 2% extra overall dmg

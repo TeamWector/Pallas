@@ -40,6 +40,14 @@ commonDeathKnight.widgets = {
         max = 99
     },
     {
+        type = "slider",
+        uid = "DeathPactPct",
+        text = "Death Pact (%)",
+        default = 20,
+        min = 0,
+        max = 99
+    },
+    {
         type = "checkbox",
         uid = "HornOfWinter",
         text = "Horn of Winter",
@@ -179,6 +187,10 @@ end
 function commonDeathKnight:DeathStrike(target)
     return Me.HealthPct <= Settings.DeathStrikePct and self:TargetHasDiseases(target) and
         Spell.DeathStrike:CastEx(target)
+end
+
+function commonDeathKnight:DeathPact()
+    return Me.HealthPct <= Settings.DeathPactPct and Spell.DeathPact:CastEx(Me)
 end
 
 ---@param unit WoWUnit
