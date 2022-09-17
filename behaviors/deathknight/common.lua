@@ -116,9 +116,9 @@ end
 
 function commonDeathKnight:BloodBoil()
     local allcancer = self:EveryoneDiseased(10)
-    local dndcd = Spell.DeathAndDecay:CooldownRemaining() > 2500
+    local dndcd = Spell.DeathAndDecay:CooldownRemaining() > 5000
 
-    return dndcd and allcancer and Spell.BloodBoil:CastEx(Me)
+    return (dndcd or self:GetRuneCount(RuneType.Blood) == 2) and allcancer and Spell.BloodBoil:CastEx(Me)
 end
 
 --- Gets a unit with either plague or fever for optimal plague delivery.
@@ -194,7 +194,7 @@ function commonDeathKnight:DeathPact()
 end
 
 ---@param unit WoWUnit
----@return boolean HasDiseases
+---@return boolean? HasDiseases
 function commonDeathKnight:TargetHasDiseases(unit)
     local plague = unit:GetAuraByMe(self.auras.bloodplague.Name)
     local fever = unit:GetAuraByMe(self.auras.frostfever.Name)
