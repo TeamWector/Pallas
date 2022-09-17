@@ -24,19 +24,18 @@ function WoWUnit:HasDebuffByMe(dname)
   return false
 end
 
----@return WoWAura
 ---@param aname string aura name
+---@return WoWAura?
 function WoWUnit:GetAuraByMe(aname)
   local auras = self.Auras
 
   for _, aura in pairs(auras) do
     if aura.Name == aname and aura.HasCaster and aura.Caster == Me.ToUnit then
       -- Undocumented copy-constructor
+      ---@diagnostic disable-next-line: undefined-global
       return WoWAura(aura)
     end
   end
-
-  return auras[999]
 end
 
 local movingMask =
