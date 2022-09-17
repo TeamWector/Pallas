@@ -4,12 +4,16 @@ Heal = Heal or Targeting:New()
 ---@type table<WoWUnit[], number>
 Heal.PriorityList = {}
 
+---@type table<WoWUnit[], number>
+Heal.Tanks = {}
+
 function Heal:Update()
   Targeting.Update(self)
 end
 
 function Heal:Reset()
   Heal.PriorityList = {}
+  Heal.Tanks = {}
 end
 
 function Heal:WantToRun()
@@ -18,6 +22,7 @@ function Heal:WantToRun()
   if Me.IsMounted then return false end
 
   if (Me.UnitFlags & UnitFlags.Looting) == UnitFlags.Looting then return false end
+  if Me:HasAura("Preparation") then return false end
   return true
 end
 
@@ -53,30 +58,41 @@ function Heal:WeighFilter()
   local group = WoWGroup(GroupType.Auto)
 
   for _, u in pairs(self.Targets) do
-    -- only heal group members for now
-    if Me.Guid ~= u.Guid then
-      local member = group:GetMemberByGuid(u.Guid)
-      if not member then goto continue end
-    end
-
     local priority = 0
+    local istank = false
+
+    -- only heal group members for now
+    local member = group:GetMemberByGuid(u.Guid)
+    if not member and Me.Guid ~= u.Guid then goto continue end
+
+    if member then
+      if member.Role == GroupRole.Tank then
+        priority = priority + 20
+        istank = true
+      end
+      if member.Role == GroupRole.Healer then priority = priority + 10 end
+      if member.Role == GroupRole.Damage then priority = priority + 5 end
+    end
 
     priority = priority + (100 - u.HealthPct)
-
-    if not Me:HasAura("Innervate") then
-      priority = priority - ((100 - Me.PowerPct) * (manaMulti / 100))
-    else
-      priority = priority + 40
-    end
+    priority = priority - ((100 - Me.PowerPct) * (manaMulti / 100))
 
     if priority > 0 or u.InCombat then
       table.insert(self.PriorityList, { Unit = u, Priority = priority })
+    end
+
+    if istank then
+      table.insert(self.Tanks, { Unit = u, Priority = priority })
     end
 
     ::continue::
   end
 
   table.sort(self.PriorityList, function(a, b)
+    return a.Priority > b.Priority
+  end)
+
+  table.sort(self.Tanks, function(a, b)
     return a.Priority > b.Priority
   end)
 end
