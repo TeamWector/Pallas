@@ -87,7 +87,7 @@ local function UnholyDamage(target)
   if common:DeathStrike(target) then return end
 
   -- Death coil spam if we dont have gargoyle ready or mind freeze is on cooldown for more than 5 sec.
-  if (Me.Power > 80 or (Spell.SummonGargoyle:CooldownRemaining() > 4000 or Spell.MindFreeze:CooldownRemaining() > 5000))
+  if (Me.Power > 80 or (Spell.SummonGargoyle:CooldownRemaining() > 4000 and Spell.MindFreeze:CooldownRemaining() > 5000))
       and Spell.DeathCoil:CastEx(target) then return end
 
   if Combat:GetEnemiesWithinDistance(10) > 1 then
