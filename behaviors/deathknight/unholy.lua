@@ -131,7 +131,7 @@ local function DeathknightUnholy()
   if Me.IsMounted then return end
 
   common:Interrupt()
-  if not Me.InCombat and common:HornOfWinter() then return end
+  if common:HornOfWinter() then return end
 
   if not Me.Pet then
     -- Get Glyph of Raise Dead, it's bis :)
