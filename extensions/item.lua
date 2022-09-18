@@ -8,11 +8,18 @@ function WoWItem:GetUsableEquipment(slot)
     end
 end
 
+---@return boolean success if the trinket was successfully used
+---@param unit WoWUnit? Unit to use the item on.
 function WoWItem:UseX(unit)
+    if not unit then unit = Me end
+    if not unit then return false end
+
     if not self.Spell then return false end
+    if not self.Spell:IsUsable() then return false end
     if not self.HasCooldown then return false end
     if self.CooldownRemaining > 0 then return false end
-    if not self:InRange(unit) then return false end
+    if not self:InRange(unit.ToObject) then return false end
 
-    self:Use(unit)
+    wector.Console:Log("Use: " .. self.Name)
+    return self:Use(unit.ToObject)
 end
