@@ -59,6 +59,18 @@ commonDeathKnight.widgets = {
         text = "Path of Frost (OOC)",
         default = false
     },
+    {
+        type = "checkbox",
+        uid = "Trinket1",
+        text = "Use Trinket1",
+        default = false
+    },
+    {
+        type = "checkbox",
+        uid = "Trinket2",
+        text = "Use Trinket2",
+        default = false
+    },
 }
 
 function commonDeathKnight:GetRuneCount(type)
@@ -73,10 +85,21 @@ function commonDeathKnight:GetRuneCount(type)
     return count
 end
 
+function commonDeathKnight:DoTrinkets(target)
+    local trinket1 = WoWItem:GetUsableEquipment(EquipSlot.Trinket1)
+    local trinket2 = WoWItem:GetUsableEquipment(EquipSlot.Trinket2)
+
+    if not target then target = Me end
+
+    if Settings.Trinket1 and trinket1 and trinket1:UseX(Me) then return end
+    if Settings.Trinket2 and trinket2 and trinket2:UseX(Me) then return end
+end
+
 function commonDeathKnight:HornOfWinter()
     local hornofWinter = Me:GetAura(Spell.HornOfWinter.Name)
 
-    return Settings.HornOfWinter and (not hornofWinter or hornofWinter.Remaining < 30000) and Spell.HornOfWinter:CastEx(Me)
+    return Settings.HornOfWinter and (not hornofWinter or hornofWinter.Remaining < 30000) and
+        Spell.HornOfWinter:CastEx(Me)
 end
 
 --- Uses blood tap if we dont have any blood runes at all left.
@@ -86,9 +109,16 @@ end
 
 function commonDeathKnight:DeathAndDecay()
     local avgdeath = Combat:TargetsAverageDeathTime()
+    local blood = self:GetRuneCount(RuneType.Blood)
+    local unholy = self:GetRuneCount(RuneType.Unholy)
+    local frost = self:GetRuneCount(RuneType.Frost)
+
+    if blood > 0 and (unholy == 0 or frost == 0) then
+        self:BloodTap()
+    end
 
     -- avgdeath needed to make most of our death and decay.
-    return avgdeath > 15 and Spell.DeathAndDecay:CastEx(Me.Position)
+    return avgdeath > 15 and Spell.DeathAndDecay:CastEx(Me)
 end
 
 function commonDeathKnight:PathOfFrost()
@@ -166,8 +196,8 @@ function commonDeathKnight:DoDiseases(target)
     local plague = target:GetAuraByMe(self.auras.bloodplague.Name)
     local fever = target:GetAuraByMe(self.auras.frostfever.Name)
 
-    if not plague and Spell.PlagueStrike:CastEx(target) then return true end
-    if not fever and Spell.IcyTouch:CastEx(target) then return true end
+    if (not fever or fever.Remaining < 3000) and Spell.IcyTouch:CastEx(target) then return true end
+    if (not plague or plague.Remaining < 3000) and Spell.PlagueStrike:CastEx(target) then return true end
 end
 
 --- Returns a target on which we can use pestilence on.

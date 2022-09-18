@@ -150,4 +150,18 @@ function Combat:TargetsAverageDeathTime()
   return seconds / count
 end
 
+---@return number count Amount of mobs that are within the distance you provided.
+---@param dist number Range from myself to check for enemies
+function Combat:GetEnemiesWithinDistance(dist)
+  local count = 0
+
+  for _, u in pairs(self.Targets) do
+    if Me:GetDistance(u) < dist then
+      count = count + 1
+    end
+  end
+
+  return count
+end
+
 return Combat
