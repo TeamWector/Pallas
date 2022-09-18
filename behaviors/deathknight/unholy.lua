@@ -87,7 +87,7 @@ local function UnholyDamage(target)
   if common:DeathStrike(target) then return end
 
   -- Death coil spam if we dont have gargoyle ready or mind freeze is on cooldown for more than 5 sec.
-  if (Me.Power > 65 or (Spell.SummonGargoyle:CooldownRemaining() > 4000 or Spell.MindFreeze:CooldownRemaining() > 5000))
+  if (Me.Power > 80 or (Spell.SummonGargoyle:CooldownRemaining() > 4000 and Spell.MindFreeze:CooldownRemaining() > 5000))
       and Spell.DeathCoil:CastEx(target) then return end
 
   if Combat:GetEnemiesWithinDistance(10) > 1 then
@@ -102,6 +102,9 @@ local function UnholyDamage(target)
       Spell.BloodPresence:CastEx(Me) then return end
 
   if Settings.GargoyleCD and Me:HasVisibleAura(common.auras.unholypresence.Name) and SummonGargoyle(target) then return end
+
+  -- Maybe use pestilence to refresh diseases?
+  if common:PestilenceRefresh(target) then return end
 
   if (not diseaseTarget or diseaseTarget == target) and target:TimeToDeath() > 5 and
       (not fever or fever.Remaining < 3000) then
@@ -128,7 +131,7 @@ local function DeathknightUnholy()
   if Me.IsMounted then return end
 
   common:Interrupt()
-  if not Me.InCombat and common:HornOfWinter() then return end
+  if common:HornOfWinter() then return end
 
   if not Me.Pet then
     -- Get Glyph of Raise Dead, it's bis :)

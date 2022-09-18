@@ -232,6 +232,13 @@ function commonDeathKnight:TargetHasDiseases(unit)
     return plague and plague.Remaining > 3000 and fever and fever.Remaining > 3000
 end
 
+function commonDeathKnight:PestilenceRefresh(target)
+    local fever = target:GetAuraByMe(self.auras.frostfever.Name)
+    local plague = target:GetAuraByMe(self.auras.bloodplague.Name)
+    return self:GetRuneCount(RuneType.Blood) > 0 and
+        (plague and plague.Remaining < 3000 or fever and fever.Remaining < 3000) and Spell.Pestilence:CastEx(target)
+end
+
 ---@return boolean shouldpest this both does pestilence and checks if we should
 function commonDeathKnight:Pestilence()
     local pestTarget = self:GetPestilenceTarget()
