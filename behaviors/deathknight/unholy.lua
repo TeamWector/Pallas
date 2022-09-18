@@ -55,7 +55,7 @@ end
 
 local function UnholyMulti(target)
   -- Force multi target waiting for runes if we are fighting more than 3 units.
-  if Combat.EnemiesInMeleeRange > 3 then
+  if Combat:GetEnemiesWithinDistance(10) > 3 then
     -- Force pestilence because Wandering Plague talent is imba.
     if common:Pestilence() then return true end
     if common:DeathAndDecay() then return end
@@ -73,6 +73,8 @@ local function UnholyDamage(target)
   if not Me:IsAttacking(target) then Me:StartAttack(target) end
   -- Lets not do any spells if we on GCD.
   if GCD:CooldownRemaining() > 0 then return end
+  -- Let's pop trinkets before spells :)
+  common:DoTrinkets(target)
 
   local fever = target:GetAuraByMe(common.auras.frostfever.Name)
   local plague = target:GetAuraByMe(common.auras.bloodplague.Name)
@@ -85,9 +87,10 @@ local function UnholyDamage(target)
   if common:DeathStrike(target) then return end
 
   -- Death coil spam if we dont have gargoyle ready or mind freeze is on cooldown for more than 5 sec.
-  if (Me.Power > 65 or (Spell.SummonGargoyle:CooldownRemaining() > 4000 or Spell.MindFreeze:CooldownRemaining() > 5000)) and Spell.DeathCoil:CastEx(target) then return end
+  if (Me.Power > 65 or (Spell.SummonGargoyle:CooldownRemaining() > 4000 or Spell.MindFreeze:CooldownRemaining() > 5000))
+      and Spell.DeathCoil:CastEx(target) then return end
 
-  if Combat.EnemiesInMeleeRange > 1 then
+  if Combat:GetEnemiesWithinDistance(10) > 1 then
     -- if this returns true, we are forcing the multi target routine.
     if UnholyMulti(target) then return end
   end
