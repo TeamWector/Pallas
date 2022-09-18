@@ -38,18 +38,19 @@ local function PetAttack(target)
     Me:PetAttack(target)
   end
 
-  -- If gnaw on cooldown then spam claw, otherwise hold 30 energy for gnaw.
-  if not Settings.GnawSpell and Spell.Claw:CastEx(target) or
-      Settings.GnawSpell and (Spell.Gnaw:CooldownRemaining() > 2500 or pet.PowerPct >= 70) and
-      Spell.Claw:CastEx(target) then return end
+  if not Settings.GnawSpell then
+    Spell.Claw:CastEx(target)
+  elseif Settings.GnawSpell and (Spell.Gnaw:CooldownRemaining() > 2500 or pet.PowerPct >= 70) then
+    Spell.Claw:CastEx(target)
+  end
 
   if (not ghoulfrenzy or ghoulfrenzy.Remaining < 5000) and Spell.GhoulFrenzy:CastEx(Me) then return end
 end
 
 --Gargoyle logic
 local function SummonGargoyle(target)
-  if Me.PowerPct >= 60 and Spell.Berserking:CastEx(Me) then Spell.SummonGargoyle:CastEx(target) return end
-  return Me.PowerPct >= 60 and Spell.SummonGargoyle:CastEx(target)
+  if Me.Power >= 60 and Spell.Berserking:CastEx(Me) then Spell.SummonGargoyle:CastEx(target) return end
+  return Me.Power >= 60 and Spell.SummonGargoyle:CastEx(target)
 end
 
 local function UnholyMulti(target)
@@ -83,8 +84,8 @@ local function UnholyDamage(target)
   -- Death strike will only happen if target has both diseases.
   if common:DeathStrike(target) then return end
 
-  -- Death coil spam if we dont have gargoyle ready.
-  if (Me.PowerPct > 70 or Spell.SummonGargoyle:CooldownRemaining() > 4000) and Spell.DeathCoil:CastEx(target) then return end
+  -- Death coil spam if we dont have gargoyle ready or mind freeze is on cooldown for more than 5 sec.
+  if (Me.Power > 65 or (Spell.SummonGargoyle:CooldownRemaining() > 4000 or Spell.MindFreeze:CooldownRemaining() > 5000)) and Spell.DeathCoil:CastEx(target) then return end
 
   if Combat.EnemiesInMeleeRange > 1 then
     -- if this returns true, we are forcing the multi target routine.
