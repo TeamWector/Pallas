@@ -5,7 +5,17 @@ Spell = setmetatable({
 },
 {
   __index = function(tbl, key)
-    if tbl.Cache[key] then return tbl.Cache[key] end
+    if tbl.Cache[key] then
+      -- fix for cache containing rank 1 spells after relogging
+      local spell = tbl.Cache[key]
+      local tmp = WoWSpell(spell.Name)
+      if tmp.Rank > spell.Rank then
+        -- corrupt cache, update
+        Spell:UpdateCache()
+        wector.Console:Log('Updated corrupt cached')
+      end
+      return tbl.Cache[key]
+    end
     return tbl.NullSpell
   end
 })
@@ -44,6 +54,8 @@ end
 Spell.EventListener = wector.FrameScript:CreateListener()
 Spell.EventListener:RegisterEvent('LEARNED_SPELL_IN_TAB')
 Spell.EventListener:RegisterEvent('PLAYER_ENTERING_WORLD')
+Spell.EventListener:RegisterEvent('SPELL_DATA_LOAD_RESULT')
+function Spell.EventListener:SPELL_DATA_LOAD_RESULT(_, _) Spell:UpdateCache() end
 function Spell.EventListener:LEARNED_SPELL_IN_TAB(_, _, _) Spell:UpdateCache() end
 function Spell.EventListener:PLAYER_ENTERING_WORLD(_, _) Spell:UpdateCache() end
 
