@@ -54,8 +54,6 @@ end
 Spell.EventListener = wector.FrameScript:CreateListener()
 Spell.EventListener:RegisterEvent('LEARNED_SPELL_IN_TAB')
 Spell.EventListener:RegisterEvent('PLAYER_ENTERING_WORLD')
-Spell.EventListener:RegisterEvent('SPELL_DATA_LOAD_RESULT')
-function Spell.EventListener:SPELL_DATA_LOAD_RESULT(_, _) Spell:UpdateCache() end
 function Spell.EventListener:LEARNED_SPELL_IN_TAB(_, _, _) Spell:UpdateCache() end
 function Spell.EventListener:PLAYER_ENTERING_WORLD(_, _) Spell:UpdateCache() end
 
