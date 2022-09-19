@@ -1,6 +1,9 @@
 Menu = {}
 ---@type ImMenu
 Menu.MainMenu = nil
+---@type ImCombobox
+Menu.CombatBehavior = nil
+
 Menu.EventListener = wector.FrameScript:CreateListener()
 Menu.EventListener:RegisterEvent('PLAYER_LEAVING_WORLD')
 function Menu.EventListener:PLAYER_LEAVING_WORLD()
@@ -15,17 +18,23 @@ function Menu:Initialize()
 
   Menu.MainMenu = ImMenu("Pallas")
 
-  Menu.GroupTest = ImGroupbox("Combat")
+  -- Combat
+  Menu.CombatBehavior = ImCombobox("Behavior")
+  Menu.MainMenu:Add(Menu.CombatBehavior)
 
-  local autotarget = ImCheckbox("Auto-target", Settings.Core.AutoTarget)
-  autotarget.OnClick = function(_, _, newValue) Settings.Core.AutoTarget = newValue end
-  Menu.GroupTest:Add(autotarget)
+  Menu.CombatGroup = ImGroupbox("Combat")
 
-  local attackooc = ImCheckbox("Attack out of combat", Settings.Core.AttackOutOfCombat)
-  attackooc.OnClick = function(_, _, newValue) Settings.Core.AttackOutOfCombat = newValue end
-  Menu.GroupTest:Add(attackooc)
+  if Settings.PallasAutoTarget == nil then Settings.PallasAutoTarget = false end
+  local autotarget = ImCheckbox("Auto-target", Settings.PallasAutoTarget)
+  autotarget.OnClick = function(_, _, newValue) Settings.PallasAutoTarget = newValue end
+  Menu.CombatGroup:Add(autotarget)
 
-  Menu.MainMenu:Add(Menu.GroupTest)
+  if Settings.PallasAttackOOC == nil then Settings.PallasAttackOOC = false end
+  local attackooc = ImCheckbox("Attack out of combat", Settings.PallasAttackOOC)
+  attackooc.OnClick = function(_, _, newValue) Settings.PallasAttackOOC = newValue end
+  Menu.CombatGroup:Add(attackooc)
+
+  Menu.MainMenu:Add(Menu.CombatGroup)
 end
 
 function Menu:AddOptionMenu(options)

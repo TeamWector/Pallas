@@ -42,14 +42,14 @@ function Combat:WantToRun()
 
   if (Me.UnitFlags & UnitFlags.Looting) == UnitFlags.Looting then return false end
 
-  return Settings.Core.AttackOutOfCombat or (Me.UnitFlags & UnitFlags.InCombat) == UnitFlags.InCombat
+  return Settings.PallasAttackOOC or (Me.UnitFlags & UnitFlags.InCombat) == UnitFlags.InCombat
 end
 
 function Combat:CollectTargets()
   local flags = ObjectTypeFlag.Unit
   local units = wector.Game:GetObjectsByFlag(flags)
 
-  if not Me.InCombat and Settings.Core.AttackOutOfCombat then
+  if not Me.InCombat and Settings.PallasAttackOOC then
     local target = Me.Target
     if target and not target.IsTapDenied then
       table.insert(self.Targets, Me.Target)
@@ -66,7 +66,7 @@ function Combat:ExclusionFilter()
   for k, u in pairs(self.Targets) do
     if not Me:CanAttack(u) then
       self.Targets[k] = nil
-    elseif not u.InCombat or (not Settings.Core.AttackOutOfCombat and not u.InCombat) then
+    elseif not u.InCombat or (not Settings.PallasAttackOOC and not u.InCombat) then
       self.Targets[k] = nil
     elseif u.Dead or u.Health <= 0 then
       self.Targets[k] = nil
@@ -126,7 +126,7 @@ function Combat:WeighFilter()
   self.BestTarget = priorityList[1].Unit
 
   -- If auto-target is disabled we're done here
-  if not Settings.Core.AutoTarget then return end
+  if not Settings.PallasAutoTarget then return end
 
   if not Me.Target then
     Me:SetTarget(self.BestTarget)

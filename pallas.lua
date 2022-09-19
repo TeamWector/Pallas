@@ -10,12 +10,11 @@ function Pallas.EventListener:PLAYER_ENTERING_WORLD(_, _)
 end
 
 function Pallas:Initialize()
-  Menu:Initialize()
-
   Me = wector.Game.ActivePlayer
   if not wector.Game.InWorld or not Me then return end
 
   print('Initialize Pallas')
+  Menu:Initialize()
   Behavior:Initialize()
 end
 

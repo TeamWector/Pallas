@@ -1,8 +1,4 @@
 Settings = setmetatable({
-  Core = {
-    AutoTarget = false,
-    AttackOutOfCombat = false
-  },
   Character = {}
 },
 {
