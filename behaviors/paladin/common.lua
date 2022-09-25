@@ -7,14 +7,14 @@ commonPaladin.widgets = {
         text = "Select Seal",
         default = 0,
         options = { "Seal of Wisdom", "Seal of Light", "Seal of Righteousness", "Seal of Corruption",
-            "Seal of Justice" }
+            "Seal of Justice", "Seal of Command" }
     },
     {
         type = "combobox",
         uid = "PaladinBuff",
         text = "Select Self Buff",
         default = 0,
-        options = { "Blessing of Wisdom", "Blessing of Kings", "Blessing of Might" }
+        options = { "Blessing of Wisdom", "Blessing of Kings", "Blessing of Might", "Blessing of Sanctuary" }
     },
     {
         type = "combobox",
@@ -46,6 +46,8 @@ function commonPaladin:GetSealOption()
         return Spell.SealOfCorruption
     elseif option == 4 then
         return Spell.SealOfJustice
+    elseif option == 5 then
+        return Spell.SealOfCommand
     end
 
     -- default to wisdom..
@@ -60,6 +62,8 @@ function commonPaladin:GetBuffOption()
         return Spell.BlessingOfKings
     elseif option == 2 then
         return Spell.BlessingOfMight
+    elseif option == 3 then
+        return Spell.BlessingOfSanctuary
     end
 
     -- Default to wisdom..
