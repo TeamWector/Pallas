@@ -5,99 +5,54 @@ local options = {
   -- widgets
   Widgets = {
     {
-      type = "checkbox",
-      uid = "WarlockAfflWandFinish",
-      text = "Wand Finisher",
-      default = false
+      type = "slider",
+      uid = "UAThreshold",
+      text = "UA Threshold",
+      default = 2000,
+      min = 0,
+      max = 20000
     },
     {
       type = "slider",
-      uid = "WarlockAfflLifeTapPercent",
-      text = "Life Tap hp%",
-      default = 90,
+      uid = "CorruptionThreshold",
+      text = "Corruption Threshold",
+      default = 1000,
+      min = 0,
+      max = 20000
     },
     {
       type = "slider",
-      uid = "WarlockAfflWandExecutePercent",
-      text = "Wand Finish hp%",
-      default = 30,
-      max = 60
-    },
-    {
-      type = "slider",
-      uid = "WarlockAfflDrainSoulPct",
-      text = "Drain Soul hp% (0 to disable)",
-      default = 0,
-      max = 100
+      uid = "AgonyThreshold",
+      text = "Agony Threshold",
+      default = 1000,
+      min = 0,
+      max = 20000
     },
   }
 }
 
-local spells = {
-  DemonArmor = WoWSpell("Demon Armor"),
-  DemonSkin = WoWSpell("Demon Skin"),
-  LifeTap = WoWSpell("Life Tap"),
-  CurseOfAgony = WoWSpell("Curse of Agony"),
-  Corruption = WoWSpell("Corruption"),
-  DrainLife = WoWSpell("Drain Life"),
-  DrainSoul = WoWSpell("Drain Soul"),
-  ShadowBolt = WoWSpell("Shadow Bolt"),
-  Shoot = WoWSpell("Shoot")
-}
 
 WarlockAfflListener = wector.FrameScript:CreateListener()
 WarlockAfflListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
 
--- This fixes the problem of double casting corruption
-local corruptionFix = 0
+-- This fixes the problem of double casting UA
+local UAFix = 0
 function WarlockAfflListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, _, spellID)
-  if unitTarget == Me and spellID == spells.Corruption.Id then
-    corruptionFix = wector.Game.Time + 100
+  if unitTarget == Me and spellID == Spell.UnstableAffliction.Id then
+    UAFix = wector.Game.Time + 100
   end
 end
 
-local function LifetapValue()
-  local spellid = spells.LifeTap.Id
-
-  if spellid == 1454 then
-    return 30
-  elseif spellid == 1455 then
-    return 90
-  elseif spellid == 1456 then
-    return 168
-  elseif spellid == 11678 then
-    return 264
-  elseif spellid == 11688 then
-    return 372
-  elseif spellid == 11689 then
-    return 516
-  elseif spellid == 27222 then
-    return 698
-  end
-
-  -- why tho?
-  return 0
-end
-
+local GCD = WoWSpell(61304)
 local function WarlockAfflictionCombat()
-  -- Threshold % on me for LifeTap
-  local HPThresh = Settings.WarlockAfflLifeTapPercent
-  -- Threshold % on enemy for using spells
-  local SpellThresh = Settings.WarlockAfflWandExecutePercent
+  if Me.IsMounted then return end
+  if not Me.IsChanneling and Me.HealthPct > 85 and (Me.PowerPct < 60 or not Me.InCombat and Me.PowerPct < 95) and Spell.LifeTap:CastEx(Me) then return end
 
-  -- buff up
-  local spellDemonBuff = spells.DemonArmor.Slot >= 0 and spells.DemonArmor or spells.DemonSkin
-
-  -- Always make sure we are out of combat for buffs and summons and shit
   if not Me.InCombat then
-    -- Demon Armor/Skin
-    if not Me:HasVisibleAura(spellDemonBuff.Id) and spellDemonBuff:CastEx(Me) then return end
+    if not Me:HasVisibleAura(Spell.DemonArmor.Name) and Spell.DemonArmor:CastEx(Me) then return end
+    if not Me:HasVisibleAura(Spell.UnendingBreath.Name) and Me:IsSwimming() and Spell.UnendingBreath:CastEx(Me) then return end
+    if not Me:HasVisibleAura(Spell.DetectInvisibility.Name) and Spell.DetectInvisibility:CastEx(Me) then return end
   end
-
-  -- Lifetap anytime to gain value outside of combat also
-  -- Life Tap if our health is more than what we choose and our mana deficit is more than what lifetap will return
-  if Me.HealthPct >= HPThresh and not Me.IsCastingOrChanneling and (Me.PowerMax - Me.Power >= LifetapValue()) and
-      spells.LifeTap:CastEx(Me) then return end
 
   -- Make sure we have a target before continuing
   local target = Combat.BestTarget
@@ -109,47 +64,60 @@ local function WarlockAfflictionCombat()
     if not Me.Pet.Target or Me.Pet.Target ~= Me.Target then
       Me:PetAttack(target)
     end
-  end
 
-  -- Drain Soul
-  if target.HealthPct < Settings.WarlockAfflDrainSoulPct then
-    local current = Me.CurrentChannel
-    if not current and spells.DrainSoul:CastEx(target) then
-      return
-    elseif current ~= spells.DrainSoul then
-      Me:StopCasting()
+    Spell.Torment:CastEx(target)
+
+    if Me.InCombat and #Me:GetUnitsAround(10) > 0 then
+      Spell.Sacrifice:CastEx(Me.Pet)
     end
+  end
 
+  if GCD:CooldownRemaining() > 0 then return end
+
+  -- CAST PART
+  local ua = target:GetAuraByMe(Spell.UnstableAffliction.Name)
+  local corruption = target:GetAuraByMe(Spell.Corruption.Name)
+  local agony = target:GetAuraByMe(Spell.CurseOfAgony.Name)
+  local shouldUA = (wector.Game.Time - UAFix) > 0
+
+  if target.HealthPct <= 25 then
+    if not Me.IsChanneling then
+      local cast = Me.CurrentCast
+      if cast and cast:CastRemaining() > 1000 then
+          Me:StopCasting()
+      end
+    else
+      return
+    end
+    if Spell.DrainSoul:CastEx(target) then return end
     return
   end
 
-  if Me:HasBuff("Shadow Trance") and spells.ShadowBolt:CastEx(target) then return end
+  if Spell.Haunt:CastEx(target) then return end
+  if Me:HasVisibleAura("Shadow Trance") and Spell.ShadowBolt:CastEx(target) then return end
 
-  -- Wand finisher, convert to percentage when that is implemented
-  if target:GetHealthPercent() <= SpellThresh then
-    if not spells.Shoot.IsAutoRepeat and spells.Shoot:CastEx(target) then return end
-
-    return
+  if target:TimeToDeath() > 10 then
+    if target.Health > Settings.UAThreshold and shouldUA and (not ua or ua.Remaining < 1500) and
+        Spell.UnstableAffliction:CastEx(target) then return end
+    if target.Health > Settings.CorruptionThreshold and (not corruption or corruption.Remaining < 2000) and
+        Spell.Corruption:CastEx(target) then return end
+    if target.Health > Settings.AgonyThreshold and (not agony or agony.Remaining < 2000) and
+        Spell.CurseOfAgony:CastEx(target) then return end
   end
 
-  if Me.IsCastingOrChanneling then return end
+  -- AoE Dot
+  for _, unit in pairs(Combat.Targets) do
+    local corr = unit:GetAuraByMe(Spell.Corruption.Name)
+    local unstab = unit:GetAuraByMe(Spell.UnstableAffliction.Name)
+    local ttd = unit:TimeToDeath()
 
-  -- Curruption
-  local shouldCorruption = (wector.Game.Time - corruptionFix) > 0
-  if shouldCorruption and not target:HasDebuffByMe("Corruption") and spells.Corruption:CastEx(target) then return end
+    if ttd > 6 and unit.Health > Settings.CorruptionThreshold and (not corr or corr.Remaining < 2000) and
+        Spell.Corruption:CastEx(unit) then return end
+    if ttd > 12 and shouldUA and unit.Health > Settings.UAThreshold and (not unstab or unstab.Remaining < 2000) and
+        Spell.UnstableAffliction:CastEx(unit) then return end
+  end
 
-  -- Curse of Agony
-  if not target:HasDebuffByMe("Curse of Agony") and spells.CurseOfAgony:CastEx(target) then return end
-
-  -- Drain Life if our mana is above a percentage
-  if Me.PowerPct > 60 and spells.DrainLife:CastEx(target) then return end
-
-  -- Wand
-  -- Only if not fully debuffed
-  if not target:HasDebuffByMe("Curse of Agony") or not target:HasDebuffByMe("Corruption") then return end
-
-  -- Use wand if mana below drain life mana threshold
-  if not spells.Shoot.IsAutoRepeat and Me.PowerPct <= 60 and spells.Shoot:CastEx(target) then return end
+  if Spell.ShadowBolt:CastEx(target) then return end
 end
 
 local behaviors = {

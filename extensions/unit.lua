@@ -62,6 +62,14 @@ function WoWUnit:InCombatWithMe()
   return false
 end
 
+function WoWUnit:IsSwimming()
+  return (self.MovementFlags & MovementFlags.Swimming > 0)
+end
+
+function WoWUnit:IsStunned()
+  return (self.UnitFlags & UnitFlags.Stunned > 0)
+end
+
 function WoWUnit:WithinLineOfSight(target)
   local from = Me.Position
   from.z = from.z + Me.DisplayHeight

@@ -101,6 +101,10 @@ function WoWSpell:HasRange(target)
   return min > 0 or max > 0
 end
 
+function WoWSpell:CastRemaining()
+  return self.CastEnd - wector.Game.Time
+end
+
 ---@deprecated
 function WoWSpell:CanUse(target)
   if not target then target = wector.Game.ActivePlayer.ToUnit end

@@ -102,19 +102,14 @@ local function PaladinHolyHeal()
         if hlost < Settings.FlashOfLightAmt * 0.7 then Me:StopCasting() end
     end
 
-    if Me.IsCasting and not IsCastingHeal() then
-        local lowest = Heal:GetLowestMember()
-        if lowest and lowest.HealthPct < Settings.DPSHealthPct then Me:StopCasting() end
-    end
-
     for _, v in pairs(Heal.PriorityList) do
         local u = v.Unit
         local hpct = u.HealthPct
         local hlost = u.HealthMax - u.Health
 
         if u.InCombat then
-            if hpct <= Settings.LayOnHandsPct and u:GetUnitsAround(10) > 0 and Spell.LayOnHands:CastEx(u) then return end
-            if hpct <= Settings.HandOfProtectionPct and u:GetUnitsAround(10) > 0 and Spell.HandOfProtection:CastEx(u) then return end
+            if hpct <= Settings.LayOnHandsPct and #u:GetUnitsAround(10) > 0 and Spell.LayOnHands:CastEx(u) then return end
+            if hpct <= Settings.HandOfProtectionPct and #u:GetUnitsAround(10) > 0 and Spell.HandOfProtection:CastEx(u) then return end
         end
 
         if hlost >= Settings.HolyShockAmt and Spell.HolyShock:CastEx(u) then return end
