@@ -1,5 +1,4 @@
 --- Abstract interface for targeting
-
 ---@class Targeting
 ---@field Targets WoWUnit[]
 Targeting = {

@@ -109,6 +109,7 @@ function Behavior:Initialize(isReload)
 
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Heal)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Combat)
+  self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Tank)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Rest)
 
   -- extra stuff
@@ -138,6 +139,27 @@ function Behavior:Update()
       v()
     end
     ::continue::
+  end
+end
+
+function Behavior:CollectScriptPaths(name)
+  -- <root>\scripts\Pallas\behaviors\<classname>
+  local path = filesystem.Path(string.format('%s\\behaviors\\%s\\', wector.script_path, name))
+
+  -- iterate all files in class behaviors directory
+  local it = filesystem.Directory(path)
+  for _, v in pairs(it) do
+    local s = tostring(v)
+    -- if file has extension '.lua'
+    if s:len() > 4 and s:match('.lua', s:len() - 4) then
+      local rel = filesystem.relative_base(v, wector.script_path):gsub('\\', '.')
+      rel = rel:sub(1, rel:len() - 4)
+      wector.Console:Log(rel)
+      local behavior = require(rel)
+      if type(behavior) == 'boolean' and behavior then
+        wector.Console:Log('Failed to load "' .. rel .. '"')
+      end
+    end
   end
 end
 
