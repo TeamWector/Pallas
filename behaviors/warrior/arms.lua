@@ -62,15 +62,19 @@ local function WarriorArmsCombat()
     if Spell.Overpower:CastEx(target) then return end
 
     local hamstring = target:GetAura("Hamstring")
-    local freedom = target:GetAura("Blessing of Freedom")
+    local freedom = target:GetAura("Hand of Freedom")
     local crip = target:GetAura("Crippling Poison")
     if target.IsPlayer and not hamstring and not freedom and not crip and Spell.Hamstring:CastEx(target) then return end
 
     -- Sweeping Strikes
     if aoe and Spell.SweepingStrikes:CastEx(Me) then return end
 
+    if Spell.BloodFury:CastEx(Me) then return end
+
+    common:UseTrinkets()
+
     -- Bladestorm
-    if Me:HasBuffByMe("Sweeping Strikes") and Spell.Bladestorm:CastEx(Me) then return end
+    if Me:HasBuffByMe("Sweeping Strikes") and Me:InMeleeRange(target) and Spell.Bladestorm:CastEx(Me) then return end
 
     -- Mortal Strike, make sure we cast blood thirst if ready before continuing
     if Spell.MortalStrike:CastEx(target) then return end
@@ -84,6 +88,12 @@ local function WarriorArmsCombat()
 
     -- Whirlwind
     if Spell.Whirlwind:CastEx(target) then return end
+
+    -- Revenge
+    if Spell.Revenge:CastEx(target) then return end
+
+    -- Shield Slam
+    if Spell.ShieldSlam:CastEx(target) then return end
 
     -- Heroic Strike/Cleave
     if Spell.Cleave.IsKnown then

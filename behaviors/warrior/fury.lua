@@ -52,6 +52,9 @@ local function WarriorFuryCombat()
   -- only melee spells from here on
   if not Me:InMeleeRange(target) then return end
 
+  if Spell.BloodFury:CastEx(Me) then return end
+  common:UseTrinkets()
+
   -- Victory Rush
   if Me:IsFacing(target) and Spell.VictoryRush:CastEx(target) then return end
 
