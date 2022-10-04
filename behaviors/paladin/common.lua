@@ -32,7 +32,21 @@ commonPaladin.widgets = {
     },
 }
 
+function commonPaladin:HolyWrath()
+    local units = wector.Game.Units
+    for _, u in pairs(units) do
+        local correctType = u.CreatureType == 6 and not u.Dead
+        if correctType and Me:GetDistance(u) < 8 and Spell.HolyWrath:CastEx(u) then return end
+    end
+end
 
+function commonPaladin:HammerOfWrath()
+    local units = wector.Game.Units
+    for _, u in pairs(units) do
+        local correctUnit = Me:GetDistance(u) < 30 and u.HealthPct <= 20 and Me:CanAttack(u) and not u.Dead
+        if correctUnit and Spell.HammerOfWrath:CastEx(u) then return end
+    end
+end
 
 function commonPaladin:GetSealOption()
     local option = Settings.PaladinSeal
