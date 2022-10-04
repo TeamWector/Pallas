@@ -49,7 +49,7 @@ local function WarlockAfflictionCombat()
   if not Me.IsChanneling and Me.HealthPct > 85 and (Me.PowerPct < 60 or not Me.InCombat and Me.PowerPct < 95) and Spell.LifeTap:CastEx(Me) then return end
 
   if not Me.InCombat then
-    if not Me:HasVisibleAura(Spell.DemonArmor.Name) and Spell.DemonArmor:CastEx(Me) then return end
+    if not Me:HasVisibleAura(Spell.FelArmor.Name) and Spell.FelArmor:CastEx(Me) then return end
     if not Me:HasVisibleAura(Spell.UnendingBreath.Name) and Me:IsSwimming() and Spell.UnendingBreath:CastEx(Me) then return end
     if not Me:HasVisibleAura(Spell.DetectInvisibility.Name) and Spell.DetectInvisibility:CastEx(Me) then return end
   end
@@ -79,8 +79,9 @@ local function WarlockAfflictionCombat()
   local corruption = target:GetAuraByMe(Spell.Corruption.Name)
   local agony = target:GetAuraByMe(Spell.CurseOfAgony.Name)
   local shouldUA = (wector.Game.Time - UAFix) > 0
+  local targetttd = target:TimeToDeath()
 
-  if target.HealthPct <= 25 then
+  if target.HealthPct <= 25 and targetttd > 4 then
     if not Me.IsChanneling then
       local cast = Me.CurrentCast
       if cast and cast:CastRemaining() > 1000 then
@@ -93,10 +94,12 @@ local function WarlockAfflictionCombat()
     return
   end
 
+  if Me.IsCastingOrChanneling then return end
+
   if Spell.Haunt:CastEx(target) then return end
   if Me:HasVisibleAura("Shadow Trance") and Spell.ShadowBolt:CastEx(target) then return end
 
-  if target:TimeToDeath() > 10 then
+  if targetttd > 10 then
     if target.Health > Settings.UAThreshold and shouldUA and (not ua or ua.Remaining < 1500) and
         Spell.UnstableAffliction:CastEx(target) then return end
     if target.Health > Settings.CorruptionThreshold and (not corruption or corruption.Remaining < 2000) and
@@ -109,14 +112,15 @@ local function WarlockAfflictionCombat()
   for _, unit in pairs(Combat.Targets) do
     local corr = unit:GetAuraByMe(Spell.Corruption.Name)
     local unstab = unit:GetAuraByMe(Spell.UnstableAffliction.Name)
-    local ttd = unit:TimeToDeath()
+    local uttd = unit:TimeToDeath()
 
-    if ttd > 6 and unit.Health > Settings.CorruptionThreshold and (not corr or corr.Remaining < 2000) and
+    if uttd > 6 and unit.Health > Settings.CorruptionThreshold and (not corr or corr.Remaining < 2000) and
         Spell.Corruption:CastEx(unit) then return end
-    if ttd > 12 and shouldUA and unit.Health > Settings.UAThreshold and (not unstab or unstab.Remaining < 2000) and
+    if uttd > 12 and shouldUA and unit.Health > Settings.UAThreshold and (not unstab or unstab.Remaining < 2000) and
         Spell.UnstableAffliction:CastEx(unit) then return end
   end
 
+  if Me.HealthPct < 60 and Spell.DrainLife:CastEx(target) then return end
   if Spell.ShadowBolt:CastEx(target) then return end
 end
 

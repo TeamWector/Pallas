@@ -45,20 +45,25 @@ local function PaladinRetriHeal()
 
     if lowest then
         local healthLost = lowest.HealthMax - lowest.Health
-        if lowest.HealthPct < 60 and Spell.FlashOfLight:CastEx(lowest) then return end
+        if lowest.HealthPct < 10 and lowest.InCombat and Spell.LayOnHands:CastEx(lowest) then return end
+        if lowest.HealthPct < 65 and Spell.FlashOfLight:CastEx(lowest) then return end
         if artofwar and healthLost > 500 and Spell.FlashOfLight:CastEx(lowest) then return end
     end
 
     local target = Combat.BestTarget
     if not target then return end
 
-    MeleeAttack(target)
+    if target:HasVisibleAura(Spell.Repentance.Name) then return end
+
+    --MeleeAttack(target)
     if Me:IsStunned() and Spell.HandOfFreedom:CastEx(Me) then return end
-    if not target.InCombat and Spell.HandOfReckoning:CastEx(target) then return end
-    if Spell.JudgementOfWisdom:CastEx(target) then return end
-    if Spell.HammerOfWrath:CastEx(target) then return end
+    if common:HammerOfWrath() then return end
+    if Spell.JudgementOfLight:CastEx(target) then return end
+
     if artofwar and (not lowest or lowest.HealthPct > 95) and Spell.Exorcism:CastEx(target) then return end
-    if not artofwar and Spell.CrusaderStrike:CastEx(target) then return end
+    if Spell.CrusaderStrike:CastEx(target) then return end
+    if Spell.DivineStorm:CastEx(target) then return end
+    common:HolyWrath()
     if not Me:IsMoving() and Me:GetDistance(target) < 8 and Combat:TargetsAverageDeathTime() > 8 and
         Spell.Consecration:CastEx(Me) then return end
 end
