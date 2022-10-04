@@ -66,7 +66,9 @@ local function BloodDamage(target)
     if Spell.PlagueStrike:CastEx(target) then return end
   end
 
-  if ((Me.Power > 80 or Spell.MindFreeze:CooldownRemaining() > 5000)) and Spell.DeathCoil:CastEx(target) then return end
+  if ((Me.Power > 65 or Spell.MindFreeze:CooldownRemaining() > 5000)) and Spell.DeathCoil:CastEx(target) then return end
+
+  if Spell.DeathStrike:CastEx(target) then return end
 
   -- Slap target with bloodstrike if he's soon dead or we are capped on blood runes. Mostly to trigger desolation but also works as a good finisher.
   if (target:TimeToDeath() < 5 or common:GetRuneCount(RuneType.Blood) == 2) and Spell.BloodStrike:CastEx(target) then return end
@@ -77,6 +79,7 @@ local function DeathknightBlood()
   if Me.IsCastingOrChanneling then return end
   if not Me.InCombat and common:PathOfFrost() then return end
   if Me.IsMounted then return end
+  if Me.StandStance == StandStance.Sit then return end
 
   common:Interrupt()
   if common:HornOfWinter() then return end

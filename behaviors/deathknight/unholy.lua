@@ -129,6 +129,7 @@ local function DeathknightUnholy()
   if Me.IsCastingOrChanneling then return end
   if not Me.InCombat and common:PathOfFrost() then return end
   if Me.IsMounted then return end
+  if Me.StandStance == StandStance.Sit then return end
 
   common:Interrupt()
   if common:HornOfWinter() then return end
