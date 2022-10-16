@@ -22,7 +22,7 @@ local function DruidFeralCombat()
   if not target then return end
   if not Me:IsFacing(target) then return end
 
-  if not Me:HasAura("Tiger's Fury") and target:TimeToDeath() > 6 and Spell.TigersFury:CastEx(Me) then return end
+  if Me:GetPowerByType(PowerType.Energy) < 35 and not Me:HasAura("Tiger's Fury") and target:TimeToDeath() > 6 and Spell.TigersFury:CastEx(Me) then return end
   if not target:HasAura("Faerie Fire (Feral)") and Spell.FaerieFireFeral:CastEx(target) then return end
 
   local comboPoints = Me:GetPowerByType(PowerType.Obsolete)
