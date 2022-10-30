@@ -21,13 +21,27 @@ local function DruidRestoHeal()
 
     if wildgrowth and Spell.WildGrowth:CastEx(u) then return end
 
-    -- Cast regrowth if target is under 60% health and has no hots
     if u.HealthPct < 92 and not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
-    if u.HealthPct < 40 and (u:HasBuffByMe("Rejuvenation") or u:HasBuffByMe("Regrowth")) and Spell.Swiftmend:CastEx(u, SpellCastExFlags.NoUsable) then return end
-    if u.HealthPct < 60 and (not u:HasBuffByMe("Regrowth")) and Spell.Regrowth:CastEx(u) then return end
-    if u.HealthPct < 30 and u:HasBuffByMe("Regrowth") and Spell.Regrowth:CastEx(u) then return end
-    if u.HealthPct < 80 and u.InCombat and table.length(Heal.Tanks) == 0 and (not lifebloom or lifebloom.Stacks < 3) and Spell.Lifebloom:CastEx(u) then return end
+    if u.HealthPct < 50 and (u:HasBuffByMe("Rejuvenation") or u:HasBuffByMe("Regrowth")) and Spell.Swiftmend:CastEx(u, SpellCastExFlags.NoUsable) then return end
+
+    -- Max level uses Nourish as filler, low level uses Regrowth
+    if Spell.Nourish.IsKnown then
+      if u.HealthPct < 70 and (u:HasBuffByMe("Rejuvenation") or u:HasBuffByMe("Regrowth") or u:HasBuffByMe("Wild Growth") or u:HasBuffByMe("Lifebloom")) and Spell.Nourish:CastEx(u) then return end
+    else
+      if u.HealthPct < 60 and (not u:HasBuffByMe("Regrowth") or u.HealthPct < 30) and Spell.Regrowth:CastEx(u) then return end
+    end
   end
+
+  --[[
+  for _, v in pairs(Heal.PriorityList) do
+    ---@type WoWUnit
+    local unit = v.Unit
+    local auras = unit.VisibleAuras
+    for _, aura in pairs(auras) do
+      if aura.DispelType ==
+    end
+  end
+  ]]
 
   for _, v in pairs(Heal.Tanks) do
     ---@type WoWUnit
@@ -37,9 +51,10 @@ local function DruidRestoHeal()
     local lifebloom = u:GetAuraByMe("Lifebloom")
     if not lifebloom and u.InCombat and Spell.Lifebloom:CastEx(u) then return end
     if lifebloom and u.InCombat then
-      if lifebloom.Stacks < 3 and u.HealthPct > 80 and Spell.Lifebloom:CastEx(u) then return end
-      if lifebloom.Stacks < 3 and lifebloom.Remaining > 2500 and u.HealthPct < 80 and Spell.Lifebloom:CastEx(u) then return end
-      if lifebloom.Remaining < 1500 and u.HealthPct > 70 and Spell.Lifebloom:CastEx(u) then return end
+      if u.HealthPct < 90 and lifebloom.Stacks < 1 and Spell.Lifebloom:CastEx(u) then return end
+      if u.HealthPct < 80 and lifebloom.Stacks < 2 and Spell.Lifebloom:CastEx(u) then return end
+      if u.HealthPct < 70 and lifebloom.Stacks < 3 and Spell.Lifebloom:CastEx(u) then return end
+      --if lifebloom.Remaining < 2500 and u.HealthPct > 70 and Spell.Lifebloom:CastEx(u) then return end
     end
   end
 end
