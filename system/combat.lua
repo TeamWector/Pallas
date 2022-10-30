@@ -74,6 +74,8 @@ function Combat:ExclusionFilter()
       self.Targets[k] = nil
     elseif u.IsTapDenied and (not u.Target or u.Target ~= Me) then
       self.Targets[k] = nil
+    elseif u:IsImmune() then
+      self.Targets[k] = nil
     end
   end
 end
