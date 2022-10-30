@@ -2,6 +2,7 @@
 Classification = {
   Normal = 0,
   Elite = 1,
+  Rare = 2,
   Boss = 3
 }
 
