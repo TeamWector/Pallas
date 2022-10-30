@@ -52,11 +52,15 @@ local function WarriorFuryCombat()
   -- only melee spells from here on
   if not Me:InMeleeRange(target) then return end
 
+  -- Sunder bosses and throw shattering throw
+  local sunder = target:GetVisibleAura("Sunder Armor")
+  if not target:HasVisibleAura("Expose Armor") and (target.Classification == 3 or (target.Classification == 1 and target.Level == 82)) and
+      (not sunder or (sunder.Stacks < 5 or sunder.Remaining < 3000)) and Spell.SunderArmor:CastEx(target) then return end
+  if (target.Classification == 3 or (target.Classification == 1 and target.Level == 82)) and sunder and
+      sunder.Stacks == 5 and not target:HasVisibleAura("Shattering Throw") and Spell.ShatteringThrow:CastEx(target) then return end
+
   if Spell.BloodFury:CastEx(Me) then return end
   common:UseTrinkets()
-
-  -- Victory Rush
-  if Me:IsFacing(target) and Spell.VictoryRush:CastEx(target) then return end
 
   if Me.Level < 40 and not target:HasVisibleAura("Rend") and Spell.Rend:CastEx(target) then return end
 
@@ -67,20 +71,25 @@ local function WarriorFuryCombat()
   if aoe and Settings.WarriorFurySweeping and Spell.SweepingStrikes:CastEx(Me) then return end
 
   if Me:IsFacing(target) then
-    if Me:HasVisibleAura("Slam!") and Spell.Slam:CastEx(target) then return end
-
-    -- Blood Thirst, make sure we cast blood thirst if ready before continuing
-    if Spell.Bloodthirst:CastEx(target) then return end
-
-    -- Whirlwind
-    if Spell.Whirlwind:CastEx(target) then return end
-
     -- Heroic Strike/Cleave
     local hs_or_cleave = aoe and Spell.Cleave or Spell.HeroicStrike
     if Me.PowerPct > Settings.WarriorFuryFiller and hs_or_cleave:CastEx(target) then return end
 
+    if aoe then
+      if Spell.Bloodthirst:CastEx(target) then return end
+      if Spell.Whirlwind:CastEx(target) then return end
+    else
+      if Spell.Whirlwind:CastEx(target) then return end
+      if Spell.Bloodthirst:CastEx(target) then return end
+    end
+
     -- Execute
     if Settings.WarriorFuryExecute and Spell.Execute:CastEx(target) then return end
+
+    if Me:HasVisibleAura("Slam!") and Spell.Slam:CastEx(target) then return end
+
+    -- Victory Rush
+    if Spell.VictoryRush:CastEx(target) then return end
   end
 end
 
