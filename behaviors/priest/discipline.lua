@@ -12,12 +12,22 @@ local options = {
   }
 }
 
+local function IsCastingHeal()
+  return Me.CurrentCast == Spell.FlashHeal or Me.CurrentCast == Spell.GreaterHeal or Me.CurrentCast == Spell.BindingHeal
+end
+
 local function PriestDiscHeal()
-  if Me.IsCastingOrChanneling then return end
   if Me.IsMounted then return end
   if Me.StandStance == StandStance.Sit then return end
 
   if (not Me:HasVisibleAura("Inner Fire")) and Spell.InnerFire:CastEx(Me) then return end
+
+  local spelltarget = WoWSpell:GetCastTarget()
+
+  if Me.IsCasting and IsCastingHeal() and spelltarget then
+    if spelltarget.HealthPct > 98 then Me:StopCasting() end
+  end
+
 
   -- DO ME FIRST
 
@@ -58,8 +68,9 @@ local function PriestDiscHeal()
 
 end
 
-local function PriestDiscDamage() 
+local function PriestDiscDamage()
   if Me.IsCastingOrChanneling then return end
+  if not Me.InCombat then return end
   if Me.IsMounted then return end
   if Me.StandStance == StandStance.Sit then return end
 
@@ -73,7 +84,7 @@ local function PriestDiscDamage()
   if (not holyFire) and Spell.HolyFire:CastEx(target) then return end
 
   if Spell.Smite:CastEx(target) then return end
-end 
+end
 
 local behaviors = {
   [BehaviorType.Heal] = PriestDiscHeal,

@@ -70,7 +70,7 @@ end
 
 local GCD = WoWSpell(61304)
 local function UnholyDamage(target)
-  if not Me:IsAttacking(target) then Me:StartAttack(target) end
+  --if not Me:IsAttacking(target) then Me:StartAttack(target) end
   -- Lets not do any spells if we on GCD.
   if GCD:CooldownRemaining() > 0 then return end
   -- Let's pop trinkets before spells :)
@@ -87,7 +87,12 @@ local function UnholyDamage(target)
   if common:DeathStrike(target) then return end
 
   -- Death coil spam if we dont have gargoyle ready or mind freeze is on cooldown for more than 5 sec.
-  if (Me.Power > 80 or (Spell.SummonGargoyle:CooldownRemaining() > 4000 and Spell.MindFreeze:CooldownRemaining() > 5000))
+  if (Me.Power > 80 or Spell.SummonGargoyle:CooldownRemaining() > 4000) and Spell.RaiseDead:CooldownRemaining() == 0
+      and Spell.CorpseExplosion:CastEx(Me.Pet) then return end
+
+  
+  -- Death coil spam if we dont have gargoyle ready or mind freeze is on cooldown for more than 5 sec.
+  if (Me.Power > 80 or Spell.SummonGargoyle:CooldownRemaining() > 4000)
       and Spell.DeathCoil:CastEx(target) then return end
 
   if Combat:GetEnemiesWithinDistance(10) > 1 then
@@ -106,23 +111,26 @@ local function UnholyDamage(target)
   -- Maybe use pestilence to refresh diseases?
   if common:PestilenceRefresh(target) then return end
 
-  if (not diseaseTarget or diseaseTarget == target) and target:TimeToDeath() > 5 and
+  if (not diseaseTarget or diseaseTarget == target) and
       (not fever or fever.Remaining < 3000) then
     if Spell.IcyTouch:CastEx(target) then return end
   end
 
+  if common:TargetHasDiseases(target) and Spell.ScourgeStrike:CastEx(target) then return end
+
+  
+
   if Settings.Desolation and (not desolation or desolation.Remaining < 3000) and Spell.BloodStrike:CastEx(target) then return end
 
-  if (not diseaseTarget or diseaseTarget == target) and target:TimeToDeath() > 5 and
+  if (not diseaseTarget or diseaseTarget == target) and
       (not plague or plague.Remaining < 3000) then
     if Spell.PlagueStrike:CastEx(target) then return end
   end
 
   -- Let's make sure we have all prereqs for max damage before using ScourgeStrike
-  if common:TargetHasDiseases(target) and desolation and Spell.ScourgeStrike:CastEx(target) then return end
 
   -- Slap target with bloodstrike if he's soon dead or we are capped on blood runes. Mostly to trigger desolation but also works as a good finisher.
-  if (target:TimeToDeath() < 5 or common:GetRuneCount(RuneType.Blood) == 2) and Spell.BloodStrike:CastEx(target) then return end
+  if (common:GetRuneCount(RuneType.Blood) == 2) and Spell.BloodStrike:CastEx(target) then return end
 end
 
 local function DeathknightUnholy()
