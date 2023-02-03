@@ -50,10 +50,6 @@ function WoWUnit:IsMoving()
   return (self.MovementFlags & movingMask) > 0
 end
 
-function WoWUnit:GetHealthPercent()
-  return (self.Health / self.HealthMax) * 100
-end
-
 function WoWUnit:InCombatWithMe()
   for k, v in pairs(self.ThreatTable) do
     if Me.Guid == v.Guid then return true end

@@ -46,7 +46,8 @@ end
 local GCD = WoWSpell(61304)
 local function WarlockAfflictionCombat()
   if Me.IsMounted then return end
-  if not Me.IsChanneling and Me.HealthPct > 85 and (Me.PowerPct < 60 or not Me.InCombat and Me.PowerPct < 95) and Spell.LifeTap:CastEx(Me) then return end
+  if not Me.IsChanneling and Me.HealthPct > 85 and (Me.PowerPct < 60 or not Me.InCombat and Me.PowerPct < 95) and
+      Spell.LifeTap:CastEx(Me) then return end
 
   if not Me.InCombat then
     if not Me:HasVisibleAura(Spell.FelArmor.Name) and Spell.FelArmor:CastEx(Me) then return end
@@ -85,7 +86,7 @@ local function WarlockAfflictionCombat()
     if not Me.IsChanneling then
       local cast = Me.CurrentCast
       if cast and cast:CastRemaining() > 1000 then
-          Me:StopCasting()
+        Me:StopCasting()
       end
     else
       return
@@ -97,6 +98,7 @@ local function WarlockAfflictionCombat()
   if Me.IsCastingOrChanneling then return end
 
   if Spell.Haunt:CastEx(target) then return end
+
   if Me:HasVisibleAura("Shadow Trance") and Spell.ShadowBolt:CastEx(target) then return end
 
   if targetttd > 10 then

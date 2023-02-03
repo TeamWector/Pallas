@@ -2,6 +2,21 @@ local commonPaladin = {}
 
 commonPaladin.widgets = {
     {
+        type = "slider",
+        uid = "PleaPct",
+        text = "Divine Plea Below %",
+        default = 85,
+        min = 0,
+        max = 99
+    },
+    {
+        type = "combobox",
+        uid = "PaladinJudge",
+        text = "Select Judgement",
+        default = 0,
+        options = { "Judgement of Wisdom", "Judgement of Light", "Judgement of Justice"}
+    },
+    {
         type = "combobox",
         uid = "PaladinSeal",
         text = "Select Seal",
@@ -32,6 +47,10 @@ commonPaladin.widgets = {
     },
 }
 
+function commonPaladin:DivinePlea()
+    return Me.PowerPct <= Settings.PleaPct and Spell.DivinePlea:CastEx(Me)
+end
+
 function commonPaladin:HolyWrath()
     local units = wector.Game.Units
     for _, u in pairs(units) do
@@ -45,6 +64,17 @@ function commonPaladin:HammerOfWrath()
     for _, u in pairs(units) do
         local correctUnit = Me:GetDistance(u) < 30 and u.HealthPct <= 20 and Me:CanAttack(u) and not u.Dead
         if correctUnit and Spell.HammerOfWrath:CastEx(u) then return end
+    end
+end
+
+function commonPaladin:Judgement(target)
+    local option = Settings.PaladinJudge
+    if option == 0 then
+        return Spell.JudgementOfWisdom:CastEx(target)
+    elseif option == 1 then
+        return Spell.JudgementOfLight:CastEx(target)
+    elseif option == 2 then
+        return Spell.JudgementOfJustice:CastEx(target)
     end
 end
 

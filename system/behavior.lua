@@ -125,6 +125,11 @@ function Behavior:Initialize(isReload)
   end
   self:AddBehaviorFunction(antiafk.Behaviors, BehaviorType.Extra)
 
+  local radar = require('extra.radar')
+  if radar.Options then
+    Menu:AddOptionMenu(radar.Options)
+  end
+  self:AddBehaviorFunction(radar.Behaviors, BehaviorType.Extra)
 
   local loaded_behaviors = 0
   for _, v in pairs(BehaviorType) do
