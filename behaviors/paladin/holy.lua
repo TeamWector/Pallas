@@ -79,18 +79,16 @@ local function GetGroupUnits()
     local group = WoWGroup(GroupType.Auto)
     local members = {}
 
-    if group then
-        local party = group.Members
-        for _, m in pairs(party) do
+    if not group.InGroup then
+        table.insert(members, Me.ToUnit)
+    else
+        local companions = group.Members
+        for _, m in pairs(companions) do
             local unit = wector.Game:GetObjectByGuid(m.Guid)
             if unit then
                 table.insert(members, unit.ToUnit)
             end
         end
-    end
-
-    if not group or not group.InGroup then
-        table.insert(members, Me.ToUnit)
     end
 
     return members
