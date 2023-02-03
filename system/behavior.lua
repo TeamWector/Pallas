@@ -119,6 +119,18 @@ function Behavior:Initialize(isReload)
   end
   self:AddBehaviorFunction(autoloot.Behaviors, BehaviorType.Extra)
 
+  local antiafk = require('extra.antiafk')
+  if antiafk.Options then
+    Menu:AddOptionMenu(antiafk.Options)
+  end
+  self:AddBehaviorFunction(antiafk.Behaviors, BehaviorType.Extra)
+
+  local radar = require('extra.radar')
+  if radar.Options then
+    Menu:AddOptionMenu(radar.Options)
+  end
+  self:AddBehaviorFunction(radar.Behaviors, BehaviorType.Extra)
+
   local loaded_behaviors = 0
   for _, v in pairs(BehaviorType) do
     if #self[v] > 0 then
