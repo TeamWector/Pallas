@@ -43,6 +43,11 @@ function commonWarrior:DoShout()
   local shoutType = Settings.WarriorCommonShout
   local shoutAura = shoutType == 0 and Me:GetAura("Battle Shout") or Me:GetAura("Commanding Shout")
   local shoutSpell = shoutType == 0 and Spell.BattleShout or Spell.CommandingShout
+  if (Me:HasAura("Greater Blessing of Might") or Me:HasAura("Blessing of Might")) and
+      not Me:HasAura("Commanding Shout") and Spell.CommandingShout.IsReady and Spell.CommandingShout:IsUsable() then
+    Spell.CommandingShout:Cast(target)
+    return
+  end
   -- Manual Cast here because CastEx gets fucked range.
   if not Me:HasAura("Greater Blessing of Might") and not Me:HasAura("Blessing of Might") and
       (not shoutAura or shoutAura.Remaining < 15 * 1000) and shoutSpell.IsReady and shoutSpell:IsUsable() then
@@ -68,23 +73,29 @@ function commonWarrior:DoInterrupt()
   local target = t1 and t1 or t2
   if not target then return false end
 
+  -- TODO: Merge these two loops, lazy!
+
   for _, u in pairs(Combat.Targets) do
     local castorchan = u.IsCastingOrChanneling
     local spell = u.CurrentSpell
 
+    if not u.IsInterruptible then goto continue end
+
     if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:InMeleeRange(u) and Me:IsFacing(u) then
       -- Shield Bash
-      if Spell.ShieldBash:CastEx(target) then return false end
+      if Spell.ShieldBash:CastEx(u) then return false end
 
       -- Concussion Blow
-      if Spell.ConcussionBlow:CastEx(target) then return false end
+      if Spell.ConcussionBlow:CastEx(u) then return false end
 
       -- Pummel
       if Spell.Pummel:CastEx(u) then return false end
     end
 
+    ::continue::
+
     local ut = u.Target
-    if u.IsCasting and spell and ut and ut == Me.Guid then
+    if u.IsCasting and spell and ut and ut.Guid == Me.Guid then
       return true
     end
   end
@@ -93,19 +104,23 @@ function commonWarrior:DoInterrupt()
     local castorchan = u.IsCastingOrChanneling
     local spell = u.CurrentSpell
 
+    if not u.IsInterruptible then goto continue end
+
     if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:InMeleeRange(u) and Me:IsFacing(u) then
       -- Shield Bash
-      if Spell.ShieldBash:CastEx(target) then return false end
+      if Spell.ShieldBash:CastEx(u) then return false end
 
       -- Concussion Blow
-      if Spell.ConcussionBlow:CastEx(target) then return false end
+      if Spell.ConcussionBlow:CastEx(u) then return false end
 
       -- Pummel
       if Spell.Pummel:CastEx(u) then return false end
     end
 
+    ::continue::
+
     local ut = u.Target
-    if u.IsCasting and spell and ut and ut == Me.Guid then
+    if u.IsCasting and spell and ut and ut.Guid == Me.Guid then
       return true
     end
   end

@@ -50,23 +50,24 @@ local function BloodDamage(target)
 
   if Combat:GetEnemiesWithinDistance(10) > 1 then
     -- if this returns true, we are forcing the multi target routine.
+    if Spell.DeathAndDecay:CastEx(Me) then return end
     if BloodMulti(target) then return end
   end
 
   -- Maybe use pestilence to refresh diseases?
   if common:PestilenceRefresh(target) then return end
 
-  if (not diseaseTarget or diseaseTarget == target) and target:TimeToDeath() > 5 and
+  if (not diseaseTarget or diseaseTarget == target) and
       (not fever or fever.Remaining < 3000) then
     if Spell.IcyTouch:CastEx(target) then return end
   end
 
-  if (not diseaseTarget or diseaseTarget == target) and target:TimeToDeath() > 5 and
+  if (not diseaseTarget or diseaseTarget == target) and
       (not plague or plague.Remaining < 3000) then
     if Spell.PlagueStrike:CastEx(target) then return end
   end
 
-  if ((Me.Power > 65 or Spell.MindFreeze:CooldownRemaining() > 5000)) and Spell.DeathCoil:CastEx(target) then return end
+  if Me.Power > 55 and Spell.DeathCoil:CastEx(target) then return end
 
   if Spell.DeathStrike:CastEx(target) then return end
 

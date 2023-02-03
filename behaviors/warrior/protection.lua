@@ -63,9 +63,9 @@ local function WarriorProtCombat()
   local target = Tank.BestTarget
   if not target then return end
 
-  if Me.Target and not Me:IsAttacking() then
-    Me:StartAttack(Me.Target)
-  end
+  --if Me.Target and not Me:IsAttacking() then
+  --  Me:StartAttack(Me.Target)
+  --end
 
   local shockwaveUnits = 0
   local unitsInMelee = 0
@@ -121,7 +121,7 @@ local function WarriorProtCombat()
     -- Taunt
     if Settings.WarriorProtTaunt then
       local threatentry = u:GetThreatEntry(Me.ToUnit)
-      if (threatentry.RawPct < 80 or (threatentry.RawPct < 100 and not Me:InMeleeRange(u))) and Spell.Taunt:CastEx(u) then return end
+      if threatentry.RawPct < 100 and Spell.Taunt:CastEx(u) then return end
     end
 
     -- Thunder Clap

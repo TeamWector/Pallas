@@ -1,3 +1,60 @@
+---@enum Classification
+Classification = {
+  Normal = 0,
+  Elite = 1,
+  Rare = 2,
+  Boss = 3
+}
+
+function ClassificationName(classification)
+  for k, v in pairs(Classification) do
+    if classification == v then return k end
+  end
+  return 'Unknown Classification ' .. classification
+end
+
+---@enum CreatureType
+CreatureType = {
+  --Mechanical = 0,
+  Beast = 1,
+  Dragonkin = 2,
+  Demon = 3,
+  Elemental = 4,
+  --GasCloud = 5,
+  Undead = 6,
+  Humanoid = 7,
+  Critter = 8,
+  Mechanical = 9,
+  --NonCombatPet = 9,
+  NotSpecified = 10,
+  Totem = 11,
+  --Giant = 12,
+  --WildPet = 13
+}
+
+function CreatureTypeName(creatureType)
+  for k, v in pairs(CreatureType) do
+    if creatureType == v then return k end
+  end
+  return 'Unknown Creature Type ' .. creatureType
+end
+
+---@enum CreatureFamily
+CreatureFamily = {
+  None = 0,
+  Wolf = 1,
+  Bear = 4,
+  Crab = 8,
+  Worm = 42,
+}
+
+function CreatureFamilyName(creatureFamily)
+  for k, v in pairs(CreatureFamily) do
+    if creatureFamily == v then return k end
+  end
+  return tostring(creatureFamily)
+end
+
 ---@return boolean HasDebuff
 ---@param bname string buff name
 function WoWUnit:HasBuffByMe(bname)
@@ -64,6 +121,10 @@ end
 
 function WoWUnit:IsStunned()
   return (self.UnitFlags & UnitFlags.Stunned > 0)
+end
+
+function WoWUnit:IsImmune()
+  return (self.UnitFlags & UnitFlags.Unk31 > 0)
 end
 
 function WoWUnit:WithinLineOfSight(target)
