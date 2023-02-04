@@ -62,8 +62,9 @@ local colors = {
 
 local objectTypes = {
     herb = colors.green,
-    vein = colors.orange
-  }
+    vein = colors.orange,
+    treasure = colors.silver
+}
 
 local trackedObjects = {
     -- Herbs
@@ -108,6 +109,8 @@ local trackedObjects = {
     ["Ooze Covered Truesilver Vein"] = "vein",
     ["Ooze Covered Mithril Vein"] = "vein",
     ["Ooze Covered Thorium Vein"] = "vein",
+    -- Treasures
+    ["Netherwing Egg"] = "treasure",
 }
 
 function TableContains(value)
