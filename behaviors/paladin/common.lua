@@ -57,23 +57,23 @@ function commonPaladin:Blessings()
     if not Settings.Blessings then return end
 
     local classBlessings = {
-        Rogue = { Spell.BlessingOfKings, Spell.BlessingOfMight },
-        Warrior = { Spell.BlessingOfMight, Spell.BlessingOfKings },
-        DeathKnight = { Spell.BlessingOfKings, Spell.BlessingOfMight },
-        Druid = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
-        Hunter = { Spell.BlessingOfMight, Spell.BlessingOfKings },
-        Mage = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
-        Shaman = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
-        Warlock = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
-        Priest = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
-        Paladin = { Spell.BlessingOfKings, Spell.BlessingOfWisdom }
+        [ClassType.Rogue] = { Spell.BlessingOfKings, Spell.BlessingOfMight },
+        [ClassType.Warrior] = { Spell.BlessingOfMight, Spell.BlessingOfKings },
+        [ClassType.DeathKnight] = { Spell.BlessingOfKings, Spell.BlessingOfMight },
+        [ClassType.Druid] = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        [ClassType.Hunter] = { Spell.BlessingOfMight, Spell.BlessingOfKings },
+        [ClassType.Mage] = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        [ClassType.Shaman] = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        [ClassType.Warlock] = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        [ClassType.Priest] = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        [ClassType.Paladin] = { Spell.BlessingOfKings, Spell.BlessingOfWisdom }
     }
 
     local group = WoWGroup:GetGroupUnits()
     for _, member in ipairs(group) do
         local isBuffedByMe = member:HasBuffByMe(Spell.BlessingOfKings.Name) or
             member:HasBuffByMe(Spell.BlessingOfWisdom.Name) or member:HasBuffByMe(Spell.BlessingOfMight.Name)
-        local class = member.ClassName
+        local class = member.Class
         local blessings = classBlessings[class]
 
         for _, blessing in ipairs(blessings) do
@@ -89,106 +89,61 @@ function commonPaladin:DivinePlea()
 end
 
 function commonPaladin:HolyWrath()
-    local units = wector.Game.Units
-    for _, u in pairs(units) do
+    for _, u in pairs(Combat.Targets) do
         local correctType = u.CreatureType == CreatureType.Undead and not u.Dead and u.isAttackable
         if correctType and Me:GetDistance(u) < 8 and Spell.HolyWrath:CastEx(u) then return end
     end
 end
 
 function commonPaladin:HammerOfWrath()
-    local units = wector.Game.Units
-    for _, u in pairs(units) do
-        local correctUnit = Me:GetDistance(u) < 30 and u.HealthPct <= 20 and u.isAttackable and not u.Dead
-        if correctUnit and Spell.HammerOfWrath:CastEx(u) then return end
+    for _, u in pairs(Combat.Targets) do
+        if u.HealthPct < 20 and Spell.HammerOfWrath:CastEx(u, SpellCastExFlags.NoUsable) then return end
     end
 end
 
 function commonPaladin:Judgement(target)
+    local spells = { Spell.JudgementOfWisdom, Spell.JudgementOfLight, Spell.JudgementOfJustice }
     local option = Settings.PaladinJudge
-    if option == 0 then
-        return Spell.JudgementOfWisdom:CastEx(target)
-    elseif option == 1 then
-        return Spell.JudgementOfLight:CastEx(target)
-    elseif option == 2 then
-        return Spell.JudgementOfJustice:CastEx(target)
-    end
-end
-
-function commonPaladin:GetSealOption()
-    local option = Settings.PaladinSeal
-    if option == 0 then
-        return Spell.SealOfWisdom
-    elseif option == 1 then
-        return Spell.SealOfLight
-    elseif option == 2 then
-        return Spell.SealOfRighteousness
-    elseif option == 3 then
-        return Spell.SealOfCorruption
-    elseif option == 4 then
-        return Spell.SealOfJustice
-    elseif option == 5 then
-        return Spell.SealOfCommand
-    end
-
-    -- default to wisdom..
-    return Spell.SealOfWisdom
-end
-
-function commonPaladin:GetBuffOption()
-    local option = Settings.PaladinBuff
-    if option == 0 then
-        return Spell.BlessingOfWisdom
-    elseif option == 1 then
-        return Spell.BlessingOfKings
-    elseif option == 2 then
-        return Spell.BlessingOfMight
-    elseif option == 3 then
-        return Spell.BlessingOfSanctuary
-    end
-
-    -- Default to wisdom..
-    return Spell.BlessingOfWisdom
+    return spells[option + 1]:CastEx(target)
 end
 
 function commonPaladin:GetAuraOption()
+    local options = { Spell.DevotionAura, Spell.RetributionAura, Spell.ConcentrationAura, Spell.ShadowResistanceAura,
+        Spell.FrostResistanceAura, Spell.FireResistanceAura }
     local option = Settings.PaladinAura
-    if option == 0 then
-        return Spell.DevotionAura
-    elseif option == 1 then
-        return Spell.RetributionAura
-    elseif option == 2 then
-        return Spell.ConcentrationAura
-    elseif option == 3 then
-        return Spell.ShadowResistanceAura
-    elseif option == 4 then
-        return Spell.FrostResistanceAura
-    elseif option == 5 then
-        return Spell.FireResistanceAura
-    end
-
-    -- Default to concentration..
-    return Spell.ConcentrationAura
+    return options[math.min(option + 1, #options)]
 end
 
 function commonPaladin:DoAura()
     if Settings.Crusader and Me.IsMounted then
-        if not Me:HasVisibleAura(Spell.CrusaderAura.Name) and Spell.CrusaderAura:CastEx(Me) then return end
+        if not Me:HasVisibleAura(Spell.CrusaderAura.Name) then
+            return Spell.CrusaderAura:CastEx(Me)
+        end
         return
     end
 
-    local aura = self:GetAuraOption()
-    if not Me:HasBuffByMe(aura.Name) and aura:CastEx(Me) then return end
+    local options = { Spell.DevotionAura, Spell.RetributionAura, Spell.ConcentrationAura, Spell.ShadowResistanceAura,
+        Spell.FrostResistanceAura, Spell.FireResistanceAura }
+    local option = Settings.PaladinAura
+    local aura = options[math.min(option + 1, #options)] or options[1]
+    if not Me:HasBuffByMe(aura.Name) then
+        return aura:CastEx(Me)
+    end
 end
 
 function commonPaladin:DoSeal()
-    local seal = self:GetSealOption()
+    local seals = { Spell.SealOfWisdom, Spell.SealOfLight, Spell.SealOfRighteousness, Spell.SealOfCorruption,
+        Spell.SealOfJustice, Spell.SealOfCommand }
+    local option = Settings.PaladinSeal
+    local seal = seals[math.min(option + 1, #seals)] or Spell.SealOfWisdom
     if not Me:HasBuffByMe(seal.Name) and seal:CastEx(Me) then return end
 end
 
 function commonPaladin:DoBuff()
-    local buff = self:GetBuffOption()
-    if not Me:HasBuffByMe(buff.Name) and buff:CastEx(Me) then return end
+    local spells = { Spell.BlessingOfWisdom, Spell.BlessingOfKings, Spell.BlessingOfMight, Spell.BlessingOfSanctuary }
+    local option = Settings.PaladinBuff
+    local buff = spells[math.min(option + 1, #spells)]
+    if not Me:HasBuffByMe(buff.Name) then buff:CastEx(Me) end
 end
 
 return commonPaladin

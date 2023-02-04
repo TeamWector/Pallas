@@ -60,50 +60,59 @@ local colors = {
     powderblue = 0xFFB0E0E6
 }
 
+local objectTypes = {
+    herb = colors.green,
+    vein = colors.orange
+  }
+
 local trackedObjects = {
     -- Herbs
-    { name = "Silverleaf", type = "herb" },
-    { name = "Peacebloom", type = "herb" },
-    { name = "Earthroot", type = "herb" },
-    { name = "Mageroyal", type = "herb" },
-    { name = "Briarthorn", type = "herb" },
-    { name = "Bruiseweed", type = "herb" },
-    { name = "Wild Steelbloom", type = "herb" },
-    { name = "Grave Moss", type = "herb" },
-    { name = "Kingsblood", type = "herb" },
-    { name = "Liferoot", type = "herb" },
-    { name = "Fadeleaf", type = "herb" },
-    { name = "Goldthorn", type = "herb" },
-    { name = "Khadgar's Whisker", type = "herb" },
-    { name = "Wintersbite", type = "herb" },
-    { name = "Firebloom", type = "herb" },
-    { name = "Purple Lotus", type = "herb" },
-    { name = "Arthas' Tears", type = "herb" },
-    { name = "Sungrass", type = "herb" },
-    { name = "Blindweed", type = "herb" },
-    { name = "Ghost Mushroom", type = "herb" },
-    { name = "Gromsblood", type = "herb" },
-    { name = "Dreamfoil", type = "herb" },
-    { name = "Golden Sansam", type = "herb" },
-    { name = "Mountain Silversage", type = "herb" },
-    { name = "Plaguebloom", type = "herb" },
-    { name = "Icecap", type = "herb" },
-    { name = "Black Lotus", type = "herb" },
+    ["Silverleaf"] = "herb",
+    ["Peacebloom"] = "herb",
+    ["Earthroot"] = "herb",
+    ["Mageroyal"] = "herb",
+    ["Briarthorn"] = "herb",
+    ["Bruiseweed"] = "herb",
+    ["Wild Steelbloom"] = "herb",
+    ["Grave Moss"] = "herb",
+    ["Kingsblood"] = "herb",
+    ["Liferoot"] = "herb",
+    ["Fadeleaf"] = "herb",
+    ["Goldthorn"] = "herb",
+    ["Khadgar's Whisker"] = "herb",
+    ["Wintersbite"] = "herb",
+    ["Firebloom"] = "herb",
+    ["Purple Lotus"] = "herb",
+    ["Arthas' Tears"] = "herb",
+    ["Sungrass"] = "herb",
+    ["Blindweed"] = "herb",
+    ["Ghost Mushroom"] = "herb",
+    ["Gromsblood"] = "herb",
+    ["Dreamfoil"] = "herb",
+    ["Golden Sansam"] = "herb",
+    ["Mountain Silversage"] = "herb",
+    ["Plaguebloom"] = "herb",
+    ["Icecap"] = "herb",
+    ["Black Lotus"] = "herb",
     -- Ores
-    { name = "Copper Vein", type = "vein" },
-    { name = "Tin Vein", type = "vein" },
-    { name = "Iron Vein", type = "vein" },
-    { name = "Gold Vein", type = "vein" },
-    { name = "Mithril Vein", type = "vein" },
-    { name = "Truesilver Vein", type = "vein" },
-    { name = "Thorium Vein", type = "vein" },
-    { name = "Silver Vein", type = "vein" },
-    { name = "Ooze Covered Silver Vein", type = "vein" },
-    { name = "Ooze Covered Gold Vein", type = "vein" },
-    { name = "Ooze Covered Truesilver Vein", type = "vein" },
-    { name = "Ooze Covered Mithril Vein", type = "vein" },
-    { name = "Ooze Covered Thorium Vein", type = "vein" },
+    ["Copper Vein"] = "vein",
+    ["Tin Vein"] = "vein",
+    ["Iron Vein"] = "vein",
+    ["Gold Vein"] = "vein",
+    ["Mithril Vein"] = "vein",
+    ["Truesilver Vein"] = "vein",
+    ["Thorium Vein"] = "vein",
+    ["Silver Vein"] = "vein",
+    ["Ooze Covered Silver Vein"] = "vein",
+    ["Ooze Covered Gold Vein"] = "vein",
+    ["Ooze Covered Truesilver Vein"] = "vein",
+    ["Ooze Covered Mithril Vein"] = "vein",
+    ["Ooze Covered Thorium Vein"] = "vein",
 }
+
+function TableContains(value)
+    return trackedObjects[value] ~= nil, trackedObjects[value]
+end
 
 local options = {
     Name = "Radar",
@@ -151,26 +160,17 @@ local options = {
 
 local manuallytracked = {}
 local function ManualTrack(name)
-    for i, n in pairs(manuallytracked) do
-        if n == name then
-            table.remove(manuallytracked, i)
-            wector.Console:Log("UNTRACKING: " .. name)
-            return
-        end
+    if manuallytracked[name] then
+        manuallytracked[name] = nil
+        wector.Console:Log("UNTRACKING: " .. name)
+    else
+        manuallytracked[name] = true
+        wector.Console:Log("TRACKING: " .. name)
     end
-
-    table.insert(manuallytracked, name)
-    wector.Console:Log("TRACKING: " .. name)
 end
 
 local function IsTracked(name)
-    for i, n in pairs(manuallytracked) do
-        if n == name then
-            return true
-        end
-    end
-
-    return false
+    return manuallytracked[name] ~= nil
 end
 
 RadarListener = wector.FrameScript:CreateListener()
@@ -178,26 +178,19 @@ RadarListener:RegisterEvent('CONSOLE_MESSAGE')
 
 -- Easy way of manually adding target i guess..
 function RadarListener:CONSOLE_MESSAGE(msg)
-    if string.find(msg, "track") then
+    local isTrackMessage = string.find(msg, "track")
+    local isClearTrackedMessage = string.find(msg, "cleartracked")
+
+    if isTrackMessage then
         if Me.Target then
             ManualTrack(Me.Target.Name)
         end
     end
 
-    if string.find(msg, "cleartracked") then
+    if isClearTrackedMessage then
         wector.Console:Log("Cleared tracked list")
         manuallytracked = {}
     end
-end
-
-local function TableContains(value)
-    for _, v in pairs(trackedObjects) do
-        if string.find(v.name, value) then
-            return true, v.type
-        end
-    end
-
-    return false
 end
 
 local onscreen = {}
@@ -254,16 +247,14 @@ local function DrawColoredLine(object, thick)
     local start = World2Screen(Me.Position)
     local finish = World2Screen(Vec3(pos.x, pos.y, pos.z + object.DisplayHeight))
     local color = colors.white
-    local _, type = TableContains(object.Name)
-    local israre = object.IsUnit and object.Classification == 4
+    local isRare = object.IsUnit and object.Classification == Classification.Rare
 
-    if type == "herb" then
-        color = colors.green
-    elseif type == "vein" then
-        color = colors.orange
+    local objectType = trackedObjects[object.Name]
+    if objectType then
+        color = objectTypes[objectType]
     end
 
-    if israre then
+    if isRare then
         color = colors.purple
     end
 

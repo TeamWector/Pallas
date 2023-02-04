@@ -54,14 +54,6 @@ local options = {
         },
         {
             type = "slider",
-            uid = "DPSHealthPct",
-            text = "Damage Above Health Percent",
-            default = 95,
-            min = 0,
-            max = 99
-        },
-        {
-            type = "slider",
             uid = "DPSManaPct",
             text = "Damage Above Mana Percent",
             default = 70,
@@ -95,7 +87,7 @@ end
 local function BeaconLogic()
     for _, v in pairs(Heal.PriorityList) do
         local unit = v.Unit
-        local hlost = unit.HealthMax - unit.Health
+        local hlost = unit:GetHealthLost()
 
         if not unit:HasBuffByMe(Spell.BeaconOfLight.Name) and hlost > 0 and Spell.HolyLight:InRange(unit) then
             return unit
@@ -106,18 +98,21 @@ local function BeaconLogic()
 end
 
 local function PaladinHolyHeal()
-    common:DoAura()
-
     local spelltarget = WoWSpell:GetCastTarget()
     if IsCastingHeal() and spelltarget then
-        local hlost = spelltarget.HealthMax - spelltarget.Health
-        local tankLost = function() if Me.FocusTarget then return Me.FocusTarget.HealthMax - Me.FocusTarget.Health end return 0 end
-        if hlost < Settings.FlashOfLightAmt * 0.7 and tankLost() < Settings.FlashOfLightAmt * 0.7 then Me:StopCasting() end
+        local hlost = spelltarget:GetHealthLost()
+        if hlost < Settings.FlashOfLightAmt * 0.7 and
+            (not Me.FocusTarget or Me.FocusTarget:GetHealthLost() < Settings.FlashOfLightAmt * 0.7) then
+            Me:StopCasting()
+        end
     end
+
+    if Me.IsCastingOrChanneling then return end
+
+    common:DoAura()
 
     if Me.StandStance == StandStance.Sit then return end
     if Me.IsMounted then return end
-    if Me.IsCastingOrChanneling then return end
 
     if not Me.InCombat then
         common:DoSeal()
@@ -145,7 +140,7 @@ local function PaladinHolyHeal()
     for _, v in pairs(Heal.PriorityList) do
         local u = v.Unit
         local hpct = u.HealthPct
-        local hlost = u.HealthMax - u.Health
+        local hlost = u:GetHealthLost()
         local isTank = WoWGroup(GroupType.Auto).InGroup and
             WoWGroup(GroupType.Auto):GetMemberByGuid(u.Guid).GroupRole == "Tank"
         local healTarget = u
@@ -173,21 +168,16 @@ local function PaladinHolyHeal()
 end
 
 local function PaladinHolyDamage()
-    if Me.StandStance == StandStance.Sit then return end
-    if Me.IsMounted then return end
-    if Me.IsCastingOrChanneling then return end
+    local target = Combat.BestTarget
+    if not target or Me.IsCastingOrChanneling or Me.StandStance == StandStance.Sit or Me.IsMounted or target.Dead then return end
 
-    local lowest = Heal:GetLowestMember()
-
-    local target = Me.Target
-    if not target or not Me:CanAttack(target) or target.Dead then return end
     local aoe = Combat:GetEnemiesWithinDistance(8) > 1
+    local lowest = Heal:GetLowestMember()
+    local shouldAttack = not lowest or lowest:GetHealthLost() < Settings.FlashOfLightAmt
 
-    -- Spam Judgement if our lowest member is above 80% hp
-    if (not lowest or lowest.HealthPct > 80) and common:Judgement(target) then return end
+    if shouldAttack and common:Judgement(target) then return end
 
-    -- Only continue if the lowest group member is above this percent (Mana Health)
-    if Me.PowerPct < Settings.DPSManaPct or (lowest and lowest.HealthPct <= Settings.DPSHealthPct) then return end
+    if not shouldAttack or Me.PowerPct < Settings.DPSManaPct then return end
 
     if common:HammerOfWrath() then return end
     if Spell.Exorcism:CastEx(target) then return end
