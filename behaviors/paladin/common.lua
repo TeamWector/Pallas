@@ -14,7 +14,7 @@ commonPaladin.widgets = {
         uid = "PaladinJudge",
         text = "Select Judgement",
         default = 0,
-        options = { "Judgement of Wisdom", "Judgement of Light", "Judgement of Justice"}
+        options = { "Judgement of Wisdom", "Judgement of Light", "Judgement of Justice" }
     },
     {
         type = "combobox",
@@ -41,11 +41,48 @@ commonPaladin.widgets = {
     },
     {
         type = "checkbox",
+        uid = "Blessings",
+        text = "Auto Bless Companions",
+        default = true
+    },
+    {
+        type = "checkbox",
         uid = "Crusader",
         text = "Auto Crusader Aura",
         default = true
     },
 }
+
+function commonPaladin:Blessings()
+    if not Settings.Blessings then return end
+
+    local classBlessings = {
+        Rogue = { Spell.BlessingOfKings, Spell.BlessingOfMight },
+        Warrior = { Spell.BlessingOfMight, Spell.BlessingOfKings },
+        DeathKnight = { Spell.BlessingOfKings, Spell.BlessingOfMight },
+        Druid = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        Hunter = { Spell.BlessingOfMight, Spell.BlessingOfKings },
+        Mage = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        Shaman = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        Warlock = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        Priest = { Spell.BlessingOfKings, Spell.BlessingOfWisdom },
+        Paladin = { Spell.BlessingOfKings, Spell.BlessingOfWisdom }
+    }
+
+    local group = WoWGroup:GetGroupUnits()
+    for _, member in ipairs(group) do
+        local isBuffedByMe = member:HasBuffByMe(Spell.BlessingOfKings.Name) or
+            member:HasBuffByMe(Spell.BlessingOfWisdom.Name) or member:HasBuffByMe(Spell.BlessingOfMight.Name)
+        local class = member.ClassName
+        local blessings = classBlessings[class]
+
+        for _, blessing in ipairs(blessings) do
+            if not isBuffedByMe and not member:HasAura(blessing.Name) and blessing:CastEx(member) then
+                return
+            end
+        end
+    end
+end
 
 function commonPaladin:DivinePlea()
     return Me.PowerPct <= Settings.PleaPct and Spell.DivinePlea:CastEx(Me)
@@ -54,7 +91,7 @@ end
 function commonPaladin:HolyWrath()
     local units = wector.Game.Units
     for _, u in pairs(units) do
-        local correctType = u.CreatureType == 6 and not u.Dead
+        local correctType = u.CreatureType == CreatureType.Undead and not u.Dead and u.isAttackable
         if correctType and Me:GetDistance(u) < 8 and Spell.HolyWrath:CastEx(u) then return end
     end
 end
@@ -62,7 +99,7 @@ end
 function commonPaladin:HammerOfWrath()
     local units = wector.Game.Units
     for _, u in pairs(units) do
-        local correctUnit = Me:GetDistance(u) < 30 and u.HealthPct <= 20 and Me:CanAttack(u) and not u.Dead
+        local correctUnit = Me:GetDistance(u) < 30 and u.HealthPct <= 20 and u.isAttackable and not u.Dead
         if correctUnit and Spell.HammerOfWrath:CastEx(u) then return end
     end
 end

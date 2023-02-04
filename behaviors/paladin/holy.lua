@@ -75,29 +75,8 @@ for k, v in pairs(common.widgets) do
     table.insert(options.Widgets, v)
 end
 
-local function GetGroupUnits()
-    local group = WoWGroup(GroupType.Auto)
-    local members = {}
-
-    if group then
-        local party = group.Members
-        for _, m in pairs(party) do
-            local unit = wector.Game:GetObjectByGuid(m.Guid)
-            if unit then
-                table.insert(members, unit.ToUnit)
-            end
-        end
-    end
-
-    if not group or not group.InGroup then
-        table.insert(members, Me.ToUnit)
-    end
-
-    return members
-end
-
 local function Dispel()
-    local group = GetGroupUnits()
+    local group = WoWGroup:GetGroupUnits()
 
     for _, unit in pairs(group) do
         local auras = unit.VisibleAuras
@@ -143,6 +122,7 @@ local function PaladinHolyHeal()
     if not Me.InCombat then
         common:DoSeal()
         common:DoBuff()
+        common:Blessings()
     end
 
     --Dispel()
@@ -203,7 +183,8 @@ local function PaladinHolyDamage()
     if not target or not Me:CanAttack(target) or target.Dead then return end
     local aoe = Combat:GetEnemiesWithinDistance(8) > 1
 
-    if common:Judgement(target) then return end
+    -- Spam Judgement if our lowest member is above 80% hp
+    if (not lowest or lowest.HealthPct > 80) and common:Judgement(target) then return end
 
     -- Only continue if the lowest group member is above this percent (Mana Health)
     if Me.PowerPct < Settings.DPSManaPct or (lowest and lowest.HealthPct <= Settings.DPSHealthPct) then return end
