@@ -32,20 +32,20 @@ function Heal:CollectTargets()
 
   -- copy unit list
   for k, u in pairs(units) do
-    self.Targets[k] = u.ToUnit
+    self.HealTargets[k] = u.ToUnit
   end
 end
 
 function Heal:ExclusionFilter()
-  for k, u in pairs(self.Targets) do
+  for k, u in pairs(self.HealTargets) do
     if Me:CanAttack(u) then
-      self.Targets[k] = nil
+      self.HealTargets[k] = nil
     elseif u.HealthPct == 100 then
-      self.Targets[k] = nil
+      self.HealTargets[k] = nil
     elseif u.Dead or u.Health <= 1 then
-      self.Targets[k] = nil
+      self.HealTargets[k] = nil
     elseif Me:GetDistance(u) > 40 then
-      self.Targets[k] = nil
+      self.HealTargets[k] = nil
     end
   end
 end
@@ -57,7 +57,7 @@ function Heal:WeighFilter()
   local manaMulti = 30
   local group = WoWGroup(GroupType.Auto)
 
-  for _, u in pairs(self.Targets) do
+  for _, u in pairs(self.HealTargets) do
     local priority = 0
     local istank = false
 

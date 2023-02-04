@@ -1,5 +1,6 @@
 ---@diagnostic disable: param-type-mismatch
 local common = require('behaviors.paladin.common')
+local dispels = require('data.dispels')
 
 local options = {
     Name = "Paladin (Holy)",
@@ -7,7 +8,7 @@ local options = {
         {
             type = "slider",
             uid = "HolyLightAmt",
-            text = "Holy Light Heal Amount",
+            text = "Holy Light Amount",
             default = 6000,
             min = 0,
             max = 20000
@@ -15,7 +16,7 @@ local options = {
         {
             type = "slider",
             uid = "FlashOfLightAmt",
-            text = "Flash Of Light Heal Amount",
+            text = "Flash of Light Amount",
             default = 1500,
             min = 0,
             max = 10000
@@ -23,7 +24,7 @@ local options = {
         {
             type = "slider",
             uid = "HolyShockAmt",
-            text = "Holy Shock Heal Amount",
+            text = "Holy Shock Amount",
             default = 1500,
             min = 0,
             max = 10000
@@ -31,7 +32,7 @@ local options = {
         {
             type = "slider",
             uid = "HandOfProtectionPct",
-            text = "Hand Of Protection %",
+            text = "Hand of Protection Threshold (%)",
             default = 25,
             min = 0,
             max = 99
@@ -39,7 +40,7 @@ local options = {
         {
             type = "slider",
             uid = "LayOnHandsPct",
-            text = "Lay on Hands %",
+            text = "Lay on Hands Threshold (%)",
             default = 10,
             min = 0,
             max = 99
@@ -47,7 +48,7 @@ local options = {
         {
             type = "slider",
             uid = "HandOfSacrificePct",
-            text = "Hand of Sacrifice % (FOCUS)",
+            text = "Hand of Sacrifice Threshold Focus (%)",
             default = 70,
             min = 0,
             max = 99
@@ -55,7 +56,7 @@ local options = {
         {
             type = "slider",
             uid = "DPSManaPct",
-            text = "Damage Above Mana Percent",
+            text = "DPS Above Mana Threshold (%)",
             default = 70,
             min = 0,
             max = 99
@@ -67,13 +68,19 @@ for k, v in pairs(common.widgets) do
     table.insert(options.Widgets, v)
 end
 
-local function Dispel()
+local function Dispel(...)
+    local dispelTypes = {...}
     local group = WoWGroup:GetGroupUnits()
 
     for _, unit in pairs(group) do
         local auras = unit.VisibleAuras
         for _, aura in pairs(auras) do
-            if aura.IsDebuff then
+            if aura.IsDebuff and dispels[aura.Id] then
+                for _, dispelType in pairs(dispelTypes) do
+                    if dispels[aura.Id] == dispelType then
+                        return Spell.Cleanse:CastEx(unit)
+                    end
+                end
             end
         end
     end
@@ -120,13 +127,15 @@ local function PaladinHolyHeal()
         common:Blessings()
     end
 
-    --Dispel()
-
     local focus = Me.FocusTarget
     local lowest = Heal:GetLowestMember()
 
     if not lowest then
         common:DivinePlea()
+    end
+
+    if not lowest or lowest:GetHealthLost() < Settings.FlashOfLightAmt then
+        Dispel("Magic", "Poison", "Disease")
     end
 
     if focus then
