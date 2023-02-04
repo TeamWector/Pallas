@@ -8,9 +8,9 @@ function WoWGroup:GetGroupUnits()
     else
         local companions = group.Members
         for _, m in pairs(companions) do
-            local unit = wector.Game:GetObjectByGuid(m.Guid).ToUnit
+            local unit = wector.Game:GetObjectByGuid(m.Guid)
             if unit then
-                table.insert(members, unit)
+                table.insert(members, unit.ToUnit)
             end
         end
     end
