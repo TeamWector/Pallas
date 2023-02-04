@@ -1,4 +1,4 @@
-local trackedObjects = require("data.gatherables")
+local gatherables = require("data.gatherables")
 local colors = require("data.colors")
 
 local objectTypes = {
@@ -8,7 +8,7 @@ local objectTypes = {
 }
 
 function TableContains(value)
-    return trackedObjects[value] ~= nil, trackedObjects[value]
+    return gatherables[value] ~= nil, gatherables[value]
 end
 
 local options = {
@@ -146,7 +146,7 @@ local function DrawColoredLine(object, thick)
     local color = colors.white
     local isRare = object.IsUnit and object.Classification == Classification.Rare
 
-    local objectType = trackedObjects[object.Name]
+    local objectType = gatherables[object.Name]
     if objectType then
         color = objectTypes[objectType]
     end
