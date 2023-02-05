@@ -41,7 +41,7 @@ function Behavior:Initialize(isReload)
   end
 
   print('Load ' .. specname .. ' ' .. classname .. ' Behaviors')
-  local behavior = require('behaviors.' .. class_trim .. '.' .. specname_trim)
+  local behavior = require('behaviors.' .. wector.CurrentScript.Game .. '.' .. class_trim .. '.' .. specname_trim)
 
   if behavior.Options then
     Menu:AddOptionMenu(behavior.Options)
