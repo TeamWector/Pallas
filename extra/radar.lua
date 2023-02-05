@@ -1,4 +1,5 @@
 local gatherables = require("data.gatherables")
+local herbs, ores, treasures = gatherables.herb, gatherables.ore, gatherables.treasure
 local colors = require("data.colors")
 
 local objectTypes = {
@@ -6,10 +7,6 @@ local objectTypes = {
     vein = colors.orange,
     treasure = colors.silver
 }
-
-function TableContains(value)
-    return gatherables[value] ~= nil, gatherables[value]
-end
 
 local options = {
     Name = "Radar",
@@ -24,14 +21,26 @@ local options = {
         },
         {
             type = "checkbox",
-            uid = "ExtraRadarTrackGatherable",
-            text = "Track Gatherables",
+            uid = "ExtraRadarTrackHerbs",
+            text = "Track Herbs",
+            default = false
+        },
+        {
+            type = "checkbox",
+            uid = "ExtraRadarTrackOres",
+            text = "Track Ores",
+            default = false
+        },
+        {
+            type = "checkbox",
+            uid = "ExtraRadarTrackTreasures",
+            text = "Track Treasures",
             default = false
         },
         {
             type = "checkbox",
             uid = "ExtraRadarTrackAll",
-            text = "Track All Interactables",
+            text = "Track All Quests",
             default = false
         },
         {
@@ -100,8 +109,11 @@ local function IsOffscreen(object)
 end
 
 local function CollectVisuals()
-    local objects = wector.Game:GetObjectsByFlag(ObjectTypeFlag.Object)
+    local objects = wector.Game.GameObjects
     local units = wector.Game.Units
+    local track_herbs = Settings.ExtraRadarTrackHerbs
+    local track_ores = Settings.ExtraRadarTrackOres
+    local track_treasures = Settings.ExtraRadarTrackTreasures
 
     onscreen = {}
     offscreen = {}
@@ -115,25 +127,35 @@ local function CollectVisuals()
         end
     end
 
-    for _, u in pairs(units) do
-        local distance = u.Position:DistanceSq(Me.Position)
-        local israre = u.Classification == 4
-        if distance < 200 and not u.Dead then
-            if IsTracked(u.Name) or (israre and Settings.ExtraRadarTrackRares) then
-                AddToScreenList(u)
+    for _, unit in pairs(units) do
+        local distance = unit.Position:DistanceSq(Me.Position)
+        local israre = unit.Classification == Classification.Rare
+        if distance < 200 and not unit.Dead then
+            if IsTracked(unit.Name) or (israre and Settings.ExtraRadarTrackRares) then
+                AddToScreenList(unit)
             end
         end
     end
 
-    for _, o in pairs(objects) do
-        local distance = o.Position:DistanceSq(Me.Position)
-        local interactable = o.DynamicFlags & 0x04 > 1
-        if Settings.ExtraRadarTrackGatherable and TableContains(o.Name) and distance < 200 then
-            AddToScreenList(o)
-        end
+    for _, object in pairs(objects) do
+        local distance = object.Position:DistanceSq(Me.Position)
+        local interactable = object.DynamicFlags & 0x04 > 1
+
+        if distance > 200 then goto continue end
+
         if Settings.ExtraRadarTrackAll and interactable then
-            AddToScreenList(o)
+            AddToScreenList(object)
         end
+
+        local gatherables_list = { herbs, ores, treasures }
+        local track_gatherables = { track_herbs, track_ores, track_treasures }
+
+        for index, gatherable in pairs(gatherables_list) do
+            if track_gatherables[index] and gatherable[object.EntryId] then
+                AddToScreenList(object)
+            end
+        end
+        ::continue::
     end
 end
 
@@ -146,9 +168,13 @@ local function DrawColoredLine(object, thick)
     local color = colors.white
     local isRare = object.IsUnit and object.Classification == Classification.Rare
 
-    local objectType = gatherables[object.Name]
-    if objectType then
-        color = objectTypes[objectType]
+    local gatherablesTables = { herbs, ores, treasures }
+
+    for _, gatherables in ipairs(gatherablesTables) do
+        local objectType = gatherables[object.EntryId]
+        if objectType then
+            color = objectTypes[objectType]
+        end
     end
 
     if isRare then
@@ -170,7 +196,7 @@ local function Radar()
     local text, color, tracked, interactable, israre, textpos
 
     for _, o in pairs(onscreen) do
-        israre = o.IsUnit and o.Classification == 4
+        israre = o.IsUnit and o.Classification == Classification.Rare
         interactable = o.DynamicFlags & 0x04 > 1
         tracked = IsTracked(o.Name)
 

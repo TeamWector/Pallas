@@ -11,7 +11,14 @@ local dispels = {
     [50761] = "Magic", -- Pillar of Woe (HOS)
     -- Halls of Lightning
     -- The Nexus
+    [56860] = "Magic", -- Magic burn 
+    [47731] = "Magic", -- Polymorph
+    [57063] = "Magic", -- Arcane atraction
+    [57050] = "Magic", -- Crystal Chains
+    [48179] = "Magic", -- Crystalize
+    [57091] = "Magic", -- Crystalfire Breath
     -- The Oculus
+    [59261] = "Magic", -- Water Tomb
     -- The Violet Hold
     -- Utgarde Keep
     -- Utgarde Pinnacle
