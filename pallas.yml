@@ -1,6 +1,6 @@
 name: Pallas
 author: ejt
-game: wow
+game: wow_wrath
 
 files:
   - pallas.lua
