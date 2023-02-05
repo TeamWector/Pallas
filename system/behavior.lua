@@ -11,67 +11,7 @@ BehaviorType = {
   Extra = 5
 }
 
-local behavior_map = {
-  deathknight = {
-    [398] = 'Blood',
-    [399] = 'Frost',
-    [400] = 'Unholy'
-  },
-
-  druid = {
-    [283] = 'Balance',
-    [281] = 'Feral',
-    [282] = 'Restoration'
-  },
-
-  hunter = {
-    [361] = 'Beast Mastery',
-    [363] = 'Marksmanship',
-    [362] = 'Survival'
-  },
-
-  mage = {
-    [81] = 'Arcane',
-    [41] = 'Fire',
-    [61] = 'Frost'
-  },
-
-  paladin = {
-    [382] = 'Holy',
-    [383] = 'Protection',
-    [381] = 'Retribution'
-  },
-
-  priest = {
-    [201] = 'Discipline',
-    [202] = 'Holy',
-    [203] = 'Shadow'
-  },
-
-  rogue = {
-    [182] = 'Assassination',
-    [181] = 'Combat',
-    [183] = 'Sublety'
-  },
-
-  shaman = {
-    [261] = 'Elemental',
-    [263] = 'Enhancement',
-    [262] = 'Restoration'
-  },
-
-  warlock = {
-    [302] = 'Affliction',
-    [303] = 'Demonology',
-    [301] = 'Destruction'
-  },
-
-  warrior = {
-    [161] = 'Arms',
-    [164] = 'Fury',
-    [163] = 'Protection'
-  }
-}
+local behavior_map = require('data.specializations')
 
 ---
 --- Loads the behavior that best fits the current character specialization
@@ -185,15 +125,20 @@ function Behavior:HasBehavior(type)
 end
 
 function Behavior:DecideBestSpecialization()
-  local bestspec = -1
-  local bestspecpoints = -1
-  for _, v in pairs(Me.Talents.ActiveTalentGroup.Tabs) do
-    if v.Points > bestspecpoints then
-      bestspec = v.Id
-      bestspecpoints = v.Points
+  if wector.CurrentScript.Game == 'wow_retail' then
+    return Me.Talents.ActiveSpecializationId
+  elseif wector.CurrentScript.Game == 'wow_wrath' then
+    local bestspec = -1
+    local bestspecpoints = -1
+    for _, v in pairs(Me.Talents.ActiveTalentGroup.Tabs) do
+      if v.Points > bestspecpoints then
+        bestspec = v.Id
+        bestspecpoints = v.Points
+      end
     end
+    return bestspec
   end
-  return bestspec
+  return -1
 end
 
 function Behavior:AddBehaviorFunction(tbl, type)

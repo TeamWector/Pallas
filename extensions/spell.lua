@@ -1,3 +1,5 @@
+---@diagnostic disable: duplicate-set-field
+
 ---@enum SpellCastExFlags
 SpellCastExFlags = {
   NoUsable = 0x1
