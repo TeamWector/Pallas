@@ -66,12 +66,12 @@ function Heal:WeighFilter()
     if not member and Me.Guid ~= u.Guid then goto continue end
 
     if member then
-      if member.Role == GroupRole.Tank then
+      if member.Role & GroupRole.Tank == GroupRole.Tank then
         priority = priority + 20
         istank = true
       end
-      if member.Role == GroupRole.Healer then priority = priority + 10 end
-      if member.Role == GroupRole.Damage then priority = priority + 5 end
+      if member.Role & GroupRole.Healer == GroupRole.Healer then priority = priority + 10 end
+      if member.Role & GroupRole.Damage == GroupRole.Damage then priority = priority + 5 end
     end
 
     priority = priority + (100 - u.HealthPct)
