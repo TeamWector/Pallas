@@ -96,7 +96,8 @@ end
 
 function Behavior:CollectScriptPaths(name)
   -- <root>\scripts\Pallas\behaviors\<classname>
-  local path = filesystem.Path(string.format('%s\\behaviors\\%s\\', wector.script_path, name))
+  local path = filesystem.Path(string.format('%s\\behaviors\\%s\\%s\\', wector.CurrentScript.Game, wector.script_path,
+    name))
 
   -- iterate all files in class behaviors directory
   local it = filesystem.Directory(path)
