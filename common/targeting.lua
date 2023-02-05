@@ -2,7 +2,8 @@
 ---@class Targeting
 ---@field Targets WoWUnit[]
 Targeting = {
-  Targets = {}
+  Targets = {},
+  HealTargets = {}
 }
 
 function Targeting:New(o)
@@ -29,6 +30,7 @@ end
 
 function Targeting:Reset()
   self.Targets = {}
+  self.HealTargets = {}
 end
 
 function Targeting:CollectTargets()

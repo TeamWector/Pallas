@@ -158,7 +158,7 @@ function Combat:GetEnemiesWithinDistance(dist)
   local count = 0
 
   for _, u in pairs(self.Targets) do
-    if Me:GetDistance(u) < dist then
+    if Me:GetDistance(u) <= dist then
       count = count + 1
     end
   end

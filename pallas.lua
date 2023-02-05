@@ -21,13 +21,6 @@ end
 function Pallas:OnUpdate()
   if not wector.Game.InWorld or not Me then return end
 
-  local objects = wector.Game.GameObjects
-  for _, o in pairs(objects) do
-    if o.Name == "Netherwing Egg" then
-      wector.Console:Log("EGG!!!! Distance: " .. Me.Position:Distance(o.Position))
-    end
-  end
-
   Combat:Update()
   Heal:Update()
   Tank:Update()

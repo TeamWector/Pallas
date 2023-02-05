@@ -166,6 +166,10 @@ function WoWUnit:AngleToXY(x1, y1, x2, y2)
   return math.deg(diff)
 end
 
+function WoWUnit:GetHealthLost()
+  return self.HealthMax - self.Health
+end
+
 function WoWUnit:AngleToPos(from, to)
   return self:AngleToXY(from.x, from.y, to.x, to.y)
 end
@@ -207,7 +211,6 @@ function WoWUnit:TimeToDeath()
 
   return 9999
 end
-
 
 ---@return integer
 ---@param target WoWUnit The target of the unit, pet, me, another player?

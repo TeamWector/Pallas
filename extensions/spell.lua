@@ -4,17 +4,16 @@ SpellCastExFlags = {
 }
 
 local CastTarget = nil
----@return WoWUnit
+local spellDelay = {}
+
 function WoWSpell:GetCastTarget()
   return CastTarget
 end
 
-local spellDelay = {}
-
 SpellListener = wector.FrameScript:CreateListener()
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
 
-function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, _, spellID)
+function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget)
   if unitTarget == Me then
     CastTarget = nil
   end
