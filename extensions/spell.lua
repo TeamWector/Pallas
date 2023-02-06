@@ -35,6 +35,8 @@ function WoWSpell:CastEx(a1, ...)
   -- are we already casting (i.e. actionbar button is highlighted)?
   if self.IsActive then return false end
 
+  if not self.IsKnown then return false end
+
   -- if spell has cast time, are we moving?
   if self.CastTime > 0 and Me:IsMoving() then return false end
 
