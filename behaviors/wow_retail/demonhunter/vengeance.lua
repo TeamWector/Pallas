@@ -64,6 +64,10 @@ local function DemonhunterVengeanceCombat()
     local target = Combat.BestTarget
     if not target then return end
 
+    if not Me:InMeleeRange(target) then
+        if Spell.ThrowGlaive:CastEx(target) then return end
+    end
+
     -- only melee spells from here on
     if not Me:InMeleeRange(target) or not Me:IsFacing(target) then return end
 
@@ -85,7 +89,8 @@ local function DemonhunterVengeanceCombat()
 
     -- Instead of Fracture, works for Shear as well.
     if Spell.DemonsBite:CastEx(target) then return end
-    if Spell.ThrowGlaive:CastEx(target) then print("THROW GLAIVE MF") return end
+    if Spell.ThrowGlaive:CastEx(target) then return end
+    
 end
 
 local behaviors = {
