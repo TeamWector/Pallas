@@ -1,4 +1,4 @@
-local common = require('behaviors.warrior.common')
+local common = require('behaviors.wow_retail.warrior.common')
 
 --[[ !TODO
   - Better thunder clap + demo should logic

@@ -1,4 +1,4 @@
-local common = require('behaviors.warrior.common')
+local common = require('behaviors.wow_wrath.warrior.common')
 
 local options = {
   -- The sub menu name
@@ -54,7 +54,8 @@ local function WarriorFuryCombat()
 
   -- Sunder bosses and throw shattering throw
   local sunder = target:GetVisibleAura("Sunder Armor")
-  if not target:HasVisibleAura("Expose Armor") and (target.Classification == 3 or (target.Classification == 1 and target.Level == 82)) and
+  if not target:HasVisibleAura("Expose Armor") and
+      (target.Classification == 3 or (target.Classification == 1 and target.Level == 82)) and
       (not sunder or (sunder.Stacks < 5 or sunder.Remaining < 3000)) and Spell.SunderArmor:CastEx(target) then return end
   if (target.Classification == 3 or (target.Classification == 1 and target.Level == 82)) and sunder and
       sunder.Stacks == 5 and not target:HasVisibleAura("Shattering Throw") and Spell.ShatteringThrow:CastEx(target) then return end
