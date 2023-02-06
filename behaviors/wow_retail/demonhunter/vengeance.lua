@@ -13,8 +13,6 @@ for k, v in pairs(common.widgets) do
     table.insert(options.Widgets, v)
 end
 
-local run = false;
-
 local function TheHunt(target)
     local frailtyAura = target:GetAura("Frailty")
     if frailtyAura and frailtyAura.Stacks > 2 and Spell.TheHunt:CastEx(target) then return end
