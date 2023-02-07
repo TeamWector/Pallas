@@ -95,7 +95,7 @@ local function DemonhunterHavocCombat()
 
     TheHunt(target)
 
-    if not Me:InMeleeRange(target) then
+    if not Me:InMeleeRange(target) and Me:IsFacing(target) then
         if Spell.ThrowGlaive:CastEx(target) then return end
     end
 
@@ -111,6 +111,9 @@ local function DemonhunterHavocCombat()
     BladeDance(target)
     AnnihilationEssenceBreakDebuff(target)
     common:ImmolationAura()
+    if Combat.EnemiesInMeleeRange > 1 then
+        common:UseTrinkets()
+    end
     ThrowGlaiveOvercap(target)
     -- TODO FelRushUnboundChaosBuff function exists, PERHAPS A MESSAGE ON SCREEN 
     AnnihilationRotation(target)
