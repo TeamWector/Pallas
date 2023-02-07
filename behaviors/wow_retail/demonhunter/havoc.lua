@@ -87,8 +87,6 @@ local function FelRushMomentum()
     end
 end
 
-local run = false
-
 local function DemonhunterHavocCombat()
     local target = Combat.BestTarget
     if not target then return end

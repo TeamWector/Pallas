@@ -28,7 +28,7 @@ local function FelDevastation(target)
 end
 
 local function SoulCleave(target)
-    if Me.Power >= 59 and Spell.SoulCleave:CastEx(target) then return end
+    if Me.Power > 100 and Spell.SoulCleave:CastEx(target) then return end
 end
 
 local function DemonSpikes()
@@ -44,10 +44,10 @@ local function FieryBrand(target)
     end
 end
 
-local function SpiritBomb(target)
-    local soulFragmentAura = Me:GetAura("Soul Fragments")
-    if soulFragmentAura and soulFragmentAura.Stacks >= 5 and Me.Power >= 40 then
-        if Spell.SpiritBomb:CastEx(target) then return end
+local function SpiritBomb()
+    local soulFragmentAura = Me:GetVisibleAura("Soul Fragments")
+    if soulFragmentAura and soulFragmentAura.Stacks > 1 and Me.Power >= 40 then
+        if Spell.SpiritBomb:CastEx(Me) then return end
     end
 end
 
@@ -71,7 +71,7 @@ local function DemonhunterVengeanceCombat()
     TheHunt(target)
 
     if not Me:InMeleeRange(target) and Me:IsFacing(target) then
-        ThrowGlaive(target)
+        common:ThrowGlaive(target)
     end
 
     -- only melee spells from here on
@@ -80,7 +80,7 @@ local function DemonhunterVengeanceCombat()
     common:DoInterrupt()
     FieryBrand(target)
     -- todo optional infernalStrike
-    SpiritBomb(target)
+    SpiritBomb()
     common:ImmolationAura()
     FelDevastation(target)
     SoulCarver(target)
