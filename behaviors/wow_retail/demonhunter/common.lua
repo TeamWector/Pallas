@@ -72,6 +72,23 @@ function commonDemonhunter:DoInterrupt()
   return false
 end
 
+function commonDemonhunter:ArcaneTorrent()
+  -- TODO FIX ME to use CastEx
+  if Spell.ArcaneTorrent:Cast(Me) then return end
+end
+
+function commonDemonhunter:ImmolationAura()
+  if Spell.ImmolationAura:CastEx(Me) then return end
+end
+
+function commonDemonhunter:SigilOfFlame(target)
+  if Me.Power < 70 and Spell.SigilOfFlame:CastEx(target) then return end
+end
+
+function commonDemonhunter:ThrowGlaive(target)
+  if Spell.ThrowGlaive:CastEx(target) then return end
+end
+
 function commonDemonhunter:UseTrinkets()
   local items = Me.Equipment
 

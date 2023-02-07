@@ -28,12 +28,12 @@ local function FelDevastation(target)
 end
 
 local function SoulCleave(target)
-    if  Me.Power >= 70 and Spell.SoulCleave:CastEx(target) then return end
+    if Me.Power >= 59 and Spell.SoulCleave:CastEx(target) then return end
 end
 
 local function DemonSpikes()
     -- todo revisit me charges is nil
-    if not Me:GetVisibleAura("Demon Spikes") and Me.HealthPct < 55 and Spell.DemonSpikes.Charges > 0  then
+    if not Me:GetVisibleAura("Demon Spikes") and Me.HealthPct < 55 and Spell.DemonSpikes.Charges > 0 then
         if Spell.DemonSpikes:CastEx() then return end
     end
 end
@@ -51,10 +51,6 @@ local function SpiritBomb(target)
     end
 end
 
-local function SigilOfFlame(target)
-    if Me.Power < 70 and Spell.SigilOfFlame:CastEx(target) then return end
-end
-
 -- Also casts Shear if Fracture is not known
 local function Fracture(target)
     if Spell.Fracture.IsKnown then
@@ -64,15 +60,18 @@ local function Fracture(target)
     end
 end
 
+
+
 local function DemonhunterVengeanceCombat()
+
     local target = Combat.BestTarget
     if not target then return end
 
     DemonSpikes()
     TheHunt(target)
 
-    if not Me:InMeleeRange(target) then
-        if Spell.ThrowGlaive:CastEx(target) then return end
+    if not Me:InMeleeRange(target) and Me:IsFacing(target) then
+        ThrowGlaive(target)
     end
 
     -- only melee spells from here on
@@ -82,7 +81,7 @@ local function DemonhunterVengeanceCombat()
     FieryBrand(target)
     -- todo optional infernalStrike
     SpiritBomb(target)
-    if Spell.ImmolationAura:CastEx(Me) then return end
+    common:ImmolationAura()
     FelDevastation(target)
     SoulCarver(target)
 
@@ -91,9 +90,10 @@ local function DemonhunterVengeanceCombat()
     end
 
     SoulCleave(target)
-    SigilOfFlame(target)
+    common:SigilOfFlame(target)
     Fracture(target)
-    if Spell.ThrowGlaive:CastEx(target) then return end
+    common:ThrowGlaive(target)
+    common:ArcaneTorrent()
 end
 
 local behaviors = {
