@@ -46,7 +46,7 @@ end
 
 local function SpiritBomb()
     local soulFragmentAura = Me:GetVisibleAura("Soul Fragments")
-    if soulFragmentAura and soulFragmentAura.Stacks > 1 and Me.Power >= 40 then
+    if soulFragmentAura and soulFragmentAura.Stacks > 2 and Me.Power >= 40 then
         if Spell.SpiritBomb:CastEx(Me) then return end
     end
 end
@@ -63,9 +63,11 @@ end
 
 
 local function DemonhunterVengeanceCombat()
+    if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
     local target = Combat.BestTarget
     if not target then return end
+    if Me.IsCastingOrChanneling then return end
 
     DemonSpikes()
     TheHunt(target)

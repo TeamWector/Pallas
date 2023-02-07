@@ -88,8 +88,11 @@ local function FelRushMomentum()
 end
 
 local function DemonhunterHavocCombat()
+    if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
+
     local target = Combat.BestTarget
     if not target then return end
+    if Me.IsCastingOrChanneling then return end
 
     TheHunt(target)
 

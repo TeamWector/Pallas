@@ -15,7 +15,7 @@ for k, v in pairs(common.widgets) do
 end
 
 local function IceBlock()
-    if Me.Health < 19 and not Me:HasVisibleAura("Hypothermia") then
+    if Me.HealthPct < 19 and not Me:HasVisibleAura("Hypothermia") then
         if Spell.IceBlock:CastEx(Me) then return end
     end
 end
@@ -76,10 +76,13 @@ end
 
 local function MageFrostCombat()
 
+    if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
+
     IceBlock()
 
     local target = Combat.BestTarget
     if not target then return end
+    if Me.IsCastingOrChanneling then return end
 
     IceBarrier()
 
