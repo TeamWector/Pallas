@@ -1,5 +1,5 @@
 -- TODO
--- local common = require('behaviors.wow_retail.mage.common')
+local common = require('behaviors.wow_retail.mage.common')
 
 local options = {
     -- The sub menu name
@@ -10,24 +10,18 @@ local options = {
     }
 }
 
--- TODO
--- for k, v in pairs(common.widgets) do
---     table.insert(options.Widgets, v)
--- end
-local function ArcaneIntellect()
-    if not Me:HasVisibleAura("Arcane Intellect") then
-        if Spell.ArcaneIntellect:CastEx(Me) then return end
-    end
+for k, v in pairs(common.widgets) do
+    table.insert(options.Widgets, v)
 end
 
 local function IceBlock()
-    if Me.Health < 19 and not Me:HasAura("Hypothermia") then
+    if Me.Health < 19 and not Me:HasVisibleAura("Hypothermia") then
         if Spell.IceBlock:CastEx(Me) then return end
     end
 end
 
 local function IceBarrier()
-    if not Me:HasAura("Ice Barrier") then
+    if not Me:HasVisibleAura("Ice Barrier") then
         if Spell.IceBarrier:CastEx(Me) then return end
     end
 end
@@ -37,13 +31,14 @@ local function IceNova(target)
 end
 
 local function RuneOfPower()
-    if (not Spell.IcyVeins.IsKnown or Spell.IcyVeins:CooldownRemaining() > 10000) and not Me:HasAura("Rune of Power") and not Me:IsMoving() then
+    if (not Spell.IcyVeins.IsKnown or Spell.IcyVeins:CooldownRemaining() > 10000) and not Me:HasVisibleAura("Rune of Power") and
+        not Me:IsMoving() then
         if Spell.RuneOfPower:CastEx(Me) then return end
     end
 end
 
 local function IcyVeins()
-    if not Me:HasAura("Rune of Power") then
+    if not Me:HasVisibleAura("Rune of Power") then
         if Spell.IcyVeins:CastEx(Me) then return end
     end
 end
@@ -67,7 +62,7 @@ local function CometStorm(target)
 end
 
 local function IceLance(target)
-    if (target:HasAura("Winter's Chill") or Me:HasAura("Fingers of Frost")) and Spell.IceLance:CastEx(target) then return end
+    if (target:HasAura("Winter's Chill") or Me:HasVisibleAura("Fingers of Frost")) and Spell.IceLance:CastEx(target) then return end
 end
 
 local function Frostbolt(target)
@@ -76,7 +71,7 @@ local function Frostbolt(target)
 end
 
 local function MageRest()
-    ArcaneIntellect()
+    common:ArcaneIntellect()
 end
 
 local function MageFrostCombat()
