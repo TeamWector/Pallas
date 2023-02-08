@@ -32,7 +32,7 @@ end
 
 local function RuneOfPower()
     if (not Spell.IcyVeins.IsKnown or Spell.IcyVeins:CooldownRemaining() > 10000) and not Me:HasVisibleAura("Rune of Power") and
-        not Me:IsMoving() then
+        (not Me:IsMoving()) then
         if Spell.RuneOfPower:CastEx(Me) then return end
     end
 end
@@ -62,7 +62,7 @@ local function CometStorm(target)
 end
 
 local function IceLance(target)
-    if (target:HasAura("Winter's Chill") or Me:HasVisibleAura("Fingers of Frost")) and Spell.IceLance:CastEx(target) then return end
+    if (target:HasAura("Winter's Chill") or Me:HasVisibleAura("Fingers of Frost") or (Me:IsMoving())) and Spell.IceLance:CastEx(target) then return end
 end
 
 local function Frostbolt(target)
@@ -79,6 +79,7 @@ local function MageFrostCombat()
     if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
     IceBlock()
+
 
     local target = Combat.BestTarget
     if not target then return end
