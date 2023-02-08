@@ -1,22 +1,45 @@
 local options = {
-  -- The sub menu name
-  Name = "Druid (Resto)",
-
-  -- widgets
-  Widgets = {
-    {
-      type = "checkbox",
-      uid = "DruidRestoDPS",
-      text = "Enable DPS",
-      default = false
-    },
-    {
-      type = "checkbox",
-      uid = "DruidRestoEfflorescence",
-      text = "Use Efflorescence (experimental)",
-      default = false
+    -- The sub menu name
+    Name = "Druid (Resto)",
+    -- widgets
+    Widgets = {
+        {
+            type = "checkbox",
+            uid = "DruidRestoDPS",
+            text = "Enable DPS",
+            default = false
+        },
+        {
+            type = "checkbox",
+            uid = "DruidRestoEfflorescence",
+            text = "Use Efflorescence (experimental)",
+            default = false
+        },
+        {
+            type = "checkbox",
+            uid = "DruidRestoOvergrowth",
+            text = "Use Overgrowth",
+            default = false
+        },
+        {
+            type = "checkbox",
+            uid = "DruidRestoTranquility",
+            text = "Use Tranquility",
+            default = false
+        },
+        {
+            type = "checkbox",
+            uid = "DruidRestoConvoke",
+            text = "Use Convoke",
+            default = false
+        },
+        {
+            type = "checkbox",
+            uid = "DruidInnervate",
+            text = "Use Innervate when mana low",
+            default = false
+        }
     }
-  }
 }
 
 local function CalculateNearbyFriendlies(loc, range)
@@ -130,7 +153,9 @@ local function DruidRestoHeal()
   if (Me.MovementFlags & MovementFlags.Flying) > 0 then return end
 
   if Me.ShapeshiftForm == ShapeshiftForm.Bear or
-      Me.ShapeshiftForm == ShapeshiftForm.DireBear then return end
+      Me.ShapeshiftForm == ShapeshiftForm.DireBear then
+    return
+  end
 
   if Me.ShapeshiftForm ~= ShapeshiftForm.Travel then
 
@@ -164,23 +189,33 @@ local function DruidRestoHeal()
     local u = v.Unit
     local prio = v.Priority
 
-    if wildgrowth and Spell.WildGrowth:CastEx(u) then return end
 
+    -- TODO convoke and tranq logic need to take into account Multiple people low
+    if Settings.DruidRestoOvergrowth and u.HealthPct < 25 and Spell.Overgrowth:CastEx(u) then return end
     if u.HealthPct < 50 and Spell.CenarionWard:CastEx(u) then return end
     if u.HealthPct < 50 and (u:HasBuffByMe("Rejuvenation") or u:HasBuffByMe("Regrowth")) and
-        Spell.Swiftmend:CastEx(u, SpellCastExFlags.NoUsable) then return end
+        Spell.Swiftmend:CastEx(u, SpellCastExFlags.NoUsable) then
+      return
+    end
+
+    if Settings.DruidInnervate and Me.PowerPct < 25 and Spell.Innervate:CastEx(Me) then return end
+    if wildgrowth and Spell.WildGrowth:CastEx(u) then return end
+
     -- fix ugly
     if Me.ShapeshiftForm == ShapeshiftForm.Cat then
       if u.HealthPct < 80 and not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
     else
       if u.HealthPct < 92 and not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
     end
+    if u.HealthPct < 45 and Spell.AdaptiveSwarm:CastEx(u) then return end
 
     -- Max level uses Nourish as filler, low level uses Regrowth
     if Spell.Nourish.IsKnown then
       if u.HealthPct < 70 and
           (u:HasBuffByMe("Rejuvenation") or u:HasBuffByMe("Regrowth") or u:HasBuffByMe("Wild Growth") or
-              u:HasBuffByMe("Lifebloom")) and Spell.Nourish:CastEx(u) then return end
+          u:HasBuffByMe("Lifebloom")) and Spell.Nourish:CastEx(u) then
+        return
+      end
     else
       if u.HealthPct < 70 and (not u:HasBuffByMe("Regrowth") or u.HealthPct < 60) and Spell.Regrowth:CastEx(u) then return end
     end
@@ -196,7 +231,6 @@ local function DruidRestoHeal()
     end
   end
   ]]
-
   for _, v in pairs(Heal.Tanks) do
     ---@type WoWUnit
     local u = v.Unit
@@ -224,8 +258,8 @@ local function DruidRestoHeal()
 end
 
 return {
-  Options = options,
-  Behaviors = {
-    [BehaviorType.Heal] = DruidRestoHeal,
-  }
+    Options = options,
+    Behaviors = {
+        [BehaviorType.Heal] = DruidRestoHeal,
+    }
 }
