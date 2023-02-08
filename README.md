@@ -1,8 +1,8 @@
-# Pallas beta
+# Pallas Beta
 
 Currently in BETA!
 
-Pallas is a general purpose PvE behavior script aimed to support all classes and specializations for Wrath of the Lich King Classic. PvP is not officially supported!
+Pallas is a general purpose PvE behavior script aimed to support all classes and specializations for Dragonflight and Wrath of the Lich King Classic. PvP is not officially supported!
 
 ## Prerequisites
 
@@ -10,11 +10,41 @@ The only prerequisite is having a working copy of Wector and credentials to use 
 
 ## Installing
 
-Download this repository using the method of your liking then place it into the scripts directory at the root of Wector. Optionally rename the Pallas folder from `Pallas-master` to `Pallas` if you cloned the master branch.
+Download this repository using the method of your liking then place it into the scripts directory at the root of Wector. Optionally rename the Pallas folder from `Pallas-master` to `Pallas` if you download the master branch in zip format.
 
-After installation the path to Pallas will be `<Wector root>/scripts/Pallas`
+After installation the path to Pallas should be `<Wector root>/scripts/Pallas`
 
-## Status
+## Status (Dragonflight)
+
+:x: Not supported\
+:large_blue_diamond: Kinda supported\
+:heavy_check_mark: Fully supported
+
+|                   |                      |                   |                      |                   |                      |
+|-------------------|:--------------------:|-------------------|:--------------------:|-------------------|:--------------------:|
+| **Death Knight**  |                      | **Mage**          |                      | **Shaman**        |                      |
+| Blood             |         :x:          | Arcane            |         :x:          | Elemental         |         :x:          |
+| Frost             |         :x:          | Fire              |         :x:          | Enhancement       |         :x:          |
+| Unholy            |         :x:          | Frost             | :large_blue_diamond: | Restoration       |         :x:          |
+| **Demon Hunter**  |                      | **Monk**          |                      | **Warlock**       |                      |
+| Havoc             | :large_blue_diamond: | Brewmaster        |         :x:          | Affliction        |         :x:          |
+| Vengeance         | :large_blue_diamond: | Mistweaver        |         :x:          | Demonology        |         :x:          |
+|                   |                      | Windwalker        |         :x:          | Destruction       |         :x:          |
+| **Druid**         |                      | **Paladin**       |                      | **Warrior**       |                      |
+| Balance           |         :x:          | Holy              |         :x:          | Arms              |         :x:          |
+| Feral             | :large_blue_diamond: | Protection        |         :x:          | Fury              |  :heavy_check_mark:  |
+| Guardian          |         :x:          | Retribution       |         :x:          | Protection        | :large_blue_diamond: |
+| Restoration       | :large_blue_diamond: |                   |                      |                   |                      |
+| **Evoker**        |                      | **Priest**        |                      |                   |                      |
+| Devastation       |         :x:          | Discipline        |         :x:          |                   |                      |
+| Preservation      |         :x:          | Holy              |         :x:          |                   |                      |
+|                   |                      | Shadow            |         :x:          |                   |                      |
+| **Hunter**        |                      | **Rogue**         |                      |                   |                      |
+| Beast Mastery     |         :x:          | Assassination     |         :x:          |                   |                      |
+| Marksmanship      |         :x:          | Outlaw            |         :x:          |                   |                      |
+| Survival          |         :x:          | Sublety           |         :x:          |                   |                      |
+
+## Status (Wrath)
 
 :x: Not supported\
 :large_blue_diamond: Kinda supported\
@@ -23,17 +53,17 @@ After installation the path to Pallas will be `<Wector root>/scripts/Pallas`
 |                   |                      |                   |                      |                   |                      |
 |-------------------|:--------------------:|-------------------|:--------------------:|-------------------|:--------------------:|
 | **Death Knight**  |                      | **Mage**          |                      | **Rogue**         |                      |
-| Blood             |         :x:          | Arcane            |         :x:          | Assassination     |         :x:          |
+| Blood             | :large_blue_diamond: | Arcane            |         :x:          | Assassination     |         :x:          |
 | Frost             |         :x:          | Fire              |         :x:          | Combat            | :large_blue_diamond: |
-| Unholy            |  :heavy_check_mark:  | Frost             |         :x:          | Sublety           |         :x:          |
+| Unholy            |  :heavy_check_mark:  | Frost             | :large_blue_diamond: | Sublety           |         :x:          |
 | **Druid**         |                      | **Paladin**       |                      | **Shaman**        |                      |
-| Balance           |         :x:          | Holy              |  :heavy_check_mark:  | Restoration       |         :x:          |
-| Feral             |         :x:          | Protection        | :large_blue_diamond: | Enhancement       |         :x:          |
-| Restoration       |         :x:          | Restribution      |         :x:          | Elemental         |         :x:          |
+| Balance           | :large_blue_diamond: | Holy              |  :heavy_check_mark:  | Restoration       |         :x:          |
+| Feral             |         :x:          | Protection        | :large_blue_diamond: | Enhancement       | :large_blue_diamond: |
+| Restoration       |  :heavy_check_mark:  | Restribution      | :large_blue_diamond: | Elemental         |         :x:          |
 | **Hunter**        |                      | **Priest**        |                      | **Warlock**       |                      |
-| Beast Mastery     |         :x:          | Discipline        | :large_blue_diamond: | Affliction        | :large_blue_diamond: |
+| Beast Mastery     | :large_blue_diamond: | Discipline        | :large_blue_diamond: | Affliction        | :large_blue_diamond: |
 | Masksmanship      |         :x:          | Holy              | :large_blue_diamond: | Demonology        |         :x:          |
-| Survival          |         :x:          | Shadow            |         :x:          | Destruction       |         :x:          |
+| Survival          |         :x:          | Shadow            | :large_blue_diamond: | Destruction       |         :x:          |
 | **Warrior**       |                      |                   |                      |                   |                      |
 | Arms              |  :heavy_check_mark:  |                   |                      |                   |                      |
 | Fury              |  :heavy_check_mark:  |                   |                      |                   |                      |
@@ -43,4 +73,4 @@ After installation the path to Pallas will be `<Wector root>/scripts/Pallas`
 
 Pallas is a community driven script for Wector, therefore it rests on contributions from users to keep alive and well. If you wish to contribute to this project there are some things you need to consider.
 
-Please read [CONTRIBUTING.md](CONTRIBUTE.md) for details on our code of conduct, the process for submitting pull requests to us, and recommended coding styles.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, the process for submitting pull requests to us, and recommended coding styles.
