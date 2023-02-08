@@ -1,3 +1,5 @@
+---@diagnostic disable: duplicate-set-field
+
 Pallas = {}
 Pallas.EventListener = wector.FrameScript:CreateListener()
 Pallas.EventListener:RegisterEvent('PLAYER_ENTERING_WORLD')

@@ -2,12 +2,6 @@ local gatherables = require("data.gatherables")
 local herbs, ores, treasures = gatherables.herb, gatherables.ore, gatherables.treasure
 local colors = require("data.colors")
 
-local objectTypes = {
-    herb = colors.green,
-    vein = colors.orange,
-    treasure = colors.silver
-}
-
 local options = {
     Name = "Radar",
 
@@ -39,8 +33,8 @@ local options = {
         },
         {
             type = "checkbox",
-            uid = "ExtraRadarTrackAll",
-            text = "Track All Quests",
+            uid = "ExtraRadarTrackQuests",
+            text = "Track QuestObjects",
             default = false
         },
         {
@@ -60,8 +54,24 @@ local options = {
             uid = "ExtraRadarDrawDistance",
             text = "Draw Distance",
             default = false
-        }
+        },
+        {
+            type = "slider",
+            uid = "ExtraRadarLoadDistance",
+            text = "Radar Load Distance",
+            default = 200,
+            min = 1,
+            max = 200
+        },
     }
+}
+local objectColors = {
+    ["herb"] = colors.green,
+    ["vein"] = colors.orange,
+    ["treasure"] = colors.silver,
+    ["rare"] = colors.purple,
+    ["tracked"] = colors.white,
+    ["quests"] = colors.pink
 }
 
 local manuallytracked = {}
@@ -84,8 +94,8 @@ RadarListener:RegisterEvent('CONSOLE_MESSAGE')
 
 -- Easy way of manually adding target i guess..
 function RadarListener:CONSOLE_MESSAGE(msg)
-    local isTrackMessage = string.find(msg, "track")
-    local isClearTrackedMessage = string.find(msg, "cleartracked")
+    local isTrackMessage = string.match(msg, "track")
+    local isClearTrackedMessage = string.match(msg, "clearmanual")
 
     if isTrackMessage then
         if Me.Target then
@@ -94,7 +104,6 @@ function RadarListener:CONSOLE_MESSAGE(msg)
     end
 
     if isClearTrackedMessage then
-        wector.Console:Log("Cleared tracked list")
         manuallytracked = {}
     end
 end
@@ -108,130 +117,116 @@ local function IsOffscreen(object)
     return finish.x == -1.0 or finish.y == 1.0
 end
 
+---@param t string object type (rare, quest, herb, ore, treasure, tracked)
+---@param o WoWObject WoWObject to check
+function AddToScreenList(o, t)
+    local list = IsOffscreen(o) and offscreen or onscreen
+    table.insert(list, { object = o, type = t })
+end
+
 local function CollectVisuals()
     local objects = wector.Game.GameObjects
     local units = wector.Game.Units
-    local track_herbs = Settings.ExtraRadarTrackHerbs
-    local track_ores = Settings.ExtraRadarTrackOres
-    local track_treasures = Settings.ExtraRadarTrackTreasures
+    -- Settings
+    local settings = {
+        trackHerbs = Settings.ExtraRadarTrackHerbs,
+        trackOres = Settings.ExtraRadarTrackOres,
+        trackTreasures = Settings.ExtraRadarTrackTreasures,
+        trackRares = Settings.ExtraRadarTrackRares,
+        trackQuests = Settings.ExtraRadarTrackQuests,
+        trackManual = table.length(manuallytracked) > 0,
+        loadRange = Settings.ExtraRadarLoadDistance,
+    }
 
     onscreen = {}
     offscreen = {}
 
-    local function AddToScreenList(object)
-        local isoffscreen = IsOffscreen(object)
-        if isoffscreen then
-            table.insert(offscreen, object)
-        else
-            table.insert(onscreen, object)
-        end
-    end
-
     for _, unit in pairs(units) do
-        local distance = unit.Position:DistanceSq(Me.Position)
-        local israre = unit.Classification == Classification.Rare
-        if distance < 200 and not unit.Dead then
-            if IsTracked(unit.Name) or (israre and Settings.ExtraRadarTrackRares) then
-                AddToScreenList(unit)
+        local distance = Me.Position:DistanceSq(unit.Position)
+        if distance <= settings.loadRange then
+            if unit.Classification == Classification.Rare and settings.trackRares then
+                AddToScreenList(unit, "rare")
+            elseif IsTracked(unit.Name) and settings.trackManual then
+                AddToScreenList(unit, "tracked")
             end
         end
     end
 
     for _, object in pairs(objects) do
-        local distance = object.Position:DistanceSq(Me.Position)
-        local interactable = object.DynamicFlags & 0x04 > 1
+        local distance = Me.Position:DistanceSq(object.Position)
+        if distance <= settings.loadRange then
+            local isQuest = object.DynamicFlags & 0x04 > 1 and settings.trackQuests
+            local isHerb = herbs[object.EntryId] and settings.trackHerbs
+            local isOre = ores[object.EntryId] and settings.trackOres
+            local isTreasure = treasures[object.EntryId] and settings.trackTreasures
 
-        if distance > 200 then goto continue end
-
-        if Settings.ExtraRadarTrackAll and interactable then
-            AddToScreenList(object)
-        end
-
-        local gatherables_list = { herbs, ores, treasures }
-        local track_gatherables = { track_herbs, track_ores, track_treasures }
-
-        for index, gatherable in pairs(gatherables_list) do
-            if track_gatherables[index] and gatherable[object.EntryId] then
-                AddToScreenList(object)
+            if isQuest then
+                AddToScreenList(object, "quest")
+            elseif isHerb then
+                AddToScreenList(object, "herb")
+            elseif isOre then
+                AddToScreenList(object, "vein")
+            elseif isTreasure then
+                AddToScreenList(object, "treasure")
             end
         end
-        ::continue::
     end
 end
 
-local function DrawColoredLine(object, thick)
+local function DrawColoredLines()
     if not Settings.ExtraRadarDrawLines then return end
 
-    local pos = object.Position
-    local start = World2Screen(Me.Position)
-    local finish = World2Screen(Vec3(pos.x, pos.y, pos.z + object.DisplayHeight))
-    local color = colors.white
-    local isRare = object.IsUnit and object.Classification == Classification.Rare
+    for _, o in pairs(onscreen) do
+        local object = o.object
+        local type = o.type
+        local pos = object.Position
+        local start = World2Screen(Me.Position)
+        local finish = World2Screen(Vec3(pos.x, pos.y, pos.z + object.DisplayHeight))
+        local color = objectColors[type] or colors.white
 
-    local gatherablesTables = { herbs, ores, treasures }
+        DrawLine(start, finish, color, 2)
+    end
+end
 
-    for _, gatherables in ipairs(gatherablesTables) do
-        local objectType = gatherables[object.EntryId]
-        if objectType then
-            color = objectTypes[objectType]
+local function DrawColoredText()
+    local add = 1
+    local max = 4
+    local count = 0
+    local mepos = Me.Position
+
+    for _, o in pairs(offscreen) do
+        if count >= max then break end
+        local object = o.object
+        local textpos = World2Screen(Vec3(mepos.x, mepos.y, mepos.z + add))
+        local text = "Not On Screen: " ..
+            object.Name .. ", Distance: " .. math.floor(Me.Position:DistanceSq(object.Position)) .. " yards"
+
+        DrawText(textpos, colors.teal, text)
+        add = add + 0.4
+        count = count + 1
+    end
+
+    for _, o in pairs(onscreen) do
+        local object = o.object
+        local type = o.type
+        local textpos = World2Screen(Vec3(object.Position.x, object.Position.y,
+            object.Position.z + object.DisplayHeight + 1))
+        local text = "[" .. string.upper(type:sub(1, 1)) .. "] " .. object.Name
+
+        if Settings.ExtraRadarDrawDistance then
+            text = text .. ", Distance: " .. math.floor(Me.Position:DistanceSq(object.Position)) .. "yd"
         end
-    end
 
-    if isRare then
-        color = colors.purple
+        DrawText(textpos, colors.yellow, text)
     end
-
-    DrawLine(start, finish, color, thick)
 end
 
 local function Radar()
     if not Settings.ExtraRadar then return end
 
     CollectVisuals()
-
-    local add = 1
-    local max = 4
-    local count = 0
-    local mepos = Me.Position
-    local text, color, tracked, interactable, israre, textpos
-
-    for _, o in pairs(onscreen) do
-        israre = o.IsUnit and o.Classification == Classification.Rare
-        interactable = o.DynamicFlags & 0x04 > 1
-        tracked = IsTracked(o.Name)
-
-        if israre then
-            text = "[R] " .. o.Name
-        elseif interactable then
-            text = "[Q] " .. o.Name
-        elseif tracked then
-            text = "[T] " .. o.Name
-        else
-            text = o.Name
-        end
-
-        if Settings.ExtraRadarDrawDistance then
-            text = text .. " [" .. math.floor(Me:GetDistance(o)) .. "yd]"
-        end
-
-        textpos = World2Screen(Vec3(o.Position.x, o.Position.y, o.Position.z + o.DisplayHeight + 1))
-        color = colors.yellow
-
-        DrawColoredLine(o, 2.0)
-        DrawText(textpos, color, text)
-    end
-
-    for _, o in pairs(offscreen) do
-        if count >= max then break end
-
-        textpos = World2Screen(Vec3(mepos.x, mepos.y, mepos.z + add))
-        color = colors.teal
-        text = "Not On Screen: " .. o.Name .. ", Distance: " .. math.floor(Me:GetDistance(o)) .. " yards"
-
-        DrawText(textpos, color, text)
-        add = add + 0.4
-        count = count + 1
-    end
+    DrawColoredText()
+    DrawColoredLines()
 end
 
 local behaviors = {
