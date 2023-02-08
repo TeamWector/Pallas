@@ -47,6 +47,7 @@ local function CalculateEfflorescencePosition()
       local from = Vec3(x, y, origin.z)
       local to = Vec3(x, y, 0.0)
       local hitflags = TraceLineHitFlags.WmoCollision | TraceLineHitFlags.Terrain
+      ---@diagnostic disable-next-line: param-type-mismatch
       local intersected, result = wector.World:TraceLineWithResult(from, to, hitflags)
       if intersected then
         -- XXX: zdelta is bogus sometimes which screws everything up
@@ -92,16 +93,31 @@ local function DruidRestoDamage()
     if Me:InMeleeRange(target) and Me:IsFacing(target) and Spell.CatForm:CastEx(Me) then return end
   end
 
-  if Me.ShapeshiftForm == ShapeshiftForm.Cat then
+  if Me.ShapeshiftForm == ShapeshiftForm.Cat and Me:InMeleeRange(target) and Me:IsFacing(target) then
     if not target:HasDebuffByMe("Rake") and Spell.Rake:CastEx(target) then return end
     if not target:HasDebuffByMe("Thrash") and Spell.Thrash:CastEx(target) then return end
-    if Me:GetPowerByType(PowerType.ComboPoints) == 5 and Spell.FerociousBite:CastEx(target) then return end
+    if Me:GetPowerByType(PowerType.ComboPoints) == 5 then
+      local rip = target:GetAuraByMe("Rip")
+      if not rip and target:TimeToDeath() > 12 and Spell.Rip:CastEx(target) then return end
+      if Spell.FerociousBite:CastEx(target) then return end
+    end
     if #target:GetUnitsAround(10) > 2 then
       if Spell.Swipe:CastEx(target) then return end
     else
       if Spell.Shred:CastEx(target) then return end
     end
   end
+end
+
+local function FindAdaptiveSwarm()
+  local units = wector.Game:GetObjectsByFlag(ObjectTypeFlag.Unit)
+  for _, v in pairs(units) do
+    local u = v.ToUnit
+    if not u then return false end
+    local aura = u:GetVisibleAura("Adaptive Swarm")
+    if aura and aura.HasCaster and aura.Caster == Me.ToUnit then return true end
+  end
+  return false
 end
 
 local efflorescence_time = 0
@@ -121,17 +137,22 @@ local function DruidRestoHeal()
   end
 
   local wildgrowth = false
-  if table.length(Heal.PriorityList) > 3 then
+  if table.length(Heal.PriorityList) >= 2 then
     wildgrowth = true
   end
 
   if Settings.DruidRestoEfflorescence then
     -- XXX: Testing, very buggy right now
-    if wildgrowth and wector.Game.Time - efflorescence_time > 15000 then
+    -- XXX: Move efflorescence if new position found with more friendlies
+    -- XXX: Remove time constraint and only rely on how many are inside it
+    -- XXX: Only place efflorescence if there are enemies nearby
+    local time_since_last_efflo = wector.Game.Time - efflorescence_time
+    if wildgrowth and time_since_last_efflo > 15000 then
       local efflo_pos = CalculateEfflorescencePosition()
-      if efflo_pos.x ~= 0.0 and efflorescence_pos:DistanceSq(efflo_pos) > 30 then
+      if efflo_pos.x ~= 0.0 and (efflorescence_pos:DistanceSq(efflo_pos) > 30 or time_since_last_efflo > 15000) then
         if Spell.Efflorescence:CastEx(efflo_pos) then
           efflorescence_time = wector.Game.Time
+          efflorescence_pos = efflo_pos
           return
         end
       end
@@ -145,11 +166,15 @@ local function DruidRestoHeal()
 
     if wildgrowth and Spell.WildGrowth:CastEx(u) then return end
 
-
     if u.HealthPct < 50 and Spell.CenarionWard:CastEx(u) then return end
     if u.HealthPct < 50 and (u:HasBuffByMe("Rejuvenation") or u:HasBuffByMe("Regrowth")) and
         Spell.Swiftmend:CastEx(u, SpellCastExFlags.NoUsable) then return end
-    if u.HealthPct < 92 and not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
+    -- fix ugly
+    if Me.ShapeshiftForm == ShapeshiftForm.Cat then
+      if u.HealthPct < 80 and not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
+    else
+      if u.HealthPct < 92 and not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
+    end
 
     -- Max level uses Nourish as filler, low level uses Regrowth
     if Spell.Nourish.IsKnown then
@@ -177,14 +202,20 @@ local function DruidRestoHeal()
     local u = v.Unit
 
     -- this is a mess but works
+    if Me.ShapeshiftForm == ShapeshiftForm.Cat and u.HealthPct > 80 then goto continue end
+
     local lifebloom = u:GetAuraByMe("Lifebloom")
     if not lifebloom and Spell.Lifebloom:CastEx(u) then return end
+
+    if not FindAdaptiveSwarm() and Spell.AdaptiveSwarm:CastEx(u) then return end
     --if lifebloom and u.InCombat then
     --  if u.HealthPct < 90 and lifebloom.Stacks < 1 and Spell.Lifebloom:CastEx(u) then return end
     --  if u.HealthPct < 80 and lifebloom.Stacks < 2 and Spell.Lifebloom:CastEx(u) then return end
     --  if u.HealthPct < 70 and lifebloom.Stacks < 3 and Spell.Lifebloom:CastEx(u) then return end
     --  --if lifebloom.Remaining < 2500 and u.HealthPct > 70 and Spell.Lifebloom:CastEx(u) then return end
     --end
+
+    ::continue::
   end
 
   if Settings.DruidRestoDPS then
