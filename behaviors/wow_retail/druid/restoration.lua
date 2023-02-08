@@ -36,7 +36,7 @@ local options = {
         {
             type = "checkbox",
             uid = "DruidInnervate",
-            text = "Use Innervate when mana low",
+            text = "Use Innervate when mana low (experimental)",
             default = false
         }
     }
@@ -198,6 +198,7 @@ local function DruidRestoHeal()
       return
     end
 
+    -- TODO fix innervate, but if you trigger the CD. GG
     if Settings.DruidInnervate and Me.PowerPct < 25 and Spell.Innervate:CastEx(Me) then return end
     if wildgrowth and Spell.WildGrowth:CastEx(u) then return end
 
@@ -207,7 +208,6 @@ local function DruidRestoHeal()
     else
       if u.HealthPct < 92 and not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
     end
-    if u.HealthPct < 45 and Spell.AdaptiveSwarm:CastEx(u) then return end
 
     -- Max level uses Nourish as filler, low level uses Regrowth
     if Spell.Nourish.IsKnown then
