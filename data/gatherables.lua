@@ -54,13 +54,19 @@ local herbs = {
     [375243] = "herb", -- Infurious Bubble Poppy
     [375244] = "herb", -- Frigid Bubble Poppy
     [375245] = "herb", -- Windswept Bubble Poppy
+    [375246] = "herb", -- Decayed Bubble Poppy
+    [381957] = "herb", -- Lush Bubble Poppy
     [384294] = "herb", -- Self-Grown Bubble Poppy
+    [384299] = "herb", -- Self-Grown Decayed Bubble Poppy
     [381154] = "herb", -- Writhebark
     [381196] = "herb", -- Titan-Touched Writhebark
     [381197] = "herb", -- Infurious Writhebark
     [381200] = "herb", -- Frigid Writhebark
     [381199] = "herb", -- Windswept Writhebark
+    [381198] = "herb", -- Decayed Writhebark
+    [381958] = "herb", -- Lush Writhebark
     [384293] = "herb", -- Self-Grown Writhebark
+    [384298] = "herb", -- Self-Grown Decayed Writhebark
 }
 
 local ores = {
