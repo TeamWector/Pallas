@@ -6,3 +6,13 @@ table.length = function(list)
   end
   return len
 end
+
+table.contains = function(tbl, value)
+  for k, v in pairs(tbl) do
+    if value == v then
+      return true
+    end
+  end
+
+  return false
+end
