@@ -1,19 +1,16 @@
 local common = require('behaviors.wow_retail.demonhunter.common')
 
 local options = {
-  -- The sub menu name
-  Name = "Demonhunter (Vengeance)",
-
-  -- widgets  TODO
-  Widgets = {
-  }
+    -- The sub menu name
+    Name = "Demonhunter (Vengeance)",
+    -- widgets  TODO
+    Widgets = {
+    }
 }
 
 for k, v in pairs(common.widgets) do
   table.insert(options.Widgets, v)
 end
-
-local run = false;
 
 local function TheHunt(target)
   local frailtyAura = target:GetAura("Frailty")
@@ -30,14 +27,12 @@ local function FelDevastation(target)
 end
 
 local function SoulCleave(target)
-  local frailtyAura = target:GetAura("Frailty")
-  if frailtyAura and frailtyAura.Remaining > 3000 and Me.Power >= 60 then
-    if Spell.ChaosStrike:CastEx(target) then return end
-  end
+  if Me.Power > 100 and Spell.SoulCleave:CastEx(target) then return end
 end
 
 local function DemonSpikes()
-  if Me.HealthPct < 55 and Spell.DemonSpikes.Charges > 0 then
+  -- todo revisit me charges is nil
+  if not Me:GetVisibleAura("Demon Spikes") and Me.HealthPct < 55 and Spell.DemonSpikes.Charges > 0 then
     if Spell.DemonSpikes:CastEx() then return end
   end
 end
@@ -48,23 +43,36 @@ local function FieryBrand(target)
   end
 end
 
-local function SpiritBomb(target)
-  local soulFragmentAura = Me:GetAura("Soul Fragments")
-  if soulFragmentAura and soulFragmentAura.Stacks >= 5 and Me.Power >= 40 then
-    if Spell.SpiritBomb:CastEx(target) then return end
+local function SpiritBomb()
+  local soulFragmentAura = Me:GetVisibleAura("Soul Fragments")
+  if soulFragmentAura and soulFragmentAura.Stacks > 2 and Me.Power >= 40 then
+    if Spell.SpiritBomb:CastEx(Me) then return end
   end
 end
 
-local function SigilOfFlame(target)
-  if Me.Power < 70 and Spell.SigilOfFlame:CastEx(target) then return end
+-- Also casts Shear if Fracture is not known
+local function Fracture(target)
+  if Spell.Fracture.IsKnown then
+    if Spell.Fracture:CastEx(target) then return end
+  else
+    if Spell.Shear:CastEx(target) then return end
+  end
 end
 
+
+
 local function DemonhunterVengeanceCombat()
+  if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
+
   local target = Combat.BestTarget
   if not target then return end
+  if Me.IsCastingOrChanneling then return end
 
-  if not Me:InMeleeRange(target) then
-    if Spell.ThrowGlaive:CastEx(target) then return end
+  DemonSpikes()
+  TheHunt(target)
+
+  if not Me:InMeleeRange(target) and Me:IsFacing(target) then
+    common:ThrowGlaive(target)
   end
 
   -- only melee spells from here on
@@ -73,27 +81,24 @@ local function DemonhunterVengeanceCombat()
   common:DoInterrupt()
   FieryBrand(target)
   -- todo optional infernalStrike
-  SpiritBomb(target)
+  SpiritBomb()
+  common:ImmolationAura()
   FelDevastation(target)
+  SoulCarver(target)
 
   if Combat.EnemiesInMeleeRange > 1 then
     common:UseTrinkets()
   end
 
   SoulCleave(target)
-  if Spell.ImmolationAura:CastEx(Me) then return end
-  TheHunt(target)
-  SoulCarver(target)
-  SigilOfFlame(target)
-
-  -- Instead of Fracture, works for Shear as well.
-  if Spell.DemonsBite:CastEx(target) then return end
-  if Spell.ThrowGlaive:CastEx(target) then return end
-
+  common:SigilOfFlame(target)
+  Fracture(target)
+  common:ThrowGlaive(target)
+  common:ArcaneTorrent()
 end
 
 local behaviors = {
-  [BehaviorType.Combat] = DemonhunterVengeanceCombat
+    [BehaviorType.Combat] = DemonhunterVengeanceCombat
 }
 
 return { Options = options, Behaviors = behaviors }

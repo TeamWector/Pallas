@@ -1,19 +1,19 @@
-local commonDemonhunter = {}
+local commonMage = {}
 
 --[[ !TODO
   - Everything
 ]]
 
-commonDemonhunter.widgets = {
+commonMage.widgets = {
   {
     type = "checkbox",
-    uid = "DemonhunterCommonTrinket1",
+    uid = "MageCommonTrinket1",
     text = "Use Trinket 1",
     default = false
   },
   {
     type = "checkbox",
-    uid = "DemonhunterCommonTrinket2",
+    uid = "MageCommonTrinket2",
     text = "Use Trinket 2",
     default = false
   },
@@ -22,7 +22,7 @@ commonDemonhunter.widgets = {
 ---
 --- Interrupts melee attackers spell casting if possible, returns true if there is a spell casting on us we cannot interrupt.
 ---@return boolean
-function commonDemonhunter:DoInterrupt()
+function commonMage:DoInterrupt()
   local t1 = Combat.BestTarget
   local t2 = Tank.BestTarget
   local target = t1 and t1 or t2
@@ -38,7 +38,7 @@ function commonDemonhunter:DoInterrupt()
 
     if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:InMeleeRange(u) and Me:IsFacing(u) then
       -- Disrupt
-      if Spell.Disrupt:CastEx(u) then return false end
+      if Spell.Counterspell:CastEx(u) then return false end
     end
 
     ::continue::
@@ -55,8 +55,8 @@ function commonDemonhunter:DoInterrupt()
     if not u.IsInterruptible then goto continue end
 
     if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:InMeleeRange(u) and Me:IsFacing(u) then
-      -- Disrupt
-      if Spell.Disrupt:CastEx(u) then return false end
+      -- Counterspell
+      if Spell.Counterspell:CastEx(u) then return false end
     end
 
     ::continue::
@@ -69,31 +69,20 @@ function commonDemonhunter:DoInterrupt()
   return false
 end
 
-function commonDemonhunter:ArcaneTorrent()
-  -- TODO FIX ME to use CastEx
-  if Spell.ArcaneTorrent:Cast(Me) then return end
+function commonMage:ArcaneIntellect()
+  if not Me:HasVisibleAura("Arcane Intellect") then
+      if Spell.ArcaneIntellect:CastEx(Me) then return end
+  end
 end
 
-function commonDemonhunter:ImmolationAura()
-  if Spell.ImmolationAura:CastEx(Me) then return end
-end
-
-function commonDemonhunter:SigilOfFlame(target)
-  if Me.Power < 70 and Spell.SigilOfFlame:CastEx(target) then return end
-end
-
-function commonDemonhunter:ThrowGlaive(target)
-  if Spell.ThrowGlaive:CastEx(target) then return end
-end
-
-function commonDemonhunter:UseTrinkets()
+function commonMage:UseTrinkets()
   local items = Me.Equipment
 
   local trinket1 = items[EquipSlot.Trinket1]
-  if Settings.DemonhunterCommonTrinket1 and trinket1:UseX() then return end
+  if Settings.MageCommonTrinket1 and trinket1:UseX() then return end
 
   local trinket2 = items[EquipSlot.Trinket2]
-  if Settings.DemonhunterCommonTrinket2 and trinket2:UseX() then return end
+  if Settings.MageCommonTrinket2 and trinket2:UseX() then return end
 end
 
-return commonDemonhunter
+return commonMage
