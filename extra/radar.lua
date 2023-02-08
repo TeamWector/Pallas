@@ -141,7 +141,7 @@ local function CollectVisuals()
   offscreen = {}
 
   for _, unit in pairs(units) do
-    local distance = Me.Position:DistanceSq(unit.Position)
+    local distance = Me.Position:DistanceSq2D(unit.Position)
     if distance <= settings.loadRange then
       if unit.Classification == Classification.Rare and settings.trackRares then
         AddToScreenList(unit, "rare")
@@ -152,7 +152,7 @@ local function CollectVisuals()
   end
 
   for _, object in pairs(objects) do
-    local distance = Me.Position:DistanceSq(object.Position)
+    local distance = Me.Position:DistanceSq2D(object.Position)
     if distance <= settings.loadRange then
       local isQuest = object.DynamicFlags & 0x04 > 1 and settings.trackQuests
       local isHerb = herbs[object.EntryId] and settings.trackHerbs
