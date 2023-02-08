@@ -48,6 +48,19 @@ local herbs = {
     [190176] = "herb", -- Frost Lotus
     [191019] = "herb", -- Adder's Tongue
     [191303] = "herb", -- Firethorn
+    -- Dragonflight
+    [375241] = "herb", -- Bubble Poppy
+    [375242] = "herb", -- Titan-Touched Bubble Poppy
+    [375243] = "herb", -- Infurious Bubble Poppy
+    [375244] = "herb", -- Frigid Bubble Poppy
+    [375245] = "herb", -- Windswept Bubble Poppy
+    [384294] = "herb", -- Self-Grown Bubble Poppy
+    [381154] = "herb", -- Writhebark
+    [381196] = "herb", -- Titan-Touched Writhebark
+    [381197] = "herb", -- Infurious Writhebark
+    [381200] = "herb", -- Frigid Writhebark
+    [381199] = "herb", -- Windswept Writhebark
+    [384293] = "herb", -- Self-Grown Writhebark
 }
 
 local ores = {
