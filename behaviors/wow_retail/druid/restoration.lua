@@ -35,10 +35,28 @@ local options = {
         },
         {
             type = "checkbox",
+            uid = "DruidRestoNaturesSwiftness",
+            text = "Use Natures Swiftness",
+            default = false
+        },
+        {
+            type = "checkbox",
             uid = "DruidInnervate",
             text = "Use Innervate when mana low (experimental)",
             default = false
-        }
+        },
+        {
+            type = "checkbox",
+            uid = "DruidRestoBarkskin",
+            text = "Use Barkskin",
+            default = false
+        },
+        {
+            type = "checkbox",
+            uid = "DruidRestoPvPMode",
+            text = "PVP Enabled - some extra casts",
+            default = false
+        },
     }
 }
 
@@ -189,9 +207,13 @@ local function DruidRestoHeal()
     local u = v.Unit
     local prio = v.Priority
 
-
     -- TODO convoke and tranq logic need to take into account Multiple people low
     if Settings.DruidRestoOvergrowth and u.HealthPct < 25 and Spell.Overgrowth:CastEx(u) then return end
+
+    if Settings.DruidRestoNaturesSwiftness and u.HealthPct < 25 and Spell.NaturesSwiftness:CastEx(Me) then return end
+    -- Dont need to check natures swiftness settings, if you cast it, i'll try use it
+    if u.HealthPct < 35 and Me:GetVisibleAura(132158) and Spell.Regrowth:CastEx(u) then return end
+
     if u.HealthPct < 50 and Spell.CenarionWard:CastEx(u) then return end
     if u.HealthPct < 50 and (u:HasBuffByMe("Rejuvenation") or u:HasBuffByMe("Regrowth")) and
         Spell.Swiftmend:CastEx(u, SpellCastExFlags.NoUsable) then
@@ -199,8 +221,7 @@ local function DruidRestoHeal()
     end
 
     -- TODO fix innervate, but if you trigger the CD. GG
-    if Settings.DruidInnervate and Me.PowerPct < 25 and Spell.Innervate:CastEx(Me) then return end
-    if wildgrowth and Spell.WildGrowth:CastEx(u) then return end
+    if Settings.DruidInnervate and Me:GetPowerPctByType(PowerType.Mana) < 25 and Spell.Innervate:CastEx(Me) then return end
 
     -- fix ugly
     if Me.ShapeshiftForm == ShapeshiftForm.Cat then
@@ -208,6 +229,23 @@ local function DruidRestoHeal()
     else
       if u.HealthPct < 92 and not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
     end
+
+    -- Some PVP stuff AND if there are no tanks, do heals prepared for tanks below
+    if #Heal.Tanks == 0 or Settings.DruidRestoPvPMode then
+      if u.HealthPct < 50 and u:GetAuraByMe("Rejuvenation") and u:GetAuraByMe("Rejuvenation").Remaining < 3000
+          and u:GetAuraByMe("Lifebloom") and u:GetAuraByMe("Lifebloom").Remaining < 3000
+          and Spell.Invigorate:CastEx(u) then
+        return
+      end
+      if u.HealthPct < 50 and (not FindAdaptiveSwarm()) and Spell.AdaptiveSwarm:CastEx(u) then return end
+
+      if Settings.DruidRestoBarkskin and u.HealthPct < 45 and Spell.Barkskin:CastEx(u) then return end
+
+      if u.HealthPct < 85 and not u:GetAuraByMe("Lifebloom") and Spell.Lifebloom:CastEx(u) then return end
+    end
+
+    if u.HealthPct < 65 and wildgrowth and Spell.WildGrowth:CastEx(u) then return end
+
 
     -- Max level uses Nourish as filler, low level uses Regrowth
     if Spell.Nourish.IsKnown then

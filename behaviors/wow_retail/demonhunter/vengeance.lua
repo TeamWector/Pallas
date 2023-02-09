@@ -32,7 +32,7 @@ end
 
 local function DemonSpikes()
   -- todo revisit me charges is nil
-  if not Me:GetVisibleAura("Demon Spikes") and Me.HealthPct < 55 and Spell.DemonSpikes.Charges > 0 then
+  if Me.HealthPct < 55 and Spell.DemonSpikes.Charges > 0 and not Me:GetVisibleAura("Demon Spikes") then
     if Spell.DemonSpikes:CastEx() then return end
   end
 end
