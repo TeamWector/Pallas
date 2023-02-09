@@ -19,7 +19,6 @@ Settings = setmetatable({
 
     return value
   end,
-
   __newindex = function(tbl, key, value)
     local raw = rawget(tbl, key)
     if raw ~= nil then return raw end
@@ -28,7 +27,8 @@ Settings = setmetatable({
     if not char then return end
     local mine = rawget(char, string.format('player%d', Me.Guid.Low))
     if not mine then
-      mine = rawset(char, string.format('player%d', Me.Guid.Low), {})
+      rawset(char, string.format('player%d', Me.Guid.Low), {})
+      mine = rawget(char, string.format('player%d', Me.Guid.Low))
     end
 
     rawset(mine, key, value)
