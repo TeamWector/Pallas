@@ -75,7 +75,7 @@ local function Felblade(target)
   end
 
 local function ChaosStrike(target)
-  if Me.Power > 50 and Spell.ChaosStrike:CastEx(target) then return end
+  if Me.Power > 40 and Spell.ChaosStrike:CastEx(target) then return end
 end
 
 local function FelRushMomentum()
