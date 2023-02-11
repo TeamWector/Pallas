@@ -76,6 +76,7 @@ end
 local function FelRushUnboundChaosBuff()
   if Settings.HavocMomentumDrawText and Me:HasVisibleAura("Unbound Chaos") and Spell.FelRush:CooldownRemaining() == 0 then
     useFelRush = true
+    return
   end
 end
 
@@ -94,6 +95,7 @@ end
 local function FelRushMomentum()
   if Settings.HavocMomentumDrawText and (not Me:HasVisibleAura("Momentum")) and Spell.FelRush:CooldownRemaining() == 0 then
     useFelRush = true
+    return
   end
 end
 
