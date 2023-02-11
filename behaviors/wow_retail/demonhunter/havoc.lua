@@ -1,16 +1,26 @@
 local common = require('behaviors.wow_retail.demonhunter.common')
+local colors = require("data.colors")
 
 local options = {
     -- The sub menu name
     Name = "Demonhunter (Havoc)",
     -- widgets  TODO
     Widgets = {
+        {
+            type = "checkbox",
+            uid = "HavocMomentumDrawText",
+            text = "Tells you when to use fel rush / vengeful retreat",
+            default = true
+        }
     }
 }
 
 for k, v in pairs(common.widgets) do
   table.insert(options.Widgets, v)
 end
+
+local useVengefulRetreat = false
+local useFelRush = false
 
 local function TheHunt(target)
   if Spell.TheHunt:CastEx(target) then return end
@@ -27,8 +37,11 @@ local function EyeBeam(target)
 end
 
 local function VengefulRetreat()
-  if Spell.EssenceBreak:CooldownRemaining() == 0 or Spell.EssenceBreak:CooldownRemaining() > 10000 then
-    if Spell.VengefulRetreat:CastEx(Me) then return end
+  if Settings.HavocMomentumDrawText and Spell.EssenceBreak:CooldownRemaining() == 0 or Spell.EssenceBreak:CooldownRemaining() > 10000 then
+    if Spell.VengefulRetreat:CooldownRemaining() == 0 then
+      useVengefulRetreat = true
+      return
+    end
   end
 end
 
@@ -61,8 +74,8 @@ local function ThrowGlaiveOvercap(target)
 end
 
 local function FelRushUnboundChaosBuff()
-  if Me:HasAura("Unbound Chaos") then
-    if Spell.FelRush:CastEx() then return end
+  if Settings.HavocMomentumDrawText and Me:HasVisibleAura("Unbound Chaos") and Spell.FelRush:CooldownRemaining() == 0 then
+    useFelRush = true
   end
 end
 
@@ -71,25 +84,57 @@ local function AnnihilationRotation(target)
 end
 
 local function Felblade(target)
-    if Me.Power < 70 and Spell.Felblade:CastEx(target) then return end
-  end
+  if Me.Power < 70 and Spell.Felblade:CastEx(target) then return end
+end
 
 local function ChaosStrike(target)
   if Me.Power > 40 and Spell.ChaosStrike:CastEx(target) then return end
 end
 
 local function FelRushMomentum()
-  if not Me:HasVisibleAura("Momentum") then
-    if Spell.FelRush:CastEx() then return end
+  if Settings.HavocMomentumDrawText and (not Me:HasVisibleAura("Momentum")) and Spell.FelRush:CooldownRemaining() == 0 then
+    useFelRush = true
   end
 end
 
+local function DrawInstruction(instruction)
+  local textpos = World2Screen(Vec3(Me.Position.x, Me.Position.y, Me.Position.z + 1))
+  DrawText(textpos, colors.pink, instruction)
+end
+
+local function DrawTextForHavoc()
+  if not (Settings.HavocMomentumDrawText) then return end
+  local message = ""
+  if useVengefulRetreat then
+    message = message .. "  Use VengefulRetreat  "
+  end
+
+  if useFelRush then
+    message = message .. " Use Fel Rush "
+  end
+
+  if useVengefulRetreat and Spell.VengefulRetreat:CooldownRemaining() > 0 then
+    useVengefulRetreat = false
+  end
+
+  if not Me:HasVisibleAura("Unbound Chaos") and Me:HasVisibleAura("Momentum") then
+    useFelRush = false
+  end
+
+  DrawInstruction(message)
+end
+
+
+
 local function DemonhunterHavocCombat()
+  DrawTextForHavoc()
+
   if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
   local target = Combat.BestTarget
   if not target then return end
   if Me.IsCastingOrChanneling then return end
+
   TheHunt(target)
 
   if not Me:InMeleeRange(target) and Me:IsFacing(target) then
@@ -103,11 +148,13 @@ local function DemonhunterHavocCombat()
   DeathSweep()
   EyeBeam(target)
   -- TODO vengefulRetreat logic, function exists, but do you really want to move? PERHAPS A MESSAGE ON SCREEN
+  VengefulRetreat()
   EssenceBreak(target)
   Metamorphosis(target)
   BladeDance()
   AnnihilationEssenceBreakDebuff(target)
   common:ImmolationAura()
+  FelRushUnboundChaosBuff()
   if Combat.EnemiesInMeleeRange > 1 then
     common:UseTrinkets()
   end
@@ -117,6 +164,7 @@ local function DemonhunterHavocCombat()
   common:ThrowGlaive(target)
   Felblade(target)
   ChaosStrike(target)
+  FelRushMomentum()
   common:SigilOfFlame(target)
   common:ArcaneTorrent()
 end
