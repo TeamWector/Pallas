@@ -232,6 +232,7 @@ local function DruidRestoHeal()
 
     -- Some PVP stuff AND if there are no tanks, do heals prepared for tanks below
     if #Heal.Tanks == 0 or Settings.DruidRestoPvPMode then
+      if u.HealthPct < 25 and Spell.Ironbark:CastEx(u) then return end
       if u.HealthPct < 60 and u:GetAuraByMe("Rejuvenation") and u:GetAuraByMe("Rejuvenation").Remaining < 3000
           and u:GetAuraByMe("Lifebloom") and u:GetAuraByMe("Lifebloom").Remaining < 3000
           and Spell.Invigorate:CastEx(u) then
