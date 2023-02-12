@@ -67,10 +67,10 @@ function commonShaman:UseTrinkets()
   local items = Me.Equipment
 
   local trinket1 = items[EquipSlot.Trinket1]
-  if Settings.HunterCommonTrinket1 and trinket1:UseX() then return end
+  if Settings.ShamanCommonTrinket1 and trinket1:UseX() then return end
 
   local trinket2 = items[EquipSlot.Trinket2]
-  if Settings.HunterCommonTrinket2 and trinket2:UseX() then return end
+  if Settings.ShamanCommonTrinket2 and trinket2:UseX() then return end
 end
 
 return commonShaman

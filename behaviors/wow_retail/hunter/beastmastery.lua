@@ -64,10 +64,6 @@ local function PetAttack(target)
     Spell.Claw:CastEx(target)
 end
 
-local function CheckTurtle(Me)
-	
-end
-
 
 local function HunterBeastmasteryCombat()
   
@@ -76,10 +72,6 @@ local function HunterBeastmasteryCombat()
   if Me.Pet == nil then
     common:CallPet(HunterPetChoice)
   end
-  
-
-  -- Check for defensive Usage
-  -- CheckTurtle(Me)
 	
   if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
   local target = Combat.BestTarget
@@ -94,7 +86,6 @@ local function HunterBeastmasteryCombat()
 
   if Me.HealthPct <= Settings.HunterFortitudeoftheBearPercent and fortitudeOfTheBear:CooldownRemaining() < 1 then	
 		if Spell.FortitudeOfTheBear:CastEx(Me) then return end
-    print(fortitudeOfTheBear.Id)
 	end
 
   if Me.HealthPct <= Settings.HunterSurvivaloftheFittestPercent then	
@@ -125,11 +116,10 @@ local function HunterBeastmasteryCombat()
       if (Settings.petChoice ~= 0 and Me.Pet:GetVisibleAura(272790) and Me.Pet:GetVisibleAura(272790).Stacks >= 2)  then
         if Spell.KillCommand:CastEx(target) then return end
       end
+
       if Spell.DireBeast:CastEx(target) then return end
       if Spell.BloodShed:CastEx(target) then return end
       if Spell.DeathChakram:CastEx(target) then return end
-      
-      
       if Spell.CobraShot:CastEx(target) then return end
     end
 
@@ -141,8 +131,6 @@ local function HunterBeastmasteryCombat()
       if (not Me:GetVisibleAura(268877) or Me:GetVisibleAura(268877).Remaining < 1500)  then
         if Spell.Multishot:CastEx(target) then return end
       end
-
-      
     
       if target.HealthPct > 20 then 
         if Spell.KillShot:CastEx(target) then return end
@@ -154,6 +142,7 @@ local function HunterBeastmasteryCombat()
 
       if Spell.BloodShed:CastEx(target) then return end
       if Spell.DeathChakram:CastEx(target) then return end
+
       if (Spell.BestialWrath:CooldownRemaining() < 2000 or Spell.BestialWrath:CooldownRemaining() == 0) and Settings.HunterUseCooldowns then
         common:UseTrinkets()
         if Spell.BloodFury:CastEx(Me) then return end
@@ -161,6 +150,7 @@ local function HunterBeastmasteryCombat()
         if Spell.Fireblood:CastEx(Me) then return end
         if Spell.BestialWrath:CastEx(target) then return end
       end
+
       if Spell.DireBeast:CastEx(target) then return end
       
       if Me.Pet ~= nil then
