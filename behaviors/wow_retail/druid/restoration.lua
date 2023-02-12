@@ -208,11 +208,11 @@ local function DruidRestoHeal()
     local prio = v.Priority
 
     -- TODO convoke and tranq logic need to take into account Multiple people low
-    if Settings.DruidRestoOvergrowth and u.HealthPct < 25 and Spell.Overgrowth:CastEx(u) then return end
+    if Settings.DruidRestoOvergrowth and u.HealthPct < 40 and Spell.Overgrowth:CastEx(u) then return end
 
     if Settings.DruidRestoNaturesSwiftness and u.HealthPct < 25 and Spell.NaturesSwiftness:CastEx(Me) then return end
     -- Dont need to check natures swiftness settings, if you cast it, i'll try use it
-    if u.HealthPct < 35 and Me:GetVisibleAura(132158) and Spell.Regrowth:CastEx(u) then return end
+    if u.HealthPct < 50 and Me:GetVisibleAura(132158) and Spell.Regrowth:CastEx(u) then return end
 
     if u.HealthPct < 50 and Spell.CenarionWard:CastEx(u) then return end
     if u.HealthPct < 50 and (u:HasBuffByMe("Rejuvenation") or u:HasBuffByMe("Regrowth")) and
@@ -232,18 +232,19 @@ local function DruidRestoHeal()
 
     -- Some PVP stuff AND if there are no tanks, do heals prepared for tanks below
     if #Heal.Tanks == 0 or Settings.DruidRestoPvPMode then
-      if u.HealthPct < 50 and u:GetAuraByMe("Rejuvenation") and u:GetAuraByMe("Rejuvenation").Remaining < 3000
+      if u.HealthPct < 25 and Spell.Ironbark:CastEx(u) then return end
+      if u.HealthPct < 60 and u:GetAuraByMe("Rejuvenation") and u:GetAuraByMe("Rejuvenation").Remaining < 3000
           and u:GetAuraByMe("Lifebloom") and u:GetAuraByMe("Lifebloom").Remaining < 3000
           and Spell.Invigorate:CastEx(u) then
         return
       end
-      if u.HealthPct < 50 and (not FindAdaptiveSwarm()) and Spell.AdaptiveSwarm:CastEx(u) then return end
+      if u.HealthPct < 60 and Spell.AdaptiveSwarm:CastEx(u) then return end
 
-      if Settings.DruidRestoBarkskin and u.HealthPct < 45 and Spell.Barkskin:CastEx(u) then return end
+      if Settings.DruidRestoBarkskin and Me.HealthPct < 30 and Spell.Barkskin:CastEx(Me) then return end
 
       if u.HealthPct < 85 and not u:GetAuraByMe("Lifebloom") and Spell.Lifebloom:CastEx(u) then return end
       if Me.ShapeshiftForm == ShapeshiftForm.Bear then
-        if Me.HealthPct < 35 and Spell.FrenziedRegeneration:CastEx(Me) then return end
+        if Me.HealthPct < 45 and Spell.FrenziedRegeneration:CastEx(Me) then return end
       end
     end
 
