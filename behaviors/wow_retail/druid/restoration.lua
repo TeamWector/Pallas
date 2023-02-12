@@ -239,7 +239,7 @@ local function DruidRestoHeal()
       end
       if u.HealthPct < 60 and Spell.AdaptiveSwarm:CastEx(u) then return end
 
-      if Settings.DruidRestoBarkskin and u.HealthPct < 45 and Spell.Barkskin:CastEx(u) then return end
+      if Settings.DruidRestoBarkskin and Me.HealthPct < 30 and Spell.Barkskin:CastEx(Me) then return end
 
       if u.HealthPct < 85 and not u:GetAuraByMe("Lifebloom") and Spell.Lifebloom:CastEx(u) then return end
       if Me.ShapeshiftForm == ShapeshiftForm.Bear then
