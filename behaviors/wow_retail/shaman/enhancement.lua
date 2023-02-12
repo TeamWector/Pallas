@@ -62,9 +62,9 @@ local function ShamanEnhancementCombat()
         common:UseTrinkets()
     end
     
-    if not Me:IsMoving() then
-        if Spell.FeralSpirit:CastEx(target) then return end
-    end
+    
+    if Spell.FeralSpirit:CastEx(target) then return end
+    
    
     if(hotHand or (ashenCatalyst and ashenCatalyst.Stacks >= 7)) then
         if Spell.LavaLash:CastEx(target) then return end
@@ -80,6 +80,11 @@ local function ShamanEnhancementCombat()
 
     if Spell.PrimordialWave:CastEx(target) then return end
 
+    if not target:HasAura(188389) then
+        
+        if Spell.FlameShock:CastEx(target) then return end
+    end
+
     if (maelstrom and maelstrom.Stacks >= 8 and Me:GetAura(375986)) then
         if #target:GetUnitsAround(5) <= Settings.ShamanAOEtargets then
             if Spell.LightningBolt:CastEx(target) then return end
@@ -88,11 +93,8 @@ local function ShamanEnhancementCombat()
         end
     end
 
-    if not target:HasAura(188389) then
-        if Spell.FlameShock:CastEx(target) then return end
-    end
-
-    if ((maelstrom and maelstrom.Stacks >= 8 and Spell.ElementalBlast.Charges > 1) or feralSpirit) then
+    
+    if ((maelstrom and maelstrom.Stacks >= 8 and Spell.ElementalBlast.Charges > 1) or (feralSpirit and Spell.ElementalBlast.Charges > 0)) then
         if Spell.ElementalBlast:CastEx(target) then return end
     end
 
@@ -103,7 +105,7 @@ local function ShamanEnhancementCombat()
     if Spell.IceStrike:CastEx(target) then return end
     
     if(not maelstromOfElements and maelstrom and maelstrom.Stacks >=5 and Spell.Stormstrike.Charges > 0 ) then
-        print("Stormstrike Loop")
+        
         if Spell.Stormstrike:CastEx(target) then return end
     end
 
@@ -140,9 +142,10 @@ local function ShamanEnhancementCombat()
     
     if Spell.FrostShock:CastEx(target) then return end
     if Spell.CrashLightning:CastEx(Me) then return end
-    if Spell.FlameShock:CastEx(Me) then return end
+    
     if Spell.Stormstrike:CastEx(target) then return end
-    --if Spell.FlameShock:CastEx(target) then return end
+    print("------ Nothing more in Prio - Casting Flame Shock!! --------")
+    if Spell.FlameShock:CastEx(target) then return end
     
     if not Me:InMeleeRange(target) and Me:IsFacing(target) then
         if Spell.LightningBolt:CastEx(target) then return end
