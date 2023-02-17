@@ -41,11 +41,11 @@ local function ShamanEnhancementCombat()
     local sundering = WoWSpell(197214)
 
     local maelstrom = Me:GetAura(344179)
-    local hotHand = Me:GetAura(215785)
-    local ashenCatalyst = Me:GetAura(390371)
-    local feralSpirit = Me:GetAura(333957)
-    local maelstromOfElements = Me:GetAura(394677)
-    local hailStorm = Me:GetAura(384357)
+    local hotHand = Me:GetAura("Hot Hand")
+    local ashenCatalyst = Me:GetAura("Ashen Catalyst")
+    local feralSpirit = Me:GetAura("Feral Spirits")
+    local maelstromOfElements = Me:GetAura("Maelstrom of Elements")
+    local hailStorm = Me:GetAura("Hailstorm")
 
     if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
     local target = Combat.BestTarget
@@ -70,14 +70,15 @@ local function ShamanEnhancementCombat()
         if Spell.LavaLash:CastEx(target) then return end
     end
 
-    if not Me:GetVisibleAura(327942) then
+    if not Me:GetVisibleAura("Windfury Totem") then
         if windfuryTotem:CastEx(Me) then return end
     end
 
     if #target:GetUnitsAround(5) >= Settings.ShamanAOEtargets then
         if Spell.CrashLightning:CastEx(Me) then return end
+        if Spell.FireNova:CastEx(target) then return end
     end
-
+    
     if Spell.PrimordialWave:CastEx(target) then return end
 
     if not target:HasAura(188389) then
@@ -85,7 +86,7 @@ local function ShamanEnhancementCombat()
         if Spell.FlameShock:CastEx(target) then return end
     end
 
-    if (maelstrom and maelstrom.Stacks >= 8 and Me:GetAura(375986)) then
+    if (maelstrom and maelstrom.Stacks >= 8 and Me:GetAura("Primordial Wave")) then
         if #target:GetUnitsAround(5) <= Settings.ShamanAOEtargets then
             if Spell.LightningBolt:CastEx(target) then return end
         else
