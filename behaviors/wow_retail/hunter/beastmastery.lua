@@ -58,6 +58,10 @@ for k, v in pairs(common.widgets) do
   table.insert(options.Widgets, v)
 end
 
+local function isPetAlive()
+  return Me.Pet and not Me.Pet.Dead
+end
+
 local function PetAttack(target)
    
     Spell.Rake:CastEx(target)
@@ -68,9 +72,14 @@ end
 local function HunterBeastmasteryCombat()
   
   local fortitudeOfTheBear = WoWSpell(272679)
+  local deadPet = isPetAlive
 
-  if Me.Pet == nil then
+  if Me.Pet == nil and not Me.IsMounted then
     common:CallPet(HunterPetChoice)
+  end
+
+  if deadPet then
+    if Spell.RevivePet:CastEx(Me) then return end
   end
 	
   if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
@@ -96,14 +105,15 @@ local function HunterBeastmasteryCombat()
 		if Spell.AspectOfTheTurtle:CastEx(Me) then return end
 	end
 
-  if #target:GetUnitsAround(5) <= Settings.HunterAOEtargets then
-      if (not Me.Pet:GetAura(272790) or Me.Pet:GetAura(272790).Remaining < 2500 or Me.Pet:GetAura(272790).Stacks < 3)  then
+  if #target:GetUnitsAround(10) <= Settings.HunterAOEtargets then
+      if (not Me.Pet:GetAura("Frenzy") or Me.Pet:GetAura("Frenzy").Remaining < 2500 or Me.Pet:GetAura("Frenzy").Stacks < 3)  then
         if Spell.BarbedShot:CastEx(target) then return end
       end
     
-      if target.HealthPct > 20 then 
-        if Spell.KillShot:CastEx(target) then return end
-      end
+      if Spell.DireBeast:CastEx(target) then return end
+      if Spell.BloodShed:CastEx(target) then return end
+      if Spell.DeathChakram:CastEx(target) then return end
+      
 
       if (Spell.BestialWrath:CooldownRemaining() < 2000 or Spell.BestialWrath:CooldownRemaining() == 0) and Settings.HunterUseCooldowns then
         common:UseTrinkets()
@@ -113,22 +123,23 @@ local function HunterBeastmasteryCombat()
         if Spell.BestialWrath:CastEx(target) then return end
       end
 
-      if (Settings.petChoice ~= 0 and Me.Pet:GetVisibleAura(272790) and Me.Pet:GetVisibleAura(272790).Stacks >= 2)  then
+      if (Settings.petChoice ~= 0 and Me.Pet:GetVisibleAura("Frenzy") and Me.Pet:GetVisibleAura("Frenzy").Stacks >= 2)  then
         if Spell.KillCommand:CastEx(target) then return end
       end
-
-      if Spell.DireBeast:CastEx(target) then return end
-      if Spell.BloodShed:CastEx(target) then return end
-      if Spell.DeathChakram:CastEx(target) then return end
+      if target.HealthPct > 20 then 
+        if Spell.KillShot:CastEx(target) then return end
+      end
+      
+      
       if Spell.CobraShot:CastEx(target) then return end
     end
 
-    if #target:GetUnitsAround(5) > Settings.HunterAOEtargets then
-      if (Me.Pet ~= nil and (not Me.Pet:GetAura(272790) or Me.Pet:GetAura(272790).Remaining < 2500 or Me.Pet:GetAura(272790).Stacks < 3)) then
+    if #target:GetUnitsAround(10) > Settings.HunterAOEtargets then
+      if (Me.Pet ~= nil and (not Me.Pet:GetAura("Frenzy") or Me.Pet:GetAura("Frenzy").Remaining < 2500 or Me.Pet:GetAura("Frenzy").Stacks < 3)) then
         if Spell.BarbedShot:CastEx(target) then return end
       end
 
-      if (not Me:GetVisibleAura(268877) or Me:GetVisibleAura(268877).Remaining < 1500)  then
+      if (not Me:GetVisibleAura(268877) or Me:GetVisibleAura("Beastcleave").Remaining < 1500)  then
         if Spell.Multishot:CastEx(target) then return end
       end
     
@@ -136,7 +147,7 @@ local function HunterBeastmasteryCombat()
         if Spell.KillShot:CastEx(target) then return end
       end
 
-      if (Settings.petChoice ~= 0 and Me.Pet:GetVisibleAura(272790) and Me.Pet:GetVisibleAura(272790).Stacks >= 2)  then
+      if (Settings.petChoice ~= 0 and Me.Pet:GetVisibleAura("Frenzy") and Me.Pet:GetVisibleAura("Frenzy").Stacks >= 2)  then
         if Spell.KillCommand:CastEx(target) then return end
       end
 
@@ -155,14 +166,14 @@ local function HunterBeastmasteryCombat()
       
       if Me.Pet ~= nil then
         if Me:GetPowerByType(PowerType.Focus) > 75 then
-          if( Me.Pet:GetVisibleAura(272790).Remaining < 3500) then
+          if( Me.Pet:GetVisibleAura("Frenzy").Remaining < 3500) then
             if Spell.CobraShot:CastEx(target) then return end  
           end
         end
       end
       
       if Me.Pet ~= nil then
-        if Me.Pet:GetVisibleAura(272790) and Me.Pet:GetAura(272790).Remaining < 3500 then
+        if Me.Pet:GetVisibleAura("Frenzy") and Me.Pet:GetAura(272790).Remaining < 3500 then
           if Spell.WailingArrow:CastEx(target) then return end
         end
       end
