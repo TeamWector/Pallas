@@ -34,11 +34,13 @@ local function PaladinHolyDamage()
       return
     end
 
+    if Spell.ShieldOfTheRighteous:CastEx(target) then return end
     if Spell.HammerOfWrath:CastEx(target) then return end
     if Spell.CrusaderStrike:CastEx(target) then return end
     if Spell.Judgment:CastEx(target) then return end
     if Spell.HolyShock:CastEx(target) then return end
-    if Spell.ShieldOfTheRighteous:CastEx(target) then return end
+    if Me:InMeleeRange(target) and Spell.Consecration:CastEx(Me) then return end
+
 end
 
 

@@ -73,7 +73,7 @@ local function LavaBurstWithPrimordialWave(target)
 end
 
 local function LavaBurstWithFlameShock(target)
-    if (target:GetAuraByMe("Flame Shock") or Combat:GetEnemiesWithinDistance(39) > 2) and Spell.LavaBurst:CastEx(target) then return end
+    if (target:GetAuraByMe("Flame Shock") or #target:GetUnitsAround(20) > 2) and Spell.LavaBurst:CastEx(target) then return end
     for _, u in pairs(Combat.Targets) do
         local flameShockAura = u:GetAuraByMe("Flame Shock")
         if (flameShockAura) and Spell.LavaBurst:CastEx(u) then return end
@@ -151,14 +151,14 @@ local function ShamanElementalCombat()
 
     FireElemental()
 
-    if Combat:GetEnemiesWithinDistance(39) > 2 then
+    if #target:GetUnitsAround(20) > 2 then
         --MULTI TARGET
         Stormkeeper()
         PrimordialWave()
         FlameShock()
         LiquidMagmaTotem()
         LavaBurstWithPrimordialWave()
-        if Combat:GetEnemiesWithinDistance(39) > 3 then
+        if #target:GetUnitsAround(20) > 3 then
             Earthquake(target)
         else
             ElementalBlast(target)
