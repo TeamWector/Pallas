@@ -34,16 +34,18 @@ local function PaladinHolyDamage()
       return
     end
 
+    if Spell.AvengingWrath:CastEx(target) then return end
     if Spell.ShieldOfTheRighteous:CastEx(target) then return end
     if Spell.HammerOfWrath:CastEx(target) then return end
     if Spell.CrusaderStrike:CastEx(target) then return end
     if Spell.Judgment:CastEx(target) then return end
     if Spell.HolyShock:CastEx(target) then return end
+    if Spell.LightsHammer:CastEx(target) then return end
     if Me:InMeleeRange(target) and Spell.Consecration:CastEx(Me) then return end
 
 end
 
-
+local blah = false
 
 local function PaladinHolyHeal()
     if Me.Dead then return end
@@ -52,17 +54,31 @@ local function PaladinHolyHeal()
     if Me.StandStance == StandStance.Sit then return end
     if (Me.MovementFlags & MovementFlags.Flying) > 0 then return end
 
+    if not blah then
+      for k, _ in pairs(Spell.Cache) do
+        print(k)
+      end
+      blah = true
+    end
 
     for _, v in pairs(Heal.PriorityList) do
         ---@type WoWUnit
         local u = v.Unit
         local prio = v.Priority
 
+        if Me.HealthPct < 30 and Spell.DivineProtection:CastEx(Me) then return end
+
         if u.HealthPct < 15 and Spell.LayOnHands:CastEx(u) then return end
+        if u.HealthPct < 25 and Spell.DivineToll:CastEx(u) then return end
+
+        if u.HealthPct < 35 and u.Guid ~= Me.Guid and Me.HealthPct > 50 and Spell.LightOfTheMartyr:CastEx(u) then return end
+
+        if u.HealthPct < 35 and Spell.DivineFavor:CastEx(Me) then return end
+        if u.HealthPct < 50 and Spell.LightOfDawn:CastEx(Me) then return end
         if u.HealthPct < 70 and Spell.WordOfGlory:CastEx(u) then return end
-        if u.HealthPct < 60 and Spell.FlashOfLight:CastEx(u) then return end
+        if u.HealthPct < 70 and Spell.FlashOfLight:CastEx(u) then return end
         if u.HealthPct < 80 and Spell.HolyShock:CastEx(u) then return end
-        if u.HealthPct < 70 and Spell.HolyLight:CastEx(u) then return end
+        if u.HealthPct < 75 and Spell.HolyLight:CastEx(u) then return end
 
     end
 
@@ -71,6 +87,7 @@ local function PaladinHolyHeal()
         local u = v.Unit
 
         if not u:HasBuffByMe("Beacon of Light") and Spell.BeaconOfLight:CastEx(u) then return end
+        if u.HealthPct < 30 and Spell.BlessingOfSacrifice:CastEx(u) then return end
     end
 
     if Settings.PaladinHolyDPS then
