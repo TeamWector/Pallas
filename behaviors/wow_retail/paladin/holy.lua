@@ -45,7 +45,6 @@ local function PaladinHolyDamage()
 
 end
 
-local blah = false
 
 local function PaladinHolyHeal()
     if Me.Dead then return end
@@ -53,13 +52,6 @@ local function PaladinHolyHeal()
     if Me.IsCastingOrChanneling then return end
     if Me.StandStance == StandStance.Sit then return end
     if (Me.MovementFlags & MovementFlags.Flying) > 0 then return end
-
-    if not blah then
-      for k, _ in pairs(Spell.Cache) do
-        print(k)
-      end
-      blah = true
-    end
 
     for _, v in pairs(Heal.PriorityList) do
         ---@type WoWUnit
