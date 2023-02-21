@@ -7,6 +7,20 @@ local options = {
 
     -- widgets  TODO
     Widgets = {
+        {
+            type = "checkbox",
+            uid = "FrostMageIceBlock",
+            text = "Enable IceBlock Use",
+            default = false
+        },
+        {
+            type = "slider",
+            uid = "FrostMageIceBlockPercent",
+            text = "HP Percent to Ice Blockt",
+            default = 19,
+            min = 1,
+            max = 100
+        },
     }
 }
 
@@ -15,7 +29,7 @@ for k, v in pairs(common.widgets) do
 end
 
 local function IceBlock()
-    if Me.HealthPct < 19 and not Me:HasVisibleAura("Hypothermia") then
+    if Settings.FrostMageIceBlock and Me.HealthPct <= Settings.FrostMageIceBlockPercent and not Me:HasVisibleAura("Hypothermia") then
         if Spell.IceBlock:CastEx(Me) then return end
     end
 end

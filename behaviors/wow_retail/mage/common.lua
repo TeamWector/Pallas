@@ -36,8 +36,8 @@ function commonMage:DoInterrupt()
 
     if not u.IsInterruptible then goto continue end
 
-    if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:InMeleeRange(u) and Me:IsFacing(u) then
-      -- Disrupt
+    if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:IsFacing(u) then
+      -- Counterspell
       if Spell.Counterspell:CastEx(u) then return false end
     end
 
@@ -54,7 +54,7 @@ function commonMage:DoInterrupt()
 
     if not u.IsInterruptible then goto continue end
 
-    if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:InMeleeRange(u) and Me:IsFacing(u) then
+    if castorchan and spell and spell.CastStart + 500 < wector.Game.Time and Me:IsFacing(u) then
       -- Counterspell
       if Spell.Counterspell:CastEx(u) then return false end
     end
