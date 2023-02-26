@@ -81,13 +81,15 @@ function WoWUnit:HasDebuffByMe(dname)
   return false
 end
 
----@param aname string aura name
+---@param identifier any aura name or id
 ---@return WoWAura?
-function WoWUnit:GetAuraByMe(aname)
+function WoWUnit:GetAuraByMe(identifier)
   local auras = self.Auras
+  local typ = type(identifier)
 
   for _, aura in pairs(auras) do
-    if aura.Name == aname and aura.HasCaster and aura.Caster == Me.ToUnit then
+    if (typ == "string" and aura.Name == identifier or typ == "number" and aura.Id == identifier)
+        and aura.HasCaster and aura.Caster == Me.ToUnit then
       -- Undocumented copy-constructor
       ---@diagnostic disable-next-line: undefined-global
       return WoWAura(aura)
@@ -96,7 +98,7 @@ function WoWUnit:GetAuraByMe(aname)
 end
 
 local movingMask =
-MovementFlags.Forward |
+    MovementFlags.Forward |
     MovementFlags.Backward |
     MovementFlags.StrafeLeft |
     MovementFlags.StrafeRight |
@@ -105,6 +107,10 @@ MovementFlags.Forward |
     MovementFlags.Descending
 function WoWUnit:IsMoving()
   return (self.MovementFlags & movingMask) > 0
+end
+
+function WoWUnit:IsSitting()
+  return self.StandStance == StandStance.Sit
 end
 
 function WoWUnit:InCombatWithMe()

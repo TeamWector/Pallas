@@ -47,7 +47,7 @@ local function GetHolyPower()
 end
 
 local function PaladinProtCombat()
-  local target = Combat.BestTarget
+  local target = Tank.BestTarget
   if not target then return end
 
   local dawn = Me:GetAura(blessing_of_dawn)
@@ -81,7 +81,7 @@ local function PaladinProtHeal()
 end
 
 local behaviors = {
-  [BehaviorType.Combat] = PaladinProtCombat,
+  [BehaviorType.Tank] = PaladinProtCombat,
   [BehaviorType.Heal] = PaladinProtHeal
 }
 
