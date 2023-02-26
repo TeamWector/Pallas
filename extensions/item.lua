@@ -8,7 +8,7 @@ function WoWItem:GetUsableEquipment(slot)
     end
 end
 
----@return boolean success if the trinket was successfully used
+---@return boolean success if the item was successfully used
 ---@param unit WoWUnit? Unit to use the item on.
 function WoWItem:UseX(unit)
     if not unit then unit = Me end

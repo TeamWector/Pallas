@@ -41,12 +41,13 @@ local function HammerOfWrath()
   return false
 end
 
+-- Placeholder for now. NYI
 local function GetHolyPower()
   return Me:GetPowerByType(PowerType.HolyPower)
 end
 
-local function PaladinProt()
-  local target = Combat.BestTarget
+local function PaladinProtCombat()
+  local target = Tank.BestTarget
   if not target then return end
 
   local dawn = Me:GetAura(blessing_of_dawn)
@@ -79,9 +80,9 @@ local function PaladinProtHeal()
   end
 end
 
-return {
-    Behaviors = {
-        [BehaviorType.Combat] = PaladinProt,
-        [BehaviorType.Heal] = PaladinProtHeal
-    }
+local behaviors = {
+  [BehaviorType.Tank] = PaladinProtCombat,
+  [BehaviorType.Heal] = PaladinProtHeal
 }
+
+return { Options = options, Behaviors = behaviors }

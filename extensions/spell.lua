@@ -21,6 +21,10 @@ function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget)
   end
 end
 
+local exclusions = {
+  117952 -- Crackling Jade Lightning (Channeled with no casttime)
+}
+
 function WoWSpell:CastEx(a1, ...)
   local arg1, arg2, arg3 = a1, ...
   if not arg1 then return false end
@@ -38,7 +42,7 @@ function WoWSpell:CastEx(a1, ...)
   if not self.IsKnown then return false end
 
   -- if spell has cast time, are we moving?
-  if self.CastTime > 0 and Me:IsMoving() then return false end
+  if (self.CastTime > 0 or table.contains(exclusions, self.Id)) and Me:IsMoving() then return false end
 
   if type(arg1) == 'userdata' and type(arg1.ToUnit) ~= 'nil' then
     -- cast at unit

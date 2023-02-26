@@ -1,6 +1,6 @@
 local herbs = {
     -- Herbs
-    [765] = "herb", -- Silverleaf
+    [1617] = "herb", -- Silverleaf
     [1618] = "herb", -- Peacebloom
     [1619] = "herb", -- Earthroot
     [1620] = "herb", -- Mageroyal
