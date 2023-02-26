@@ -1,3 +1,6 @@
+-- Holy paladin M+ Rotation
+-- BEEAwtJ2KpR8WbGzhz/jy2AP8AAAAAAQSAAAAAAA0SCQJSSaNRKSIlAaJHIRTEJpkESSUSRSIFEB
+
 local common = require("behaviors.wow_retail.paladin.common")
 
 local options = {
