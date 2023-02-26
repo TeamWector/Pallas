@@ -27,7 +27,7 @@ local function tchelper(first, rest)
 end
 
 local function fmtSpellKey(name)
-  return name:gsub("(%a)([%w_'-]*)", tchelper):gsub("([%s_'%-:()]+)", "")
+  return name:gsub("(%a)([%w_'-]*)", tchelper):gsub("([%s_'%-:(),]+)", "")
 end
 
 function Spell:UpdateCache()

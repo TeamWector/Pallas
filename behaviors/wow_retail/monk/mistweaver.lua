@@ -52,6 +52,14 @@ local options = {
     },
     {
       type = "slider",
+      uid = "HealingElixirPct",
+      text = "Healing Elixir (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
       uid = "ZenPulsePct",
       text = "Zen Pulse (%)",
       default = 0,
@@ -99,6 +107,38 @@ local options = {
       min = 1,
       max = 5
     },
+    {
+      type = "slider",
+      uid = "ChijiPct",
+      text = "Chiji (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "ChijiCount",
+      text = "Chiji Count",
+      default = 1,
+      min = 1,
+      max = 5
+    },
+    {
+      type = "slider",
+      uid = "RevivalPct",
+      text = "Revival (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "RevivalCount",
+      text = "Revival Count",
+      default = 1,
+      min = 1,
+      max = 5
+    },
   }
 }
 
@@ -112,7 +152,8 @@ local auras = {
   soothingmist = 115175,
   teachingsofthemonastery = 202090,
   essencefont = 191840,
-  faeline = 388193
+  faeline = 388193,
+  improvedDetox = 388874
 }
 
 MonkMWListener = wector.FrameScript:CreateListener()
@@ -191,12 +232,18 @@ end
 local function SpinningCraneKick()
   local enemyCount = Combat:GetEnemiesWithinDistance(8)
 
-  if enemyCount < 2 then return false end
+  if enemyCount < 2 or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
   return Spell.SpinningCraneKick:CastEx(Me)
 end
 
 local function RisingSunKick(enemy)
-  return Spell.RisingSunKick:CastEx(enemy)
+  local spell = Spell.RisingSunKick
+
+  if spell:CooldownRemaining() == 0 and spell:InRange(enemy) then
+    Spell.ThunderFocusTea:CastEx(Me)
+  end
+
+  return spell:CastEx(enemy)
 end
 
 local function BlackoutKick(enemy)
@@ -232,6 +279,36 @@ local function FaelineStomp()
   end
 end
 
+local function HealingElixir()
+  return Me.HealthPct < Settings.HealingElixirPct and Spell.HealingElixir:CastEx(Me)
+end
+
+local function ChijiRedCrane()
+  local spell = Spell.ChijiTheRedCrane
+  if spell:CooldownRemaining() > 0 then return end
+
+  local below, count = Heal:GetMembersBelow(Settings.ChijiPct)
+
+  return count >= Settings.ChijiCount and spell:CastEx(Me)
+end
+
+local function Revival()
+  local spell = Spell.Revival
+  if spell:CooldownRemaining() > 0 then return end
+
+  local below, count = Heal:GetMembersBelow(Settings.RevivalPct)
+
+  return count >= Settings.RevivalCount and spell:CastEx(Me)
+end
+
+local function Dispel()
+  if Me:GetAura(auras.improvedDetox) then
+    if common:Detox("Magic", "Poison", "Disease") then return true end
+  end
+
+  if common:Detox("Magic") then return true end
+end
+
 local function MonkMistweaverDamage()
   if Me:IsSitting() or Me.IsMounted then return end
 
@@ -243,6 +320,9 @@ local function MonkMistweaverDamage()
   local lowest = Heal:GetLowestMember()
   if lowest and lowest.HealthPct < Settings.VivifyPct then return end
 
+  if Dispel() then return end
+  if common:LegSweep() then return end
+  if common:TouchOfDeath(target) then return end
   if FaelineStomp() then return end
   if ChiBurst(target) then return end
   if ChiWave(target) then return end
@@ -260,6 +340,13 @@ local function MonkMistweaver()
 
   if IsCastingOrChanneling() then return end
 
+  if common:DiffuseMagic() then return end
+  if common:FortifyingBrew() then return end
+  if common:DampenHarm() then return end
+  if common:TigersLust() then return end
+  if HealingElixir() then return end
+  if Revival() then return end
+  if ChijiRedCrane() then return end
   if EssenceFont() then return end
 
   for _, v in pairs(Heal.PriorityList) do
