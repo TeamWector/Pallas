@@ -315,7 +315,7 @@ local function MonkMistweaverDamage()
   local target = Combat.BestTarget
   if wector.SpellBook.GCD:CooldownRemaining() > 0 or (not target or not Me:IsFacing(target)) then return end
 
-  if IsCastingOrChanneling() then return end
+  if IsCastingOrChanneling() or not Me:IsFacing(target) then return end
 
   local lowest = Heal:GetLowestMember()
   if lowest and lowest.HealthPct < Settings.VivifyPct then return end
