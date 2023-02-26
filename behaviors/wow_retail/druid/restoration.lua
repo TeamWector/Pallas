@@ -150,6 +150,24 @@ local function DruidRestoDamage()
   end
 end
 
+local blacklist = {
+  [118] = "Polymorph",
+  [51514] = "Hex"
+}
+
+local function DruidPVPSaveMeHayZues()
+  for _, t in pairs(Combat.Targets) do
+    if t.IsCastingOrChanneling then
+      local spellInfo = t.SpellInfo
+      local spellName = t.CurrentSpell.Name
+      local target = wector.Game:GetObjectByGuid(spellInfo.TargetGuid1)
+      local onBlacklist = blacklist[t.CurrentSpell.Id]
+
+      if target and target == Me and onBlacklist and Me.ShapeshiftForm == ShapeshiftForm.Normal and Spell.BearForm:CastEx(Me) then return end
+    end
+  end
+end
+
 local function FindAdaptiveSwarm()
   local units = wector.Game:GetObjectsByFlag(ObjectTypeFlag.Unit)
   for _, v in pairs(units) do
@@ -169,6 +187,7 @@ local function DruidRestoHeal()
   if Me.IsCastingOrChanneling then return end
   if Me.StandStance == StandStance.Sit then return end
   if (Me.MovementFlags & MovementFlags.Flying) > 0 then return end
+
 
   if Me.ShapeshiftForm == ShapeshiftForm.Bear or
       Me.ShapeshiftForm == ShapeshiftForm.DireBear then
@@ -323,6 +342,7 @@ end
 return {
   Options = options,
   Behaviors = {
+    [BehaviorType.Combat] = DruidPVPSaveMeHayZues,
     [BehaviorType.Heal] = DruidRestoHeal,
   }
 }

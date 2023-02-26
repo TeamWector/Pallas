@@ -148,6 +148,11 @@ local function EarthShield()
     if not Me:HasVisibleAura("Earth Shield") and Spell.EarthShield:CastEx(Me) then return end
 end
 
+local function FlametongueWeapon()
+    if not Me:HasVisibleAura("Improved Flametongue Weapon") and Spell.FlametongueWeapon:CastEx(Me) then return end
+end
+
+
 local function AstralShift()
     if Settings.ShamanAstralShift > Me.HealthPct and Spell.AstralShift:CastEx(Me) then return end
 end
@@ -159,9 +164,12 @@ local function ShamanElementalCombat()
     if not target then return end
     if Me.IsCastingOrChanneling then return end
 
+
+
     AstralShift()
 
     EarthShield()
+    FlametongueWeapon()
 
     common:DoInterrupt()
 
