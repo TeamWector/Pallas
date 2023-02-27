@@ -153,7 +153,9 @@ local auras = {
   teachingsofthemonastery = 202090,
   essencefont = 191840,
   faeline = 388193,
-  improvedDetox = 388874
+  improvedDetox = 388874,
+  ancientteachings = 388026,
+  ancientconcordance =  389391
 }
 
 MonkMWListener = wector.FrameScript:CreateListener()
@@ -232,7 +234,7 @@ end
 local function SpinningCraneKick()
   local enemyCount = Combat:GetEnemiesWithinDistance(8)
 
-  if enemyCount < 2 or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
+  if (enemyCount < 5 and Me:GetAura(auras.ancientconcordance) or enemyCount < 3) or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
   return Spell.SpinningCraneKick:CastEx(Me)
 end
 
@@ -271,7 +273,7 @@ end
 local Pos = Vec3(0, 0, 0)
 local function FaelineStomp()
   if Spell.FaelineStomp:CooldownRemaining() > 0 then return end
-  if Me:GetAura(auras.faeline) and Me.Position:DistanceSq(Pos) < 10 then return end
+  if Me:GetAura(auras.faeline) and Me:GetAura(auras.ancientteachings) and Me.Position:DistanceSq(Pos) < 10 then return end
 
   if Me.InCombat and not Me:IsMoving() and Spell.FaelineStomp:CastEx(Me) then
     Pos = Me.Position
@@ -313,7 +315,8 @@ local function MonkMistweaverDamage()
   if Me:IsSitting() or Me.IsMounted then return end
 
   local target = Combat.BestTarget
-  if wector.SpellBook.GCD:CooldownRemaining() > 0 or (not target or not Me:IsFacing(target)) then return end
+  local GCD = wector.SpellBook.GCD
+  if GCD:CooldownRemaining() > 0 or (not target or not Me:IsFacing(target)) then return end
 
   if IsCastingOrChanneling() or not Me:IsFacing(target) then return end
 

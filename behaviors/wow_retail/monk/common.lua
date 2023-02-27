@@ -56,7 +56,7 @@ function commonMonk:Detox(...)
   for _, unit in pairs(group) do
     local auras = unit.VisibleAuras
     for _, aura in pairs(auras) do
-      local debuff = aura.IsDebuff or aura.HasCaster and aura.Caster.IsEnemy
+      local debuff = aura.IsDebuff or aura.Caster and aura.Caster.IsEnemy
       if debuff and dispels[aura.Id] and aura.Remaining > 2000 then
         for _, dispelType in pairs(dispelTypes) do
           if dispels[aura.Id] == dispelType then
