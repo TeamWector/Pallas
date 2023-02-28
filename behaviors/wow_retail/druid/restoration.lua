@@ -159,11 +159,11 @@ local function DruidPVPSaveMeHayZues()
   for _, t in pairs(Combat.Targets) do
     if t.IsCastingOrChanneling then
       local spellInfo = t.SpellInfo
-      local spellName = t.CurrentSpell.Name
       local target = wector.Game:GetObjectByGuid(spellInfo.TargetGuid1)
-      local onBlacklist = blacklist[t.CurrentSpell.Id]
-
-      if target and target == Me and onBlacklist and Me.ShapeshiftForm == ShapeshiftForm.Normal and Spell.BearForm:CastEx(Me) then return end
+      if (t.CurrentSpell) then
+        local onBlacklist = blacklist[t.CurrentSpell.Id]
+        if target and target == Me and onBlacklist and Me.ShapeshiftForm == ShapeshiftForm.Normal and Spell.BearForm:CastEx(Me) then return end
+      end
     end
   end
 end
@@ -235,7 +235,7 @@ local function DruidRestoHeal()
           local castorchan = u.IsCastingOrChanneling
           local spell = u.CurrentSpell
           print(u)
-  
+
           if u.Class == ClassType.Mage and castorchan and spell.Name == "Polymorph" and spell:GetCastTarget().Guid == Me.Guid then
             Spell.BearForm:CastEx(Me)
           end
