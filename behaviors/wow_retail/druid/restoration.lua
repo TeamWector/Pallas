@@ -1,63 +1,63 @@
 local options = {
-    -- The sub menu name
-    Name = "Druid (Resto)",
-    -- widgets
-    Widgets = {
-        {
-            type = "checkbox",
-            uid = "DruidRestoDPS",
-            text = "Enable DPS",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "DruidRestoEfflorescence",
-            text = "Use Efflorescence (experimental)",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "DruidRestoOvergrowth",
-            text = "Use Overgrowth",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "DruidRestoTranquility",
-            text = "Use Tranquility",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "DruidRestoConvoke",
-            text = "Use Convoke",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "DruidRestoNaturesSwiftness",
-            text = "Use Natures Swiftness",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "DruidInnervate",
-            text = "Use Innervate when mana low (experimental)",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "DruidRestoBarkskin",
-            text = "Use Barkskin",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "DruidRestoPvPMode",
-            text = "PVP Enabled - some extra casts",
-            default = false
-        },
-    }
+  -- The sub menu name
+  Name = "Druid (Resto)",
+  -- widgets
+  Widgets = {
+    {
+      type = "checkbox",
+      uid = "DruidRestoDPS",
+      text = "Enable DPS",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "DruidRestoEfflorescence",
+      text = "Use Efflorescence (experimental)",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "DruidRestoOvergrowth",
+      text = "Use Overgrowth",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "DruidRestoTranquility",
+      text = "Use Tranquility",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "DruidRestoConvoke",
+      text = "Use Convoke",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "DruidRestoNaturesSwiftness",
+      text = "Use Natures Swiftness",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "DruidInnervate",
+      text = "Use Innervate when mana low (experimental)",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "DruidRestoBarkskin",
+      text = "Use Barkskin",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "DruidRestoPvPMode",
+      text = "PVP Enabled - some extra casts",
+      default = false
+    },
+  }
 }
 
 local function CalculateNearbyFriendlies(loc, range)
@@ -150,6 +150,24 @@ local function DruidRestoDamage()
   end
 end
 
+local blacklist = {
+  [118] = "Polymorph",
+  [51514] = "Hex"
+}
+
+local function DruidRestoCombat()
+  for _, t in pairs(Combat.Targets) do
+    if t.IsCastingOrChanneling then
+      local spellInfo = t.SpellInfo
+      local target = wector.Game:GetObjectByGuid(spellInfo.TargetGuid1)
+      if (t.CurrentSpell) then
+        local onBlacklist = blacklist[t.CurrentSpell.Id]
+        if target and target == Me and onBlacklist and Me.ShapeshiftForm == ShapeshiftForm.Normal and Spell.BearForm:CastEx(Me) then return end
+      end
+    end
+  end
+end
+
 local function FindAdaptiveSwarm()
   local units = wector.Game:GetObjectsByFlag(ObjectTypeFlag.Unit)
   for _, v in pairs(units) do
@@ -170,8 +188,12 @@ local function DruidRestoHeal()
   if Me.StandStance == StandStance.Sit then return end
   if (Me.MovementFlags & MovementFlags.Flying) > 0 then return end
 
+
   if Me.ShapeshiftForm == ShapeshiftForm.Bear or
       Me.ShapeshiftForm == ShapeshiftForm.DireBear then
+    if Settings.DruidRestoPvPMode then
+      if Me.HealthPct < 45 and Spell.FrenziedRegeneration:CastEx(Me) then return end
+    end
     return
   end
 
@@ -243,9 +265,6 @@ local function DruidRestoHeal()
       if Settings.DruidRestoBarkskin and Me.HealthPct < 30 and Spell.Barkskin:CastEx(Me) then return end
 
       if u.HealthPct < 85 and not u:GetAuraByMe("Lifebloom") and Spell.Lifebloom:CastEx(u) then return end
-      if Me.ShapeshiftForm == ShapeshiftForm.Bear then
-        if Me.HealthPct < 45 and Spell.FrenziedRegeneration:CastEx(Me) then return end
-      end
     end
 
     if u.HealthPct < 65 and wildgrowth and Spell.WildGrowth:CastEx(u) then return end
@@ -300,8 +319,9 @@ local function DruidRestoHeal()
 end
 
 return {
-    Options = options,
-    Behaviors = {
-        [BehaviorType.Heal] = DruidRestoHeal,
-    }
+  Options = options,
+  Behaviors = {
+    [BehaviorType.Combat] = DruidRestoCombat,
+    [BehaviorType.Heal] = DruidRestoHeal,
+  }
 }

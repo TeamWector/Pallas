@@ -19,7 +19,7 @@ end
 
 local function SoulCarver(target)
   local frailtyAura = target:GetAura("Frailty")
-  if frailtyAura and frailtyAura.Stacks > 5 and Spell.SoulCarver:CastEx(target) then return end
+  if frailtyAura and frailtyAura.Stacks > 4 and Spell.SoulCarver:CastEx(target) then return end
 end
 
 local function FelDevastation(target)

@@ -153,7 +153,7 @@ local function CollectVisuals()
 
   for _, object in pairs(objects) do
     local distance = Me.Position:DistanceSq2D(object.Position)
-    if distance <= settings.loadRange then
+    if distance <= settings.loadRange and object:Interactable() then
       local isQuest = object.DynamicFlags & 0x04 > 1 and settings.trackQuests
       local isHerb = herbs[object.EntryId] and settings.trackHerbs
       local isOre = ores[object.EntryId] and settings.trackOres

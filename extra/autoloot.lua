@@ -71,7 +71,7 @@ local function Autoloot()
   for _, u in pairs(units) do
     local lootable = u.IsLootable
     local skinnable = u.UnitFlags == UnitFlags.Skinnable
-    local inrange = Me:GetDistance(u) < 5
+    local inrange = Me:InInteractRange(u)
     local alreadylooted = tableContains(looted, u.Guid)
     local valid = u and u.Dead
 

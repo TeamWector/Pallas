@@ -1,6 +1,6 @@
 local herbs = {
     -- Herbs
-    [765] = "herb", -- Silverleaf
+    [1617] = "herb", -- Silverleaf
     [1618] = "herb", -- Peacebloom
     [1619] = "herb", -- Earthroot
     [1620] = "herb", -- Mageroyal
@@ -99,6 +99,26 @@ local ores = {
     [189980] = "vein", -- Saronite Deposit
     [189981] = "vein", -- Rich Saronite Deposit
     [191133] = "vein", -- Titanium Vein
+    -- Dragonflight
+    [375234] = "vein", -- Hardened Draconium Deposit
+    [379248] = "vein", -- Draconium Deposit
+    [379252] = "vein", -- Draconium Deposit 2
+    [375235] = "vein", -- Molten Draconium Deposit
+    [379267] = "vein", -- Rich Draconium Deposit
+    [375238] = "vein", -- Titan Touched Draconium Deposit
+    [375239] = "vein", -- Primal Draconium Deposit
+    [375240] = "vein", -- Infurious Draconium Deposit
+    [379263] = "vein", -- Rich Draconium Deposit
+    [381102] = "vein", -- Serevite Deposit
+    [381103] = "vein", -- Serevite Deposit 2
+    [381104] = "vein", -- Rich Serevite Deposit
+    [381105] = "vein", -- Rich Serevite Deposit 2
+    [381479] = "vein", -- Hardened Shard
+    [381515] = "vein", -- Hardened Serevite Deposit
+    [381516] = "vein", -- Molten Serevite Deposit
+    [381519] = "vein", -- Infurious Serevite Deposit
+    [381517] = "vein", -- Titan-Touched Serevite Deposit
+    [381518] = "vein", -- Primal Serevite Deposit
 }
 
 local treasures = {
