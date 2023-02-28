@@ -155,7 +155,7 @@ local blacklist = {
   [51514] = "Hex"
 }
 
-local function DruidPVPSaveMeHayZues()
+local function DruidRestoCombat()
   for _, t in pairs(Combat.Targets) do
     if t.IsCastingOrChanneling then
       local spellInfo = t.SpellInfo
@@ -223,27 +223,6 @@ local function DruidRestoHeal()
       end
     end
   end
-
-  -- DO PVP SHEEEET
-  if Settings.DruidRestoPvPMode then
-    if Me.ShapeshiftForm == ShapeshiftForm.Normal then
-      local units = wector.Game.Units
-      for _, u in pairs(units) do
-        if Me:CanAttack(u) and u.IsPlayer then
-          --- this is a player that can be attacked, let's print his name to check
-          print(u.NameUnsafe)
-          local castorchan = u.IsCastingOrChanneling
-          local spell = u.CurrentSpell
-          print(u)
-
-          if u.Class == ClassType.Mage and castorchan and spell.Name == "Polymorph" and spell:GetCastTarget().Guid == Me.Guid then
-            Spell.BearForm:CastEx(Me)
-          end
-        end
-      end
-    end
-  end
-
 
   for _, v in pairs(Heal.PriorityList) do
     ---@type WoWUnit
@@ -342,7 +321,7 @@ end
 return {
   Options = options,
   Behaviors = {
-    [BehaviorType.Combat] = DruidPVPSaveMeHayZues,
+    [BehaviorType.Combat] = DruidRestoCombat,
     [BehaviorType.Heal] = DruidRestoHeal,
   }
 }

@@ -257,7 +257,7 @@ local function DivineToll(lowest)
   return count > 2 and Spell.DivineToll:CastEx(lowest)
 end
 
-local function SeasonBlesings()
+local function SeasonBlessings()
   if Spell.BlessingOfSpring:IsUsable() then
     for _, v in pairs(Heal.Tanks) do
       local t = v.Unit

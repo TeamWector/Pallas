@@ -76,7 +76,10 @@ function Heal:WeighFilter()
         istank = true
       end
       if member.Role & GroupRole.Healer == GroupRole.Healer then priority = priority + 10 end
-      if member.Role & GroupRole.Damage == GroupRole.Damage then priority = priority + 5 isdps = true end
+      if member.Role & GroupRole.Damage == GroupRole.Damage then
+        priority = priority + 5
+        isdps = true
+      end
     end
 
     priority = priority + (100 - u.HealthPct)
