@@ -32,18 +32,6 @@ local options = {
   }
 }
 
-LootListener = wector.FrameScript:CreateListener()
-
-local function tableContains(tbl, val)
-  for i = 1, #tbl do
-    if tbl[i] == val then
-      return true
-    end
-  end
-
-  return false
-end
-
 local function isInStealth()
   local stealth = Me.ShapeshiftForm == ShapeshiftForm.Stealth
   local prowl = Me.ShapeshiftForm == ShapeshiftForm.Cat and Me:HasAura("Prowl")
@@ -72,7 +60,7 @@ local function Autoloot()
     local lootable = u.IsLootable
     local skinnable = u.UnitFlags == UnitFlags.Skinnable
     local inrange = Me:InInteractRange(u)
-    local alreadylooted = tableContains(looted, u.Guid)
+    local alreadylooted = table.contains(looted, u.Guid)
     local valid = u and u.Dead
 
     if valid and (Settings.ExtraSkinning and skinnable or lootable) and not alreadylooted and inrange then

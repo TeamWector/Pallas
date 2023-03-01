@@ -89,7 +89,7 @@ function WoWUnit:GetAuraByMe(identifier)
 
   for _, aura in pairs(auras) do
     if (typ == "string" and aura.Name == identifier or typ == "number" and aura.Id == identifier)
-        and aura.HasCaster and aura.Caster == Me.ToUnit then
+        and aura.Caster and aura.Caster == Me.ToUnit then
       -- Undocumented copy-constructor
       ---@diagnostic disable-next-line: undefined-global
       return WoWAura(aura)
