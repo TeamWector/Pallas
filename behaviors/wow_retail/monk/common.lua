@@ -9,7 +9,7 @@ commonMonk.widgets = {
   },
   {
     type = "slider",
-    uid = "MonkInterruptPct",
+    uid = "CommonInterruptPct",
     text = "Kick Cast Left (%)",
     default = 0,
     min = 0,
@@ -40,50 +40,13 @@ commonMonk.widgets = {
     max = 100
   },
   {
-    type = "checkbox",
-    uid = "MonkShouldDetox",
-    text = "Dispel Party",
-    default = false
-  },
+    type = "combobox",
+    uid = "CommonDispels",
+    text = "Dispel",
+    default = 0,
+    options = { "Disabled", "Any", "Whitelist" }
+},
 }
-
-function commonMonk:Detox(...)
-  if not Settings.MonkShouldDetox or Spell.Detox:CooldownRemaining() > 0 then return end
-
-  local dispelTypes = { ... }
-  local group = WoWGroup:GetGroupUnits()
-
-  for _, unit in pairs(group) do
-    local auras = unit.VisibleAuras
-    for _, aura in pairs(auras) do
-      local debuff = aura.IsDebuff or aura.Caster and aura.Caster.IsEnemy
-      if debuff and dispels[aura.Id] and aura.Remaining > 2000 then
-        for _, dispelType in pairs(dispelTypes) do
-          if dispels[aura.Id] == dispelType then
-            return Spell.Detox:CastEx(unit)
-          end
-        end
-      end
-    end
-  end
-end
-
-function commonMonk:SpearHandStrike()
-  if Spell.SpearHandStrike:CooldownRemaining() > 0 then return end
-
-  for _, e in pairs(Combat.Targets) do
-    local cast = e.IsInterruptible and e.CurrentCast
-    if not cast then goto continue end
-
-    local isChannel = e.CurrentChannel
-    local castRemains = cast.CastEnd - wector.Game.Time
-    local castTime = cast.CastEnd - cast.CastStart
-    local castPctRemain = math.floor(castRemains / castTime * 100)
-
-    if (castPctRemain < Settings.MonkInterruptPct or isChannel) and Spell.SpearHandStrike:CastEx(e) then return true end
-    ::continue::
-  end
-end
 
 function commonMonk:TouchOfDeath(enemy)
   local spell = Spell.TouchOfDeath

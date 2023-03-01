@@ -166,4 +166,19 @@ function Combat:GetEnemiesWithinDistance(dist)
   return count
 end
 
+---@return boolean, number found returns both a boolean if it found any and how many.
+---@param aura any aura id or name
+---@param duration number? optional, amount of time left on the buff to consider it applied. (MS)
+function Combat:CheckTargetsForAuraByMe(aura, duration)
+  local count = 0
+  for _, t in pairs(self.Targets) do
+    local a = t:GetAuraByMe(aura)
+    if a and (not duration or a.Remaining > duration) then
+      count = count + 1
+    end
+  end
+
+  return count > 0, count
+end
+
 return Combat

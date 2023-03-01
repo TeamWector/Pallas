@@ -1,5 +1,7 @@
 ---@diagnostic disable: duplicate-set-field
 
+local dispels = require('data.dispels')
+
 ---@enum SpellCastExFlags
 SpellCastExFlags = {
   NoUsable = 0x1
@@ -15,10 +17,12 @@ end
 SpellListener = wector.FrameScript:CreateListener()
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
 
-function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget)
+function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castGuid, SpellID)
   if unitTarget == Me then
     CastTarget = nil
   end
+
+  spellDelay[SpellID] = wector.Game.Time + math.random(150, 500)
 end
 
 local exclusions = {
@@ -60,14 +64,12 @@ function WoWSpell:CastEx(a1, ...)
     if not Me:WithinLineOfSight(unit) then return false end
 
     wector.Console:Log('Cast ' .. self.Name)
-    spellDelay[self.Id] = wector.Game.Time + math.random(150, 500)
     CastTarget = arg1.ToUnit
     return self:Cast(arg1.ToUnit)
   else
     -- cast at position
     local x, y, z = 0, 0, 0
     if type(arg1) == 'userdata' and type(arg1.z) ~= 'nil' then
-
       -- is spell usable?
       if not self:IsUsable() then return false end
 
@@ -81,9 +83,6 @@ function WoWSpell:CastEx(a1, ...)
       return false
     end
 
-    -- position specific checks
-
-    spellDelay[self.Id] = wector.Game.Time + math.random(150, 500)
     return self:Cast(x, y, z)
   end
 end
@@ -112,9 +111,84 @@ function WoWSpell:CastRemaining()
   return self.CastEnd - wector.Game.Time
 end
 
----@deprecated
-function WoWSpell:CanUse(target)
-  if not target then target = wector.Game.ActivePlayer.ToUnit end
-  return self.IsReady and not self.IsActive and self:IsUsable() and self:InRange(target) and
-      (self.CastTime == 0 or not wector.Game.ActivePlayer:IsMoving())
+---@param unit WoWUnit? Unit to apply our aura to.
+---@param condition boolean? condition to fulfill before applying
+---@return boolean applied if we successfully applied our aura.
+function WoWSpell:Apply(unit, condition)
+  if not unit then
+    print("No unit passed to function Apply")
+    return false
+  end
+
+  if condition ~= nil and not condition then return false end
+
+  local aura = unit:GetAuraByMe(self.Name)
+  -- Absolute corruption exception (Aura Remaining 0)
+  if aura and (aura.Remaining > 2000 or aura.Remaining == 0) then return false end
+
+  return self:CastEx(unit)
+end
+
+-- (TODO) Kick Whitelist, only kick spells on our list.
+-- (TODO) Randomization of Kick Percent and Channeled time
+---@return boolean casted if we used our interrupt.
+function WoWSpell:Interrupt()
+  if self:CooldownRemaining() > 0 then return false end
+
+  -- Create a slider in your behavior file with uid CommonInterruptPct to set your own kick pct.
+  local kickpct = Settings.CommonInterruptPct or 35
+  local units = wector.Game.Units
+
+  for _, unit in pairs(units) do
+    local cast = unit.IsInterruptible and unit.CurrentCast
+    local validTarget = self:InRange(unit)
+    if not cast or not validTarget then goto continue end
+
+    local channel = unit.CurrentChannel
+    local castRemains = cast.CastEnd - wector.Game.Time
+    local castTime = cast.CastEnd - cast.CastStart
+    local castPctRemain = math.floor(castRemains / castTime * 100)
+    local channeledTime = channel and wector.Game.Time - channel.CastStart
+
+    if (castPctRemain < kickpct or channel and channeledTime > 777) and self:CastEx(unit) then return true end
+    ::continue::
+  end
+
+  return false
+end
+
+---@param dispelTypes table dispeltypes that we have access to Magic, Curse, Disease, Poison
+---@param friends boolean if we are supposed to use this spell on our friends, otherwise will use it on enemies (Soothe, Purge, Tranq Shot)
+---@return boolean casted if we casted dispel.
+function WoWSpell:Dispel(friends, dispelTypes)
+  if self:CooldownRemaining() > 0 then return false end
+  -- We create a combobox with uid CommonDispels that has three values, disabled, any, whitelist.
+  local dispel = Settings.CommonDispels or 0
+
+  if dispel == 0 then return false end
+
+  local list = not friends and Combat.Targets or friends and WoWGroup:GetGroupUnits()
+
+  if not list then print("No List Was Provided For Dispel") return false end
+
+  local types = { dispelTypes }
+
+  for _, unit in pairs(list) do
+    local auras = unit.VisibleAuras
+    for _, aura in pairs(auras) do
+      if (aura.IsDebuff or not friends) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
+        for _, dispelType in pairs(types) do
+          if aura.DispelType == dispelType then
+            -- Let 777 ms pass on aura for no instant dispel.
+            local durPassed = aura.Duration - aura.Remaining
+            if durPassed > 777 then
+              return self:CastEx(unit)
+            end
+          end
+        end
+      end
+    end
+  end
+
+  return false
 end

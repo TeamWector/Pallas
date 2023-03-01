@@ -155,23 +155,13 @@ local auras = {
   faeline = 388193,
   improvedDetox = 388874,
   ancientteachings = 388026,
-  ancientconcordance =  389391
+  ancientconcordance = 389391
 }
 
-MonkMWListener = wector.FrameScript:CreateListener()
-MonkMWListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
-
--- Fix Enveloping
-local EMFix = 0
-function MonkMWListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, _, spellID)
-  if unitTarget == Me and spellID == Spell.EnvelopingMist.Id then
-    EMFix = wector.Game.Time + 100
-  end
-end
-
 local function IsCastingOrChanneling()
-  return Me.CurrentSpell and Me.CurrentSpell.Id ~= Spell.SoothingMist.Id and
-      Me.CurrentSpell.Id ~= Spell.CracklingJadeLightning.Id
+  return Me.CurrentSpell and Me.CurrentSpell.Id ~= Spell.SoothingMist.Id
+      and Me.CurrentSpell.Id ~= Spell.CracklingJadeLightning.Id
+      and Me.CurrentSpell.Id ~= Spell.SpinningCraneKick.Id
 end
 
 local function RenewingMist()
@@ -179,23 +169,19 @@ local function RenewingMist()
 
   local friends = WoWGroup:GetGroupUnits()
   for _, f in pairs(friends) do
-    local rm = f:GetAuraByMe(auras.renewingmist)
-    if not rm or rm.Remaining <= 3000 then
-      if Spell.RenewingMist:CastEx(f) then return true end
-    end
+    if Spell.RenewingMist:Apply(f) then return true end
   end
 end
 
 local function EnvelopingMist(friend)
-  local shouldEM = (wector.Game.Time - EMFix) > 0
   if friend.HealthPct < Settings.EnvelopPct then
-    return shouldEM and not friend:GetAuraByMe(auras.envelopingmist) and Spell.EnvelopingMist:CastEx(friend)
+    return Spell.EnvelopingMist:Apply(friend)
   end
 end
 
 local function SoothingMist(friend)
   if friend.HealthPct < Settings.SoothingPct then
-    return not friend:GetAuraByMe(auras.soothingmist) and Spell.SoothingMist:CastEx(friend)
+    return Spell.SoothingMist:Apply(friend)
   end
 end
 
@@ -267,7 +253,7 @@ local function ChiWave(enemy)
 end
 
 local function CracklingJadeLightning(enemy)
-  return not enemy:GetAuraByMe(Spell.CracklingJadeLightning.Id) and Spell.CracklingJadeLightning:CastEx(enemy)
+  return Spell.CracklingJadeLightning:Apply(enemy)
 end
 
 local Pos = Vec3(0, 0, 0)
@@ -304,11 +290,13 @@ local function Revival()
 end
 
 local function Dispel()
+  local DispelType = WoWDispelType
+
   if Me:GetAura(auras.improvedDetox) then
-    if common:Detox("Magic", "Poison", "Disease") then return true end
+    if Spell.Detox:Dispel(true, DispelType.Magic, DispelType.Poison, DispelType.Disease) then return true end
   end
 
-  if common:Detox("Magic") then return true end
+  if Spell.Detox:Dispel(true, DispelType.Magic) then return true end
 end
 
 local function MonkMistweaverDamage()
@@ -339,7 +327,7 @@ end
 local function MonkMistweaver()
   if Me:IsSitting() or Me.IsMounted then return end
 
-  if common:SpearHandStrike() then return end
+  if Spell.SpearHandStrike:Interrupt() then return end
 
   if IsCastingOrChanneling() then return end
 
@@ -360,7 +348,7 @@ local function MonkMistweaver()
     if SoothingMist(f) then return end
     if EnvelopingMist(f) then return end
     if Vivify(f) then return end
-    if f.HealthPct < Settings.RenewingPct and not f:GetAuraByMe(auras.renewingmist) and Spell.RenewingMist:CastEx(f) then return end
+    if f.HealthPct < Settings.RenewingPct and Spell.RenewingMist:Apply(f) then return end
   end
 
   if RenewingMist() then return end
