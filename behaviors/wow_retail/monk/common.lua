@@ -45,7 +45,7 @@ commonMonk.widgets = {
     text = "Dispel",
     default = 0,
     options = { "Disabled", "Any", "Whitelist" }
-},
+  },
 }
 
 function commonMonk:TouchOfDeath(enemy)
