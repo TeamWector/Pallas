@@ -169,7 +169,10 @@ function WoWSpell:Dispel(friends, dispelTypes)
 
   local list = not friends and Combat.Targets or friends and WoWGroup:GetGroupUnits()
 
-  if not list then print("No List Was Provided For Dispel") return false end
+  if not list then
+    print("No List Was Provided For Dispel")
+    return false
+  end
 
   local types = { dispelTypes }
 
