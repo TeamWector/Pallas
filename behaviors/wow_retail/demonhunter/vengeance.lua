@@ -1,11 +1,11 @@
 local common = require('behaviors.wow_retail.demonhunter.common')
 
 local options = {
-    -- The sub menu name
-    Name = "Demonhunter (Vengeance)",
-    -- widgets  TODO
-    Widgets = {
-    }
+  -- The sub menu name
+  Name = "Demonhunter (Vengeance)",
+  -- widgets  TODO
+  Widgets = {
+  }
 }
 
 for k, v in pairs(common.widgets) do
@@ -98,7 +98,7 @@ local function DemonhunterVengeanceCombat()
 end
 
 local behaviors = {
-    [BehaviorType.Combat] = DemonhunterVengeanceCombat
+      [BehaviorType.Combat] = DemonhunterVengeanceCombat
 }
 
 return { Options = options, Behaviors = behaviors }

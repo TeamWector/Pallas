@@ -3,7 +3,6 @@ local commonDemonhunter = {}
 --[[ !TODO
   - Everything
 ]]
-
 commonDemonhunter.widgets = {
   {
     type = "checkbox",

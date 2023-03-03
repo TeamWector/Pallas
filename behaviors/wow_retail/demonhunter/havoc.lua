@@ -2,17 +2,17 @@ local common = require('behaviors.wow_retail.demonhunter.common')
 local colors = require("data.colors")
 
 local options = {
-    -- The sub menu name
-    Name = "Demonhunter (Havoc)",
-    -- widgets  TODO
-    Widgets = {
-        {
-            type = "checkbox",
-            uid = "HavocMomentumDrawText",
-            text = "Tells you when to use fel rush / vengeful retreat",
-            default = true
-        }
+  -- The sub menu name
+  Name = "Demonhunter (Havoc)",
+  -- widgets  TODO
+  Widgets = {
+    {
+      type = "checkbox",
+      uid = "HavocMomentumDrawText",
+      text = "Tells you when to use fel rush / vengeful retreat",
+      default = true
     }
+  }
 }
 
 for k, v in pairs(common.widgets) do
@@ -159,18 +159,18 @@ local function DemonhunterHavocCombat()
   if Combat.EnemiesInMeleeRange > 1 then
     common:UseTrinkets()
   end
-  if ThrowGlaiveOvercap(target)  then return end
-  if AnnihilationRotation(target)  then return end
+  if ThrowGlaiveOvercap(target) then return end
+  if AnnihilationRotation(target) then return end
   if common:ThrowGlaive(target) then return end
   if Felblade(target) then return end
-  if ChaosStrike(target)  then return end
+  if ChaosStrike(target) then return end
   FelRushMomentum()
   if common:SigilOfFlame(target) then return end
   if common:ArcaneTorrent() then return end
 end
 
 local behaviors = {
-    [BehaviorType.Combat] = DemonhunterHavocCombat
+      [BehaviorType.Combat] = DemonhunterHavocCombat
 }
 
 return { Options = options, Behaviors = behaviors }
