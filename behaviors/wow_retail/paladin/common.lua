@@ -16,6 +16,10 @@ commonPaladin.auras = {
   avengingwrath = 31884
 }
 
+function commonPaladin:DoInterrupt()
+  if Spell.Rebuke:Interrupt() then return end
+end
+
 function commonPaladin:GetHolyPower()
   return Me:GetPowerByType(PowerType.HolyPower)
 end

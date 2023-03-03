@@ -23,24 +23,8 @@ commonShaman.widgets = {
   },
 }
 
-local random = math.random(100, 200)
 function commonShaman:DoInterrupt()
-  local units = wector.Game.Units
-  for _, u in pairs(Combat.Targets) do
-    if u.CurrentSpell then
-      local cast = u.CurrentCast
-      local timeLeft = 0
-      local channel = u.CurrentChannel
-
-      if cast then
-        timeLeft = cast.CastEnd - wector.Game.Time
-      end
-
-      if timeLeft <= Settings.InterruptTime + random or channel then
-        if Spell.WindShear:CastEx(u) then return end
-      end
-    end
-  end
+  if Spell.WindShear:Interrupt() then return end
 end
 
 function commonShaman:UseTrinkets()

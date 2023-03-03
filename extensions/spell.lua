@@ -137,7 +137,7 @@ function WoWSpell:Interrupt()
 
   -- Create a slider in your behavior file with uid CommonInterruptPct to set your own kick pct.
   local kickpct = Settings.CommonInterruptPct or 35
-  local units = wector.Game.Units
+  local units = Behavior:HasBehavior(BehaviorType.Combat) and Combat.Targets or wector.Game.Units
 
   for _, unit in pairs(units) do
     local cast = unit.IsInterruptible and unit.CurrentCast

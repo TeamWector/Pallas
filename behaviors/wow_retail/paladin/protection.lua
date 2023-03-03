@@ -1,3 +1,5 @@
+local common = require("behaviors.wow_retail.paladin.common")
+
 local options = {
     Name = "Paladin (Prot)",
     Widgets = {
@@ -60,6 +62,7 @@ local function PaladinProtCombat()
   if gcd:CooldownRemaining() > 0 then return end
 
   -- Keep priority down here.
+  if common:DoInterrupt() then return end
   if Spell.Judgment:CastEx(target) then return end
   if HammerOfWrath() then return end
   if Spell.AvengersShield:CastEx(target) then return end
