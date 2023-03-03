@@ -23,17 +23,17 @@ local useVengefulRetreat = false
 local useFelRush = false
 
 local function TheHunt(target)
-  if Spell.TheHunt:CastEx(target) then return end
+  if Spell.TheHunt:CastEx(target) then return true end
 end
 
 local function DeathSweep()
   if Spell.EssenceBreak:CooldownRemaining() > 3000 then
-    if Spell.DeathSweep:CastEx(Me) then return end
+    if Spell.DeathSweep:CastEx(Me) then return true end
   end
 end
 
 local function EyeBeam(target)
-  if Spell.EyeBeam:CastEx(target) then return end
+  if Spell.EyeBeam:CastEx(target) then return true end
 end
 
 local function VengefulRetreat()
@@ -46,30 +46,30 @@ local function VengefulRetreat()
 end
 
 local function EssenceBreak(target)
-  if Spell.EssenceBreak:CastEx(target) then return end
+  if Spell.EssenceBreak:CastEx(target) then return true end
 end
 
 local function Metamorphosis(target)
   if (Spell.BladeDance:CooldownRemaining() > 0 or Spell.DeathSweep:CooldownRemaining() > 0) and (Spell.EyeBeam:CooldownRemaining() > 0) then
-    if Spell.Metamorphosis:CastEx(target) then return end
+    if Spell.Metamorphosis:CastEx(target) then return true end
   end
 end
 
 local function BladeDance()
   if Spell.EssenceBreak:CooldownRemaining() > 3000 and Spell.EyeBeam:CooldownRemaining() > 3000 and Me.Power > 35 then
-    if Spell.BladeDance:CastEx(Me) then return end
+    if Spell.BladeDance:CastEx(Me) then return true end
   end
 end
 
 local function AnnihilationEssenceBreakDebuff(target)
   if target:HasVisibleAura("Essence Break") then
-    if Spell.Annihilation:CastEx(target) then return end
+    if Spell.Annihilation:CastEx(target) then return true end
   end
 end
 
 local function ThrowGlaiveOvercap(target)
   if Spell.ThrowGlaive.Charges > 1 then
-    if Spell.ThrowGlaive:CastEx(target) then return end
+    if Spell.ThrowGlaive:CastEx(target) then return true end
   end
 end
 
@@ -81,15 +81,15 @@ local function FelRushUnboundChaosBuff()
 end
 
 local function AnnihilationRotation(target)
-  if Spell.Annihilation:CastEx(target) then return end
+  if Spell.Annihilation:CastEx(target) then return true end
 end
 
 local function Felblade(target)
-  if Me.Power < 70 and Spell.Felblade:CastEx(target) then return end
+  if Me.Power < 70 and Spell.Felblade:CastEx(target) then return true end
 end
 
 local function ChaosStrike(target)
-  if Me.Power > 40 and Spell.ChaosStrike:CastEx(target) then return end
+  if Me.Power > 40 and Spell.ChaosStrike:CastEx(target) then return true end
 end
 
 local function FelRushMomentum()
@@ -137,7 +137,7 @@ local function DemonhunterHavocCombat()
   if not target then return end
   if Me.IsCastingOrChanneling then return end
 
-  TheHunt(target)
+  if TheHunt(target) then return end
 
   if not Me:InMeleeRange(target) and Me:IsFacing(target) then
     if Spell.ThrowGlaive:CastEx(target) then return end
@@ -146,29 +146,27 @@ local function DemonhunterHavocCombat()
   -- only melee spells from here on
   if not Me:InMeleeRange(target) or not Me:IsFacing(target) then return end
 
-  common:DoInterrupt()
-  DeathSweep()
-  EyeBeam(target)
-  -- TODO vengefulRetreat logic, function exists, but do you really want to move? PERHAPS A MESSAGE ON SCREEN
+  if common:DoInterrupt() then return end
+  if DeathSweep() then return end
+  if EyeBeam(target) then return end
   VengefulRetreat()
-  EssenceBreak(target)
-  Metamorphosis(target)
-  BladeDance()
-  AnnihilationEssenceBreakDebuff(target)
-  common:ImmolationAura()
+  if EssenceBreak(target) then return end
+  if Metamorphosis(target) then return end
+  if BladeDance() then return end
+  if AnnihilationEssenceBreakDebuff(target) then return end
+  if common:ImmolationAura() then return end
   FelRushUnboundChaosBuff()
   if Combat.EnemiesInMeleeRange > 1 then
     common:UseTrinkets()
   end
-  ThrowGlaiveOvercap(target)
-  -- TODO FelRushUnboundChaosBuff function exists, PERHAPS A MESSAGE ON SCREEN
-  AnnihilationRotation(target)
-  common:ThrowGlaive(target)
-  Felblade(target)
-  ChaosStrike(target)
+  if ThrowGlaiveOvercap(target)  then return end
+  if AnnihilationRotation(target)  then return end
+  if common:ThrowGlaive(target) then return end
+  if Felblade(target) then return end
+  if ChaosStrike(target)  then return end
   FelRushMomentum()
-  common:SigilOfFlame(target)
-  common:ArcaneTorrent()
+  if common:SigilOfFlame(target) then return end
+  if common:ArcaneTorrent() then return end
 end
 
 local behaviors = {

@@ -310,6 +310,16 @@ local function DruidRestoHeal()
     --  --if lifebloom.Remaining < 2500 and u.HealthPct > 70 and Spell.Lifebloom:CastEx(u) then return end
     --end
 
+    if Settings.DruidRestoPvPMode then
+      -- do lifebloom and rejuv while doing nothing
+      for _, v in pairs(Heal.PriorityList) do
+        ---@type WoWUnit
+        local u = v.Unit
+        local prio = v.Priority
+        if not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
+      end
+    end
+
     ::continue::
   end
 
