@@ -1,17 +1,19 @@
 ---@diagnostic disable: duplicate-set-field
 
 local dispels = require('data.dispels')
+local interrupts = require('data.interrupts')
 
 ---@enum SpellCastExFlags
 SpellCastExFlags = {
   NoUsable = 0x1
 }
 
-local CastTarget = nil
+local randomModifier = 0
+local castTarget = nil
 local spellDelay = {}
 
 function WoWSpell:GetCastTarget()
-  return CastTarget
+  return castTarget
 end
 
 SpellListener = wector.FrameScript:CreateListener()
@@ -19,14 +21,15 @@ SpellListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
 
 function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castGuid, SpellID)
   if unitTarget == Me then
-    CastTarget = nil
+    castTarget = nil
   end
 
   spellDelay[SpellID] = wector.Game.Time + math.random(150, 500)
 end
 
 local exclusions = {
-  117952 -- Crackling Jade Lightning (Channeled with no casttime)
+  117952, -- Crackling Jade Lightning
+  115175, -- Soothing Mist
 }
 
 function WoWSpell:CastEx(a1, ...)
@@ -64,7 +67,7 @@ function WoWSpell:CastEx(a1, ...)
     if not Me:WithinLineOfSight(unit) then return false end
 
     wector.Console:Log('Cast ' .. self.Name)
-    CastTarget = arg1.ToUnit
+    castTarget = arg1.ToUnit
     return self:Cast(arg1.ToUnit)
   else
     -- cast at position
@@ -120,7 +123,18 @@ function WoWSpell:Apply(unit, condition)
     return false
   end
 
-  if condition ~= nil and not condition then return false end
+  if condition ~= nil then
+    local type = type(condition)
+
+    if type == "function" then
+      if not condition() then return false end
+    elseif type == "boolean" then
+      if not condition then return false end
+    else
+      print("Invalid type as condition.")
+      return false
+    end
+  end
 
   local aura = unit:GetAuraByMe(self.Name)
   -- Absolute corruption exception (Aura Remaining 0)
@@ -129,28 +143,35 @@ function WoWSpell:Apply(unit, condition)
   return self:CastEx(unit)
 end
 
--- (TODO) Kick Whitelist, only kick spells on our list.
--- (TODO) Randomization of Kick Percent and Channeled time
 ---@return boolean casted if we used our interrupt.
 function WoWSpell:Interrupt()
   if self:CooldownRemaining() > 0 then return false end
 
   -- Create a slider in your behavior file with uid CommonInterruptPct to set your own kick pct.
   local kickpct = Settings.CommonInterruptPct or 35
-  local units = wector.Game.Units
+  local units = Behavior:HasBehavior(BehaviorType.Combat) and Combat.Targets or wector.Game.Units
+  -- We create a combobox with uid CommonInterrupts that has three values, disabled, any, whitelist.
+  local kick = Settings.CommonInterrupts or 0
+
+  if kick == 0 then return false end
 
   for _, unit in pairs(units) do
-    local cast = unit.IsInterruptible and unit.CurrentCast
+    local cast = unit.IsInterruptible and unit.CurrentSpell
     local validTarget = self:InRange(unit)
-    if not cast or not validTarget then goto continue end
+
+    if (not cast or kick == 2 and not interrupts[cast.Id]) or not validTarget then goto continue end
 
     local channel = unit.CurrentChannel
     local castRemains = cast.CastEnd - wector.Game.Time
     local castTime = cast.CastEnd - cast.CastStart
-    local castPctRemain = math.floor(castRemains / castTime * 100)
-    local channeledTime = channel and wector.Game.Time - channel.CastStart
+    local castPctRemain = math.floor(castRemains / castTime * 100) + randomModifier
+    local channeledTime = channel and (wector.Game.Time - channel.CastStart) + randomModifier * 10
 
-    if (castPctRemain < kickpct or channel and channeledTime > 777) and self:CastEx(unit) then return true end
+    if (castPctRemain < kickpct or channel and channeledTime > 777) and self:CastEx(unit) then
+      randomModifier = math.random(-15, 15)
+      return true
+    end
+
     ::continue::
   end
 
