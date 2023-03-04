@@ -28,7 +28,7 @@ After installation the path to Pallas should be `<Wector root>/scripts/Pallas`
 | Unholy            |         :x:          | Frost             | :large_blue_diamond: | Restoration       |         :x:          |
 | **Demon Hunter**  |                      | **Monk**          |                      | **Warlock**       |                      |
 | Havoc             | :large_blue_diamond: | Brewmaster        |         :x:          | Affliction        | :large_blue_diamond: |
-| Vengeance         | :large_blue_diamond: | Mistweaver        | :large_blue_diamond: | Demonology        |         :x:          |
+| Vengeance         | :large_blue_diamond: | Mistweaver        | :heavy_check_mark:   | Demonology        |         :x:          |
 |                   |                      | Windwalker        |         :x:          | Destruction       |         :x:          |
 | **Druid**         |                      | **Paladin**       |                      | **Warrior**       |                      |
 | Balance           |         :x:          | Holy              | :large_blue_diamond: | Arms              |         :x:          |
