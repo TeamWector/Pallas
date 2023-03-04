@@ -49,69 +49,69 @@ local function IsPowerOfTheMaelstrom()
 end
 
 local function FireElemental()
-    if Spell.FireElemental:CastEx(Me) then return end
+    if Spell.FireElemental:CastEx(Me) then return true end
 end
 
 local function TotemicRecall()
-    if Spell.LiquidMagmaTotem:CooldownRemaining() > 3000 and Spell.TotemicRecall:CastEx(Me) then return end
+    if Spell.LiquidMagmaTotem:CooldownRemaining() > 3000 and Spell.TotemicRecall:CastEx(Me) then return true end
 end
 
 local function LiquidMagmaTotem()
-    if Spell.LiquidMagmaTotem:CastEx(Me) then return end
+    if Spell.LiquidMagmaTotem:CastEx(Me) then return true end
 end
 
 local function StormkeeperNoAscendance()
-    if (not Me:HasVisibleAura("Ascendance")) and Spell.Stormkeeper:CastEx(Me) then return end
+    if (not Me:HasVisibleAura("Ascendance")) and Spell.Stormkeeper:CastEx(Me) then return true end
 end
 
 local function LavaBurstWithStormkeeper(target)
-    if IsStormkeeper() and not (IsMasterOfTheElements() or IsSurgeOfPower()) and Spell.LavaBurst:CastEx(target) then return end
+    if IsStormkeeper() and not (IsMasterOfTheElements() or IsSurgeOfPower()) and Spell.LavaBurst:CastEx(target) then return true end
 end
 
 local function LavaBurstWithPrimordialWave(target)
-    if IsPrimordialWave() and Spell.LavaBurst:CastEx(target) then return end
+    if IsPrimordialWave() and Spell.LavaBurst:CastEx(target) then return true end
 end
 
 local function LavaBurstWithFlameShock(target)
-    if (target:GetAuraByMe("Flame Shock") or #target:GetUnitsAround(20) > 2) and Spell.LavaBurst:CastEx(target) then return end
+    if (target:GetAuraByMe("Flame Shock") or #target:GetUnitsAround(20) > 2) and Spell.LavaBurst:CastEx(target) then return true end
     for _, u in pairs(Combat.Targets) do
         local flameShockAura = u:GetAuraByMe("Flame Shock")
-        if (flameShockAura) and Spell.LavaBurst:CastEx(u) then return end
+        if (flameShockAura) and Spell.LavaBurst:CastEx(u) then return true end
     end
 end
 
-local function LightningBoltWithSurgeOfPower(target) 
-    if IsSurgeOfPower() and Spell.LightningBolt:CastEx(target) then return end
+local function LightningBoltWithSurgeOfPower(target)
+    if IsSurgeOfPower() and Spell.LightningBolt:CastEx(target) then return true end
 end
 
 local function ElementalBlast(target)
-    if Spell.ElementalBlast:CastEx(target) then return end
+    if Spell.ElementalBlast:CastEx(target) then return true end
 end
 
 local function LavaBurst(target)
-    if Spell.LavaBurst:CastEx(target) then return end
+    if Spell.LavaBurst:CastEx(target) then return true end
 end
 
 local function LightningBolt(target)
-    if Spell.LightningBolt:CastEx(target) then return end
+    if Spell.LightningBolt:CastEx(target) then return true end
 end
 
 local function Earthquake(target)
-    if Spell.Earthquake:CastEx(target) then return end
+    if Spell.Earthquake:CastEx(target) then return true end
 end
 
 local function FlameOrFrostShockMoving(target)
     if Me:IsMoving() then
-        if Spell.FlameShock:CastEx(target) or Spell.FrostShock:CastEx(target)  then return end
+        if Spell.FlameShock:CastEx(target) or Spell.FrostShock:CastEx(target) then return true end
     end
 end
 
 local function Stormkeeper()
-    if Spell.Stormkeeper:CastEx(Me) then return end
+    if Spell.Stormkeeper:CastEx(Me) then return true end
 end
 
 local function LavaBeamOrChainLightning(target)
-    if (Spell.LavaBeam:CastEx(target) or Spell.ChainLightning:CastEx(target)) then return end
+    if (Spell.LavaBeam:CastEx(target) or Spell.ChainLightning:CastEx(target)) then return true end
 end
 
 local function ChainLightningMulti(target)
@@ -126,35 +126,35 @@ local function PrimordialWave()
     local unitToCastAt = nil
     for _, u in pairs(Combat.Targets) do
         local flameShockAura = u:GetAuraByMe("Flame Shock")
-        if (not flameShockAura) and Spell.PrimordialWave:CastEx(u) then return end
+        if (not flameShockAura) and Spell.PrimordialWave:CastEx(u) then return true end
         if flameShockAura and ((not lowestDuration) or lowestDuration > flameShockAura.Remaining) then
             lowestDuration = flameShockAura.Remaining
             unitToCastAt = u
         end
     end
-    if (unitToCastAt) and Spell.PrimordialWave:CastEx(unitToCastAt) then return end
+    if (unitToCastAt) and Spell.PrimordialWave:CastEx(unitToCastAt) then return true end
 end
 
 -- Loop through all units find one without flame shock or lowest duration to cast Flame Shock
 local function FlameShock()
     for _, u in pairs(Combat.Targets) do
         local flameShockAura = u:GetAuraByMe("Flame Shock")
-        if (not flameShockAura or flameShockAura.Remaining < 5400) and Spell.FlameShock:CastEx(u) then return end
+        if (not flameShockAura or flameShockAura.Remaining < 5400) and Spell.FlameShock:CastEx(u) then return true end
     end
 end
 
 
 local function EarthShield()
-    if not Me:HasVisibleAura("Earth Shield") and Spell.EarthShield:CastEx(Me) then return end
+    if not Me:HasVisibleAura("Earth Shield") and Spell.EarthShield:CastEx(Me) then return true end
 end
 
 local function FlametongueWeapon()
-    if not Me:HasVisibleAura("Improved Flametongue Weapon") and Spell.FlametongueWeapon:CastEx(Me) then return end
+    if not Me:HasVisibleAura("Improved Flametongue Weapon") and Spell.FlametongueWeapon:CastEx(Me) then return true end
 end
 
 
 local function AstralShift()
-    if Settings.ShamanAstralShift > Me.HealthPct and Spell.AstralShift:CastEx(Me) then return end
+    if Settings.ShamanAstralShift > Me.HealthPct and Spell.AstralShift:CastEx(Me) then return true end
 end
 
 
@@ -166,50 +166,49 @@ local function ShamanElementalCombat()
 
 
 
-    AstralShift()
+    if AstralShift() then return end
 
-    EarthShield()
-    FlametongueWeapon()
+    if EarthShield() then return end
+    if FlametongueWeapon() then return end
 
-    common:DoInterrupt()
+    if common:DoInterrupt() then return end
 
-    FireElemental()
+    if FireElemental() then return end
 
     if #target:GetUnitsAround(20) > 2 then
         --MULTI TARGET
-        Stormkeeper()
-        PrimordialWave()
-        FlameShock()
-        LiquidMagmaTotem()
-        LavaBurstWithPrimordialWave()
+        if Stormkeeper() then return end
+        if PrimordialWave() then return end
+        if FlameShock() then return end
+        if LiquidMagmaTotem() then return end
+        if LavaBurstWithPrimordialWave() then return end
         if #target:GetUnitsAround(20) > 3 then
-            Earthquake(target)
+            if Earthquake(target) then return end
         else
-            ElementalBlast(target)
+            if ElementalBlast(target) then return end
         end
-        ChainLightningMulti(target)
-        LavaBurstWithFlameShock(target)
-        LavaBeamOrChainLightning(target)
-        FlameOrFrostShockMoving(target)
-    else 
+        if ChainLightningMulti(target) then return end
+        if LavaBurstWithFlameShock(target) then return end
+        if LavaBeamOrChainLightning(target) then return end
+        if FlameOrFrostShockMoving(target) then return end
+    else
         -- SINGLE TARGET
-        TotemicRecall()
-        LiquidMagmaTotem()
-        PrimordialWave()
-        FlameShock()
-        StormkeeperNoAscendance()
-        LavaBurstWithStormkeeper(target)
-        LightningBoltWithSurgeOfPower(target)
-        ElementalBlast(target)
-        LavaBurst(target)
-        LightningBolt(target)
-        FlameOrFrostShockMoving(target)
+        if TotemicRecall() then return end
+        if LiquidMagmaTotem() then return end
+        if PrimordialWave() then return end
+        if FlameShock() then return end
+        if StormkeeperNoAscendance() then return end
+        if LavaBurstWithStormkeeper(target) then return end
+        if LightningBoltWithSurgeOfPower(target) then return end
+        if ElementalBlast(target) then return end
+        if LavaBurst(target) then return end
+        if LightningBolt(target) then return end
+        if FlameOrFrostShockMoving(target) then return end
     end
-
 end
 
 local behaviors = {
-    [BehaviorType.Combat] = ShamanElementalCombat
+        [BehaviorType.Combat] = ShamanElementalCombat
 }
 
 return { Options = options, Behaviors = behaviors }

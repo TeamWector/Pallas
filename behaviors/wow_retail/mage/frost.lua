@@ -30,58 +30,58 @@ end
 
 local function IceBlock()
     if Settings.FrostMageIceBlock and Me.HealthPct <= Settings.FrostMageIceBlockPercent and not Me:HasVisibleAura("Hypothermia") then
-        if Spell.IceBlock:CastEx(Me) then return end
+        if Spell.IceBlock:CastEx(Me) then return true end
     end
 end
 
 local function IceBarrier()
     if not Me:HasVisibleAura("Ice Barrier") then
-        if Spell.IceBarrier:CastEx(Me) then return end
+        if Spell.IceBarrier:CastEx(Me) then return true end
     end
 end
 
 local function IceNova(target)
-    if Spell.IceNova:CastEx(target) then return end
+    if Spell.IceNova:CastEx(target) then return true end
 end
 
 local function RuneOfPower()
     if (not Spell.IcyVeins.IsKnown or Spell.IcyVeins:CooldownRemaining() > 10000) and not Me:HasVisibleAura("Rune of Power") and
         (not Me:IsMoving()) then
-        if Spell.RuneOfPower:CastEx(Me) then return end
+        if Spell.RuneOfPower:CastEx(Me) then return true end
     end
 end
 
 local function IcyVeins()
     if not Me:HasVisibleAura("Rune of Power") then
-        if Spell.IcyVeins:CastEx(Me) then return end
+        if Spell.IcyVeins:CastEx(Me) then return true end
     end
 end
 
 local function Blizzard(target)
-    if Spell.Blizzard:CastEx(target) then return end
+    if Spell.Blizzard:CastEx(target) then return true end
 end
 
 local function Flurry(target)
     if not target:HasAura("Winter's Chill") then
-        if Spell.Flurry:CastEx(target) then return end
+        if Spell.Flurry:CastEx(target) then return true end
     end
 end
 
 local function FrozenOrb(target)
-    if Me:IsFacing(target) and Spell.FrozenOrb:CastEx(target) then return end
+    if Me:IsFacing(target) and Spell.FrozenOrb:CastEx(target) then return true end
 end
 
 local function CometStorm(target)
-    if Spell.CometStorm:CastEx(target) then return end
+    if Spell.CometStorm:CastEx(target) then return true end
 end
 
 local function IceLance(target)
-    if (target:HasAura("Winter's Chill") or Me:HasVisibleAura("Fingers of Frost") or (Me:IsMoving())) and Spell.IceLance:CastEx(target) then return end
+    if (target:HasAura("Winter's Chill") or Me:HasVisibleAura("Fingers of Frost") or (Me:IsMoving())) and Spell.IceLance:CastEx(target) then return true end
 end
 
 local function Frostbolt(target)
     if Me:IsMoving() then return end
-    if Spell.Frostbolt:CastEx(target) then return end
+    if Spell.Frostbolt:CastEx(target) then return true end
 end
 
 local function MageRest()
@@ -92,36 +92,36 @@ local function MageFrostCombat()
 
     if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
-    IceBlock()
+    if IceBlock() then return end
 
 
     local target = Combat.BestTarget
     if not target then return end
     if Me.IsCastingOrChanneling then return end
 
-    IceBarrier()
+    if IceBarrier() then return end
 
     -- do interrupt here
 
-    RuneOfPower()
-    IcyVeins()
+    if RuneOfPower() then return end
+    if IcyVeins() then return end
 
 
     if Combat:GetEnemiesWithinDistance(39) > 2 then
         -- multitarget rotation
-        FrozenOrb(target)
-        Blizzard(target)
-        IceNova(target)
-        Flurry(target)
+        if FrozenOrb(target) then return end
+        if Blizzard(target) then return end
+        if IceNova(target) then return end
+        if Flurry(target) then return end
     else
         -- singletarget rotation
-        Flurry(target)
-        FrozenOrb(target)
+        if Flurry(target) then return end
+        if FrozenOrb(target) then return end
     end
 
-    CometStorm(target)
-    IceLance(target)
-    Frostbolt(target)
+    if CometStorm(target) then return end
+    if IceLance(target) then return end
+    if Frostbolt(target) then return end
 end
 
 local behaviors = {

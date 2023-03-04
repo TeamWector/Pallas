@@ -317,6 +317,7 @@ end
 local function HolyPaladinDamage()
   if Me:IsSitting() or Me.IsCastingOrChanneling then return end
 
+  if common:DoInterrupt() then return end
   if CrusaderStrike() then return end
   if common:HammerOfWrath() then return end
   if Judgement() then return end

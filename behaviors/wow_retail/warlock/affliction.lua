@@ -16,7 +16,16 @@ local function WarlockAffliction()
   local target = Combat.BestTarget
   if not target then return end
 
+  -- Bool type for Apply function
   if Spell.UnstableAffliction:Apply(target, not Combat:CheckTargetsForAuraByMe(Spell.UnstableAffliction.Name, 3000)) then return end
+
+  -- Lambda type for Apply function
+  if Spell.DrainSoul:Apply(target, function()
+        return target.HealthPct < 20
+      end) then
+    return
+  end
+
   if Spell.Corruption:Apply(target) then return end
   if Spell.Agony:Apply(target) then return end
 
@@ -25,7 +34,6 @@ local function WarlockAffliction()
     if Spell.Agony:Apply(t) then return end
     if Spell.Corruption:Apply(t) then return end
   end
-
 end
 
 local behaviors = {

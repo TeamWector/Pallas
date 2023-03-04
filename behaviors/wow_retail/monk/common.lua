@@ -46,6 +46,13 @@ commonMonk.widgets = {
     default = 0,
     options = { "Disabled", "Any", "Whitelist" }
   },
+  {
+    type = "combobox",
+    uid = "CommonInterrupts",
+    text = "Interrupt",
+    default = 0,
+    options = { "Disabled", "Any", "Whitelist" }
+  },
 }
 
 function commonMonk:TouchOfDeath(enemy)
@@ -54,7 +61,7 @@ function commonMonk:TouchOfDeath(enemy)
   local improved = Me:GetAura(322113)
 
   for _, t in pairs(Combat.Targets) do
-    local valid = t.Health < Me.Health or improved and t.HealthPct < 15
+    local valid = t.Health < Me.Health and not t.IsPlayer or improved and t.HealthPct < 15
 
     if valid and spell:CastEx(t, SpellCastExFlags.NoUsable) then return true end
   end
