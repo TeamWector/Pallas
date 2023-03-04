@@ -155,7 +155,7 @@ local auras = {
   faeline = 388193,
   improvedDetox = 388874,
   ancientteachings = 388026,
-  ancientconcordance = 389391
+  ancientconcordance = 389391,
 }
 
 local function IsCastingOrChanneling()
@@ -253,13 +253,12 @@ local function ChiWave(enemy)
 end
 
 local function CracklingJadeLightning(enemy)
-  return Spell.CracklingJadeLightning:Apply(enemy)
+  return Me:GetDistance(enemy) > 15 and Spell.CracklingJadeLightning:Apply(enemy)
 end
 
-local Pos = Vec3(0, 0, 0)
 local function FaelineStomp()
   if Spell.FaelineStomp:CooldownRemaining() > 0 then return end
-  if Me:GetAura(auras.faeline) and Me:GetAura(auras.ancientteachings) and Me.Position:DistanceSq(Pos) < 10 then return end
+  if Me:GetAura(auras.ancientconcordance) then return end
 
   if Me.InCombat and not Me:IsMoving() and Spell.FaelineStomp:CastEx(Me) then
     Pos = Me.Position
@@ -309,7 +308,7 @@ local function MonkMistweaverDamage()
   if IsCastingOrChanneling() or not Me:IsFacing(target) then return end
 
   local lowest = Heal:GetLowestMember()
-  if lowest and lowest.HealthPct < Settings.VivifyPct then return end
+  if lowest and lowest.HealthPct < Settings.VivifyPct and Spell.Vivify:IsUsable() then return end
 
   if Dispel() then return end
   if common:LegSweep() then return end
