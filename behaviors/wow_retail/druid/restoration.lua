@@ -182,19 +182,12 @@ end
 local efflorescence_time = 0
 local efflorescence_pos = Vec3(0.0, 0.0, 0.0)
 
-local deleteme = false
 local function DruidRestoHeal()
   if Me.Dead then return end
   if Me:IsStunned() then return end
   if Me.IsCastingOrChanneling then return end
   if Me.StandStance == StandStance.Sit then return end
   if (Me.MovementFlags & MovementFlags.Flying) > 0 then return end
-
-  if (not deleteme) then
-    print('is arena' .. tostring(WoWGroup:IsArena()))
-    print('is arena preparation' .. tostring(WoWGroup:IsArenaPreparation()))
-    deleteme = true
-  end
 
   if Me.ShapeshiftForm == ShapeshiftForm.Bear or
       Me.ShapeshiftForm == ShapeshiftForm.DireBear then
@@ -322,12 +315,10 @@ local function DruidRestoHeal()
   
   if Settings.DruidRestoPvPMode and Me.ShapeshiftForm == ShapeshiftForm.Normal and WoWGroup:IsArena() and not WoWGroup:IsArenaPreparation() then
     -- do lifebloom and rejuv while doing nothing
-    for _, v in pairs(Heal.PriorityList) do
-      ---@type WoWUnit
-      local u = v.Unit
-      local prio = v.Priority
-      if Spell.Rejuvenation:Apply(u) then print('Applied Rejuv as a pre-hot on ' .. u.NameUnsafe) return  end
-      if Spell.Lifebloom:Apply(u) then print('Applied Lifebloom as a pre-hot on ' .. u.NameUnsafe) return end
+    local friends = WoWGroup:GetGroupUnits()
+    for _, f in pairs(friends) do
+      if Spell.Rejuvenation:Apply(f) then print('Applied Rejuv as a pre-hot on ' .. f.NameUnsafe) return end
+      if Spell.Lifebloom:Apply(f, f ~= Me) then print('Applied Lifebloom as a pre-hot on ' .. f.NameUnsafe) return end
     end
   end
 
