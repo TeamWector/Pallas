@@ -151,8 +151,8 @@ local function DruidRestoDamage()
 end
 
 local blacklist = {
-  [118] = "Polymorph",
-  [51514] = "Hex"
+      [118] = "Polymorph",
+      [51514] = "Hex"
 }
 
 local function DruidRestoCombat()
@@ -181,6 +181,8 @@ end
 
 local efflorescence_time = 0
 local efflorescence_pos = Vec3(0.0, 0.0, 0.0)
+
+local deleteme = false
 local function DruidRestoHeal()
   if Me.Dead then return end
   if Me:IsStunned() then return end
@@ -188,6 +190,11 @@ local function DruidRestoHeal()
   if Me.StandStance == StandStance.Sit then return end
   if (Me.MovementFlags & MovementFlags.Flying) > 0 then return end
 
+  if (not deleteme) then
+    print('is arena' .. tostring(WoWGroup:IsArena()))
+    print('is arena preparation' .. tostring(WoWGroup:IsArenaPreparation()))
+    deleteme = true
+  end
 
   if Me.ShapeshiftForm == ShapeshiftForm.Bear or
       Me.ShapeshiftForm == ShapeshiftForm.DireBear then
@@ -309,19 +316,21 @@ local function DruidRestoHeal()
     --  if u.HealthPct < 70 and lifebloom.Stacks < 3 and Spell.Lifebloom:CastEx(u) then return end
     --  --if lifebloom.Remaining < 2500 and u.HealthPct > 70 and Spell.Lifebloom:CastEx(u) then return end
     --end
-
-    if Settings.DruidRestoPvPMode then
-      -- do lifebloom and rejuv while doing nothing
-      for _, v in pairs(Heal.PriorityList) do
-        ---@type WoWUnit
-        local u = v.Unit
-        local prio = v.Priority
-        if not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
-      end
-    end
-
     ::continue::
   end
+
+  
+  if Settings.DruidRestoPvPMode and Me.ShapeshiftForm == ShapeshiftForm.Normal and WoWGroup:IsArena() and not WoWGroup:IsArenaPreparation() then
+    -- do lifebloom and rejuv while doing nothing
+    for _, v in pairs(Heal.PriorityList) do
+      ---@type WoWUnit
+      local u = v.Unit
+      local prio = v.Priority
+      if Spell.Rejuvenation:Apply(u) then print('Applied Rejuv as a pre-hot on ' .. u.NameUnsafe) return  end
+      if Spell.Lifebloom:Apply(u) then print('Applied Lifebloom as a pre-hot on ' .. u.NameUnsafe) return end
+    end
+  end
+
 
   if Settings.DruidRestoDPS then
     DruidRestoDamage()
@@ -331,7 +340,7 @@ end
 return {
   Options = options,
   Behaviors = {
-    [BehaviorType.Combat] = DruidRestoCombat,
-    [BehaviorType.Heal] = DruidRestoHeal,
+        [BehaviorType.Combat] = DruidRestoCombat,
+        [BehaviorType.Heal] = DruidRestoHeal,
   }
 }
