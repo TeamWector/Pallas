@@ -1,6 +1,5 @@
 local options = {
   Name = "Autoloot",
-
   -- widgets
   Widgets = {
     {
@@ -47,7 +46,9 @@ local function Autoloot()
   local units = wector.Game.Units
 
   if Me:IsMoving() or Me.IsCastingOrChanneling or (#Me:GetUnitsAround(10) > 0 and Me.InCombat) or
-      Me.IsMounted then return end
+      Me.IsMounted then
+    return
+  end
 
   -- clean up looted cache
   local timesince = wector.Game.Time - lastloot
