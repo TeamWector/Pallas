@@ -23,16 +23,16 @@ After installation the path to Pallas should be `<Wector root>/scripts/Pallas`
 |                   |                      |                   |                      |                   |                      |
 |-------------------|:--------------------:|-------------------|:--------------------:|-------------------|:--------------------:|
 | **Death Knight**  |                      | **Mage**          |                      | **Shaman**        |                      |
-| Blood             |         :x:          | Arcane            |         :x:          | Elemental         |         :x:          |
-| Frost             |         :x:          | Fire              |         :x:          | Enhancement       |         :x:          |
+| Blood             |         :x:          | Arcane            |         :x:          | Elemental         | :large_blue_diamond: |
+| Frost             |         :x:          | Fire              |         :x:          | Enhancement       | :large_blue_diamond: |
 | Unholy            |         :x:          | Frost             | :large_blue_diamond: | Restoration       |         :x:          |
 | **Demon Hunter**  |                      | **Monk**          |                      | **Warlock**       |                      |
-| Havoc             | :large_blue_diamond: | Brewmaster        |         :x:          | Affliction        |         :x:          |
-| Vengeance         | :large_blue_diamond: | Mistweaver        |         :x:          | Demonology        |         :x:          |
+| Havoc             | :large_blue_diamond: | Brewmaster        |         :x:          | Affliction        | :large_blue_diamond: |
+| Vengeance         | :large_blue_diamond: | Mistweaver        | :large_blue_diamond: | Demonology        |         :x:          |
 |                   |                      | Windwalker        |         :x:          | Destruction       |         :x:          |
 | **Druid**         |                      | **Paladin**       |                      | **Warrior**       |                      |
-| Balance           |         :x:          | Holy              |         :x:          | Arms              |         :x:          |
-| Feral             | :large_blue_diamond: | Protection        |         :x:          | Fury              |  :heavy_check_mark:  |
+| Balance           |         :x:          | Holy              | :large_blue_diamond: | Arms              |         :x:          |
+| Feral             | :large_blue_diamond: | Protection        | :large_blue_diamond: | Fury              |  :heavy_check_mark:  |
 | Guardian          |         :x:          | Retribution       |         :x:          | Protection        | :large_blue_diamond: |
 | Restoration       | :large_blue_diamond: |                   |                      |                   |                      |
 | **Evoker**        |                      | **Priest**        |                      |                   |                      |
@@ -40,8 +40,8 @@ After installation the path to Pallas should be `<Wector root>/scripts/Pallas`
 | Preservation      |         :x:          | Holy              |         :x:          |                   |                      |
 |                   |                      | Shadow            |         :x:          |                   |                      |
 | **Hunter**        |                      | **Rogue**         |                      |                   |                      |
-| Beast Mastery     |         :x:          | Assassination     |         :x:          |                   |                      |
-| Marksmanship      |         :x:          | Outlaw            |         :x:          |                   |                      |
+| Beast Mastery     | :large_blue_diamond: | Assassination     |         :x:          |                   |                      |
+| Marksmanship      | :large_blue_diamond: | Outlaw            |         :x:          |                   |                      |
 | Survival          |         :x:          | Sublety           |         :x:          |                   |                      |
 
 ## Status (Wrath)
