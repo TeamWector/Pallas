@@ -261,7 +261,6 @@ local function FaelineStomp()
   if Me:GetAura(auras.ancientconcordance) then return end
 
   if Me.InCombat and not Me:IsMoving() and Spell.FaelineStomp:CastEx(Me) then
-    Pos = Me.Position
     return true
   end
 end
