@@ -214,7 +214,7 @@ local function EssenceFont()
   if Spell.EssenceFont:CooldownRemaining() > 0 then return end
 
   local below, count = Heal:GetMembersBelow(Settings.EssenceFontPct)
-  return count >= Settings.EssenceFontCount and Spell.EssenceFont:CastEx(Me)
+  return count >= Settings.EssenceFontCount and Me:IsMoving() and Spell.EssenceFont:CastEx(Me)
 end
 
 local function SpinningCraneKick()
@@ -258,7 +258,7 @@ end
 
 local function FaelineStomp()
   if Spell.FaelineStomp:CooldownRemaining() > 0 then return end
-  if Me:GetAura(auras.ancientconcordance) then return end
+  if Me:GetAura(auras.ancientconcordance) and Me:GetAura(auras.ancientteachings) then return end
 
   if Me.InCombat and not Me:IsMoving() and Spell.FaelineStomp:CastEx(Me) then
     return true
