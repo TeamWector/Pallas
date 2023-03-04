@@ -62,8 +62,9 @@ function commonMonk:TouchOfDeath(enemy)
 
   for _, t in pairs(Combat.Targets) do
     local valid = t.Health < Me.Health and not t.IsPlayer or improved and t.HealthPct < 15
+    local inrange = Me:InMeleeRange(t)
 
-    if valid and spell:CastEx(t, SpellCastExFlags.NoUsable) then return true end
+    if valid and inrange and spell:CastEx(t, SpellCastExFlags.NoUsable) then return true end
   end
 end
 

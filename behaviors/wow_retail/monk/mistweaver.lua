@@ -156,6 +156,7 @@ local auras = {
   improvedDetox = 388874,
   ancientteachings = 388026,
   ancientconcordance = 389391,
+  invokechiji = 343820
 }
 
 local function IsCastingOrChanneling()
@@ -174,6 +175,20 @@ local function RenewingMist()
 end
 
 local function EnvelopingMist(friend)
+  local chiji = Me:GetAura(auras.invokechiji)
+
+  if chiji and chiji.Stacks == 3 then
+    for _, v in pairs(Heal.Tanks) do
+      local f = v.Unit
+      if Spell.EnvelopingMist:Apply(f) then return true end
+    end
+
+    for _, v in pairs(Heal.PriorityList) do
+      local f = v.Unit
+      if Spell.EnvelopingMist:Apply(f) then return true end
+    end
+  end
+
   if friend.HealthPct < Settings.EnvelopPct then
     return Spell.EnvelopingMist:Apply(friend)
   end
@@ -221,7 +236,7 @@ local function SpinningCraneKick()
   local enemyCount = Combat:GetEnemiesWithinDistance(8)
 
   if (enemyCount < 5 and Me:GetAura(auras.ancientconcordance) or enemyCount < 3) or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
-  return Spell.SpinningCraneKick:CastEx(Me)
+  return not Me.IsCastingOrChanneling and Spell.SpinningCraneKick:CastEx(Me)
 end
 
 local function RisingSunKick(enemy)
@@ -256,11 +271,11 @@ local function CracklingJadeLightning(enemy)
   return Me:GetDistance(enemy) > 15 and Spell.CracklingJadeLightning:Apply(enemy)
 end
 
-local function FaelineStomp()
+local function FaelineStomp(enemy)
   if Spell.FaelineStomp:CooldownRemaining() > 0 then return end
   if Me:GetAura(auras.ancientconcordance) and Me:GetAura(auras.ancientteachings) then return end
 
-  if Me.InCombat and not Me:IsMoving() and Spell.FaelineStomp:CastEx(Me) then
+  if Me.InCombat and not Me:IsMoving() and Me:InMeleeRange(enemy) and Spell.FaelineStomp:CastEx(Me) then
     return true
   end
 end
@@ -270,7 +285,7 @@ local function HealingElixir()
 end
 
 local function ChijiRedCrane()
-  local spell = Spell.ChijiTheRedCrane
+  local spell = Spell.InvokeChijiTheRedCrane
   if spell:CooldownRemaining() > 0 then return end
 
   local below, count = Heal:GetMembersBelow(Settings.ChijiPct)
@@ -291,10 +306,16 @@ local function Dispel()
   local DispelType = WoWDispelType
 
   if Me:GetAura(auras.improvedDetox) then
-    if Spell.Detox:Dispel(true, DispelType.Magic, DispelType.Poison, DispelType.Disease) then return true end
+    if Spell.Detox:Dispel(true, DispelType.Magic, DispelType.Disease, WoWDispelType.Poison or 4) then return true end
+    return
   end
 
   if Spell.Detox:Dispel(true, DispelType.Magic) then return true end
+end
+
+local function ManaTea()
+  local below, count = Heal:GetMembersBelow(80)
+  if count > 2 and Spell.ManaTea:CastEx(Me) then return true end
 end
 
 local function MonkMistweaverDamage()
@@ -312,7 +333,7 @@ local function MonkMistweaverDamage()
   if Dispel() then return end
   if common:LegSweep() then return end
   if common:TouchOfDeath(target) then return end
-  if FaelineStomp() then return end
+  if FaelineStomp(target) then return end
   if ChiBurst(target) then return end
   if ChiWave(target) then return end
   if SpinningCraneKick() then return end
@@ -329,6 +350,7 @@ local function MonkMistweaver()
 
   if IsCastingOrChanneling() then return end
 
+  if ManaTea() then return end
   if common:DiffuseMagic() then return end
   if common:FortifyingBrew() then return end
   if common:DampenHarm() then return end
