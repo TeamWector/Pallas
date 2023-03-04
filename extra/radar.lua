@@ -3,74 +3,74 @@ local herbs, ores, treasures = gatherables.herb, gatherables.ore, gatherables.tr
 local colors = require("data.colors")
 
 local options = {
-    Name = "Radar",
-    -- widgets
-    Widgets = {
-        {
-            type = "checkbox",
-            uid = "ExtraRadar",
-            text = "Enable Radar",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "ExtraRadarTrackHerbs",
-            text = "Track Herbs",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "ExtraRadarTrackOres",
-            text = "Track Ores",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "ExtraRadarTrackTreasures",
-            text = "Track Treasures",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "ExtraRadarTrackQuests",
-            text = "Track QuestObjects",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "ExtraRadarTrackRares",
-            text = "Track Rares",
-            default = false
-        },
-        {
-            type = "checkbox",
-            uid = "ExtraRadarDrawLines",
-            text = "Draw Lines",
-            default = true
-        },
-        {
-            type = "checkbox",
-            uid = "ExtraRadarDrawDistance",
-            text = "Draw Distance",
-            default = false
-        },
-        {
-            type = "slider",
-            uid = "ExtraRadarLoadDistance",
-            text = "Radar Load Distance",
-            default = 200,
-            min = 1,
-            max = 200
-        },
-    }
+  Name = "Radar",
+  -- widgets
+  Widgets = {
+    {
+      type = "checkbox",
+      uid = "ExtraRadar",
+      text = "Enable Radar",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "ExtraRadarTrackHerbs",
+      text = "Track Herbs",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "ExtraRadarTrackOres",
+      text = "Track Ores",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "ExtraRadarTrackTreasures",
+      text = "Track Treasures",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "ExtraRadarTrackQuests",
+      text = "Track QuestObjects",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "ExtraRadarTrackRares",
+      text = "Track Rares",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "ExtraRadarDrawLines",
+      text = "Draw Lines",
+      default = true
+    },
+    {
+      type = "checkbox",
+      uid = "ExtraRadarDrawDistance",
+      text = "Draw Distance",
+      default = false
+    },
+    {
+      type = "slider",
+      uid = "ExtraRadarLoadDistance",
+      text = "Radar Load Distance",
+      default = 200,
+      min = 1,
+      max = 200
+    },
+  }
 }
 local objectColors = {
-    ["herb"] = colors.green,
-    ["vein"] = colors.orange,
-    ["treasure"] = colors.silver,
-    ["rare"] = colors.purple,
-    ["tracked"] = colors.white,
-    ["quests"] = colors.pink
+  ["herb"] = colors.green,
+  ["vein"] = colors.orange,
+  ["treasure"] = colors.silver,
+  ["rare"] = colors.purple,
+  ["tracked"] = colors.white,
+  ["quests"] = colors.pink
 }
 
 local manuallytracked = {}
@@ -128,13 +128,13 @@ local function CollectVisuals()
   local units = wector.Game.Units
   -- Settings
   local settings = {
-      trackHerbs = Settings.ExtraRadarTrackHerbs,
-      trackOres = Settings.ExtraRadarTrackOres,
-      trackTreasures = Settings.ExtraRadarTrackTreasures,
-      trackRares = Settings.ExtraRadarTrackRares,
-      trackQuests = Settings.ExtraRadarTrackQuests,
-      trackManual = table.length(manuallytracked) > 0,
-      loadRange = Settings.ExtraRadarLoadDistance,
+    trackHerbs = Settings.ExtraRadarTrackHerbs,
+    trackOres = Settings.ExtraRadarTrackOres,
+    trackTreasures = Settings.ExtraRadarTrackTreasures,
+    trackRares = Settings.ExtraRadarTrackRares,
+    trackQuests = Settings.ExtraRadarTrackQuests,
+    trackManual = table.length(manuallytracked) > 0,
+    loadRange = Settings.ExtraRadarLoadDistance,
   }
 
   onscreen = {}
@@ -209,7 +209,7 @@ local function DrawColoredText()
     local object = o.object
     local type = o.type
     local textpos = World2Screen(Vec3(object.Position.x, object.Position.y,
-            object.Position.z + object.DisplayHeight + 1))
+      object.Position.z + object.DisplayHeight + 1))
     local text = "[" .. string.upper(type:sub(1, 1)) .. "] " .. object.Name
 
     if Settings.ExtraRadarDrawDistance then
@@ -229,7 +229,7 @@ local function Radar()
 end
 
 local behaviors = {
-    [BehaviorType.Extra] = Radar
+  [BehaviorType.Extra] = Radar
 }
 
 wector.Console:Log("Radar Loaded")

@@ -312,8 +312,8 @@ local function DruidRestoHeal()
     ::continue::
   end
 
-  
-  if Settings.DruidRestoPvPMode and Me.ShapeshiftForm == ShapeshiftForm.Normal and WoWGroup:IsArena() and not WoWGroup:IsArenaPreparation() then
+
+  if Settings.DruidRestoPvPMode and Me.ShapeshiftForm == ShapeshiftForm.Normal and Me:InArena() and not Me:HasArenaPreparation() then
     -- do lifebloom and rejuv while doing nothing
     local friends = WoWGroup:GetGroupUnits()
     for _, f in pairs(friends) do
