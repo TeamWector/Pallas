@@ -187,6 +187,7 @@ local function DruidRestoHeal()
   if Me:IsStunned() then return end
   if Me.IsCastingOrChanneling then return end
   if Me.StandStance == StandStance.Sit then return end
+  if Me.IsMounted then return end
   if (Me.MovementFlags & MovementFlags.Flying) > 0 then return end
 
   if Me.ShapeshiftForm == ShapeshiftForm.Bear or
