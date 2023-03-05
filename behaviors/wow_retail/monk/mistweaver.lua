@@ -139,6 +139,22 @@ local options = {
       min = 1,
       max = 5
     },
+    {
+      type = "slider",
+      uid = "SheilunPct",
+      text = "Sheilun's Gift (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "SheilunCount",
+      text = "Sheilun's Gift Count",
+      default = 1,
+      min = 1,
+      max = 5
+    },
   }
 }
 
@@ -156,7 +172,8 @@ local auras = {
   improvedDetox = 388874,
   ancientteachings = 388026,
   ancientconcordance = 389391,
-  invokechiji = 343820
+  invokechiji = 343820,
+  sheilunsgift = 399510
 }
 
 local function IsCastingOrChanneling()
@@ -235,7 +252,7 @@ end
 local function SpinningCraneKick()
   local enemyCount = Combat:GetEnemiesWithinDistance(8)
 
-  if (enemyCount < 5 and Me:GetAura(auras.ancientconcordance) or enemyCount < 3) or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
+  if (enemyCount < 7 and Me:GetAura(auras.ancientconcordance) or enemyCount < 3) or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
   return not Me.IsCastingOrChanneling and Spell.SpinningCraneKick:CastEx(Me)
 end
 
@@ -268,7 +285,7 @@ local function ChiWave(enemy)
 end
 
 local function CracklingJadeLightning(enemy)
-  return Me:GetDistance(enemy) > 15 and Spell.CracklingJadeLightning:Apply(enemy)
+  return not Me.IsCastingOrChanneling and Me:GetDistance(enemy) > 15 and Spell.CracklingJadeLightning:Apply(enemy)
 end
 
 local function FaelineStomp(enemy)
@@ -286,7 +303,7 @@ end
 
 local function ChijiRedCrane()
   local spell = Spell.InvokeChijiTheRedCrane
-  if spell:CooldownRemaining() > 0 then return end
+  if spell:CooldownRemaining() > 0 or not Me.InCombat then return end
 
   local below, count = Heal:GetMembersBelow(Settings.ChijiPct)
 
@@ -315,11 +332,21 @@ end
 
 local function ManaTea()
   local below, count = Heal:GetMembersBelow(80)
-  if count > 2 and Spell.ManaTea:CastEx(Me) then return true end
+  if count >= 2 and Spell.ManaTea:CastEx(Me) then return true end
+end
+
+local function SheilunsGift()
+  local spell = Spell.SheilunsGift
+  local sheilun = Me:GetAura(auras.sheilunsgift)
+  if not sheilun or sheilun.Stacks == 0 then return end
+
+  local below, count = Heal:GetMembersBelow(Settings.SheilunPct)
+
+  return sheilun.Stacks > 2 and count >= Settings.SheilunCount and spell:CastEx(Me)
 end
 
 local function MonkMistweaverDamage()
-  if Me:IsSitting() or Me.IsMounted then return end
+  if Me:IsSitting() or Me.IsMounted or Me:IsStunned() then return end
 
   local target = Combat.BestTarget
   local GCD = wector.SpellBook.GCD
@@ -330,9 +357,8 @@ local function MonkMistweaverDamage()
   local lowest = Heal:GetLowestMember()
   if lowest and lowest.HealthPct < Settings.VivifyPct and Spell.Vivify:IsUsable() then return end
 
-  if Dispel() then return end
   if common:LegSweep() then return end
-  if common:TouchOfDeath(target) then return end
+  if common:TouchOfDeath() then return end
   if FaelineStomp(target) then return end
   if ChiBurst(target) then return end
   if ChiWave(target) then return end
@@ -344,7 +370,7 @@ local function MonkMistweaverDamage()
 end
 
 local function MonkMistweaver()
-  if Me:IsSitting() or Me.IsMounted then return end
+  if Me:IsSitting() or Me.IsMounted or Me:IsStunned() then return end
 
   if Spell.SpearHandStrike:Interrupt() then return end
 
@@ -357,8 +383,10 @@ local function MonkMistweaver()
   if common:TigersLust() then return end
   if HealingElixir() then return end
   if Revival() then return end
+  if SheilunsGift() then return end
   if ChijiRedCrane() then return end
   if EssenceFont() then return end
+  if Dispel() then return end
 
   for _, v in pairs(Heal.PriorityList) do
     local f = v.Unit

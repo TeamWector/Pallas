@@ -55,16 +55,16 @@ commonMonk.widgets = {
   },
 }
 
-function commonMonk:TouchOfDeath(enemy)
+function commonMonk:TouchOfDeath()
   local spell = Spell.TouchOfDeath
   if spell:CooldownRemaining() > 0 then return end
   local improved = Me:GetAura(322113)
 
   for _, t in pairs(Combat.Targets) do
-    local valid = t.Health < Me.Health and not t.IsPlayer or improved and t.HealthPct < 15
+    local valid = t.Health < Me.HealthMax and not t.IsPlayer or improved and t.HealthPct < 15
     local inrange = Me:InMeleeRange(t)
 
-    if valid and inrange and spell:CastEx(t, SpellCastExFlags.NoUsable) then return true end
+    if valid and inrange and spell:CastEx(t) then return true end
   end
 end
 
