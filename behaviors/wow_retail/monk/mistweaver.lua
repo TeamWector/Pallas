@@ -236,8 +236,11 @@ local function ZenPulse(friend)
   if Spell.ZenPulse:CooldownRemaining() > 0 then return end
 
   if friend.HealthPct < Settings.ZenPulsePct then
-    if not Settings.ZenReverb or friend:GetAuraByMe(auras.envelopingmist) and friend:GetAuraByMe(auras.renewingmist) then
-      return #friend:GetUnitsAround(8) > 0 and Spell.ZenPulse:CastEx(friend)
+    local enemy8 = #friend:GetUnitsAround(8)
+    local reverb = not Settings.ZenReverb or
+    friend:GetAuraByMe(auras.envelopingmist) and friend:GetAuraByMe(auras.renewingmist)
+    if reverb or enemy8 > 4 then
+      return enemy8 > 0 and Spell.ZenPulse:CastEx(friend)
     end
   end
 end
@@ -289,7 +292,7 @@ local function CracklingJadeLightning(enemy)
 end
 
 local function FaelineStomp(enemy)
-  if Spell.FaelineStomp:CooldownRemaining() > 0 then return end
+  if Spell.FaelineStomp:CooldownRemaining() > 0 or Combat:TargetsAverageDeathTime() < 10 then return end
   if Me:GetAura(auras.ancientconcordance) and Me:GetAura(auras.ancientteachings) then return end
 
   if Me.InCombat and not Me:IsMoving() and Me:InMeleeRange(enemy) and Spell.FaelineStomp:CastEx(Me) then
@@ -376,6 +379,7 @@ local function MonkMistweaver()
 
   if IsCastingOrChanneling() then return end
 
+  if Dispel() then return end
   if ManaTea() then return end
   if common:DiffuseMagic() then return end
   if common:FortifyingBrew() then return end
@@ -386,7 +390,6 @@ local function MonkMistweaver()
   if SheilunsGift() then return end
   if ChijiRedCrane() then return end
   if EssenceFont() then return end
-  if Dispel() then return end
 
   for _, v in pairs(Heal.PriorityList) do
     local f = v.Unit
