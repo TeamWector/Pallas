@@ -57,7 +57,7 @@ commonMonk.widgets = {
 
 function commonMonk:TouchOfDeath()
   local spell = Spell.TouchOfDeath
-  if spell:CooldownRemaining() > 0 then return end
+  if spell:CooldownRemaining() > 0 or Me.IsCastingOrChanneling then return end
   local improved = Me:GetAura(322113)
 
   for _, t in pairs(Combat.Targets) do

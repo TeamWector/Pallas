@@ -183,11 +183,12 @@ local function IsCastingOrChanneling()
 end
 
 local function RenewingMist()
-  if Spell.RenewingMist.Charges == 0 or not Settings.RMSpread then return false end
+  local spell = Spell.RenewingMist
+  if spell.Charges == 0 or not Settings.RMSpread then return false end
 
   local friends = WoWGroup:GetGroupUnits()
   for _, f in pairs(friends) do
-    if Spell.RenewingMist:Apply(f) then return true end
+    if spell:Apply(f) then return true end
   end
 end
 
@@ -238,7 +239,7 @@ local function ZenPulse(friend)
   if friend.HealthPct < Settings.ZenPulsePct then
     local enemy8 = #friend:GetUnitsAround(8)
     local reverb = not Settings.ZenReverb or
-    friend:GetAuraByMe(auras.envelopingmist) and friend:GetAuraByMe(auras.renewingmist)
+        friend:GetAuraByMe(auras.envelopingmist) and friend:GetAuraByMe(auras.renewingmist)
     if reverb or enemy8 > 4 then
       return enemy8 > 0 and Spell.ZenPulse:CastEx(friend)
     end
@@ -292,7 +293,7 @@ local function CracklingJadeLightning(enemy)
 end
 
 local function FaelineStomp(enemy)
-  if Spell.FaelineStomp:CooldownRemaining() > 0 or Combat:TargetsAverageDeathTime() < 10 then return end
+  if Spell.FaelineStomp:CooldownRemaining() > 0 or enemy:TimeToDeath() < 10 then return end
   if Me:GetAura(auras.ancientconcordance) and Me:GetAura(auras.ancientteachings) then return end
 
   if Me.InCombat and not Me:IsMoving() and Me:InMeleeRange(enemy) and Spell.FaelineStomp:CastEx(Me) then
@@ -374,6 +375,9 @@ end
 
 local function MonkMistweaver()
   if Me:IsSitting() or Me.IsMounted or Me:IsStunned() then return end
+
+  local GCD = wector.SpellBook.GCD
+  if GCD:CooldownRemaining() > 0 then return end
 
   if Spell.SpearHandStrike:Interrupt() then return end
 
