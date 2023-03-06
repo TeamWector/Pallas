@@ -350,8 +350,11 @@ local function CracklingJadeLightning(enemy)
 end
 
 local function FaelineStomp(enemy)
-  if Spell.FaelineStomp:CooldownRemaining() > 0 or enemy:TimeToDeath() < 16 or enemy:TimeToDeath() == 9999 then return false end
+  if Spell.FaelineStomp:CooldownRemaining() > 0 then return false end
   if Me:GetAura(auras.ancientconcordance) and Me:GetAura(auras.ancientteachings) then return false end
+
+  local TTD = Combat:TargetsAverageDeathTime()
+  if TTD < 10 or TTD == 9999 then return false end
 
   if Me.InCombat and not Me:IsMoving() and Me:InMeleeRange(enemy) and Spell.FaelineStomp:CastEx(Me) then
     return true
