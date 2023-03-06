@@ -67,14 +67,6 @@ local options = {
       max = 100
     },
     {
-      type = "slider",
-      uid = "TeachingsPct",
-      text = "Teachings Mana (%)",
-      default = 0,
-      min = 0,
-      max = 100
-    },
-    {
       type = "checkbox",
       uid = "ZenReverb",
       text = "Zen Pulse Reverb",
@@ -255,8 +247,10 @@ end
 
 local function SpinningCraneKick()
   local enemyCount = Combat:GetEnemiesWithinDistance(8)
+  local hasaoekick = Me:GetAura(auras.ancientconcordance)
 
-  if (enemyCount < 7 and Me:GetAura(auras.ancientconcordance) or enemyCount < 3) or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
+  if (enemyCount < 7 and hasaoekick or enemyCount < 3) or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
+
   return not Me.IsCastingOrChanneling and Spell.SpinningCraneKick:CastEx(Me)
 end
 
@@ -272,8 +266,9 @@ end
 
 local function BlackoutKick(enemy)
   local teachings = Me:GetAura(auras.teachingsofthemonastery)
-  return (Spell.RisingSunKick:CooldownRemaining() > 2000 and (Me.PowerPct > Settings.TeachingsPct or teachings and teachings.Stacks == 3)) and
-      Spell.BlackoutKick:CastEx(enemy)
+  local multikick = teachings and teachings.Stacks == 3
+
+  return (Spell.RisingSunKick:CooldownRemaining() > 2000 or multikick) and Spell.BlackoutKick:CastEx(enemy)
 end
 
 local function TigerPalm(enemy)
