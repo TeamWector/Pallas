@@ -12,6 +12,14 @@ local options = {
     },
     {
       type = "slider",
+      uid = "InstantVivifyPct",
+      text = "Instant Vivify (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
       uid = "VivifyPct",
       text = "Vivify (%)",
       default = 0,
@@ -254,7 +262,9 @@ local function LifeCocoon(friend)
 end
 
 local function Vivify(friend)
-  if friend.HealthPct < Settings.VivifyPct then
+  local instant = Me:GetAura(392883)
+
+  if friend.HealthPct < Settings.VivifyPct or instant and friend.HealthPct < Settings.InstantVivifyPct then
     return Spell.Vivify:CastEx(friend)
   end
 end
@@ -340,8 +350,8 @@ local function CracklingJadeLightning(enemy)
 end
 
 local function FaelineStomp(enemy)
-  if Spell.FaelineStomp:CooldownRemaining() > 0 or enemy:TimeToDeath() < 10 then return end
-  if Me:GetAura(auras.ancientconcordance) and Me:GetAura(auras.ancientteachings) then return end
+  if Spell.FaelineStomp:CooldownRemaining() > 0 or enemy:TimeToDeath() < 16 or enemy:TimeToDeath() == 9999 then return false end
+  if Me:GetAura(auras.ancientconcordance) and Me:GetAura(auras.ancientteachings) then return false end
 
   if Me.InCombat and not Me:IsMoving() and Me:InMeleeRange(enemy) and Spell.FaelineStomp:CastEx(Me) then
     return true
