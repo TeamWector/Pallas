@@ -185,22 +185,23 @@ local function RenewingMist()
 end
 
 local function EnvelopingMist(friend)
+  local spell = Spell.EnvelopingMist
   local chiji = Me:GetAura(auras.invokechiji)
 
-  if chiji and chiji.Stacks == 3 then
+  if chiji and chiji.Stacks > 1 then
     for _, v in pairs(Heal.Tanks) do
       local f = v.Unit
-      if Spell.EnvelopingMist:Apply(f) then return true end
+      if spell:Apply(f) then return true end
     end
 
     for _, v in pairs(Heal.PriorityList) do
       local f = v.Unit
-      if Spell.EnvelopingMist:Apply(f) then return true end
+      if spell:Apply(f) then return true end
     end
   end
 
   if friend.HealthPct < Settings.EnvelopPct then
-    return Spell.EnvelopingMist:Apply(friend)
+    return spell:Apply(friend)
   end
 end
 
@@ -302,11 +303,12 @@ end
 
 local function ChijiRedCrane()
   local spell = Spell.InvokeChijiTheRedCrane
-  if spell:CooldownRemaining() > 0 or not Me.InCombat then return end
+  local target = Combat.BestTarget
+  if spell:CooldownRemaining() > 0 or not Me.InCombat or not target then return end
 
   local below, count = Heal:GetMembersBelow(Settings.ChijiPct)
 
-  return count >= Settings.ChijiCount and spell:CastEx(Me)
+  return Me:InMeleeRange(target) and count >= Settings.ChijiCount and spell:CastEx(Me)
 end
 
 local function Revival()
@@ -374,7 +376,7 @@ local function MonkMistweaver()
   local GCD = wector.SpellBook.GCD
   if GCD:CooldownRemaining() > 0 then return end
 
-  if Spell.SpearHandStrike:Interrupt() then return end
+  if not Me.IsCastingOrChanneling and Spell.SpearHandStrike:Interrupt() then return end
 
   if IsCastingOrChanneling() then return end
 
