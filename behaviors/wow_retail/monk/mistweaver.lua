@@ -276,8 +276,26 @@ local function TigerPalm(enemy)
   return Spell.TigerPalm:CastEx(enemy)
 end
 
-local function ChiBurst(enemy)
-  return Spell.ChiBurst:CastEx(enemy)
+local function ChiBurst()
+  local spell = Spell.ChiBurst
+  if spell:CooldownRemaining() > 0 then return end
+
+  local targetshit = 0
+
+  for _, enemy in pairs(Combat.Targets) do
+    if Me:IsFacing(enemy) then
+      targetshit = targetshit + 1
+    end
+  end
+
+  for _, v in pairs(Heal.PriorityList) do
+    local friend = v.Unit
+    if Me:IsFacing(friend) then
+      targetshit = targetshit + 1
+    end
+  end
+
+  return targetshit > 2 and Spell.ChiBurst:CastEx(Me)
 end
 
 local function ChiWave(enemy)
@@ -350,8 +368,7 @@ local function MonkMistweaverDamage()
   if Me:IsSitting() or Me.IsMounted or Me:IsStunned() then return end
 
   local target = Combat.BestTarget
-  local GCD = wector.SpellBook.GCD
-  if GCD:CooldownRemaining() > 0 or (not target or not Me:IsFacing(target)) then return end
+  if not target or not Me:IsFacing(target) then return end
 
   if IsCastingOrChanneling() or not Me:IsFacing(target) then return end
 
@@ -361,7 +378,7 @@ local function MonkMistweaverDamage()
   if common:LegSweep() then return end
   if common:TouchOfDeath() then return end
   if FaelineStomp(target) then return end
-  if ChiBurst(target) then return end
+  if ChiBurst() then return end
   if ChiWave(target) then return end
   if SpinningCraneKick() then return end
   if RisingSunKick(target) then return end
@@ -404,12 +421,14 @@ local function MonkMistweaver()
   end
 
   if RenewingMist() then return end
+
+  if MonkMistweaverDamage() then return end
 end
 
 return {
   Options = options,
   Behaviors = {
     [BehaviorType.Heal] = MonkMistweaver,
-    [BehaviorType.Combat] = MonkMistweaverDamage
+    [BehaviorType.Combat] = MonkMistweaver
   }
 }
