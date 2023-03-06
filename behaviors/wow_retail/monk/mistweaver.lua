@@ -67,6 +67,22 @@ local options = {
       max = 100
     },
     {
+      type = "slider",
+      uid = "MonkTrinket1Pct",
+      text = "Trinket 1 (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "MonkTrinket2Pct",
+      text = "Trinket 2 (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
       type = "checkbox",
       uid = "ZenReverb",
       text = "Zen Pulse Reverb",
@@ -167,6 +183,23 @@ local auras = {
   invokechiji = 343820,
   sheilunsgift = 399510
 }
+
+local function HealTrinket(friend)
+  local trink1Pct = Settings.MonkTrinket1Pct
+  local trink2Pct = Settings.MonkTrinket2Pct
+  local trinket1 = WoWItem:GetUsableEquipment(EquipSlot.Trinket1)
+  local trinket2 = WoWItem:GetUsableEquipment(EquipSlot.Trinket2)
+
+  if trink1Pct == 0 and trink2Pct == 0 then return false end
+
+  if trinket1 then
+    if friend.HealthPct < trink1Pct and trinket1:UseX(friend) then return true end
+  end
+
+  if trinket2 then
+    if friend.HealthPct < trink2Pct and trinket2:UseX(friend) then return true end
+  end
+end
 
 local function IsCastingOrChanneling()
   return Me.CurrentSpell and Me.CurrentSpell.Id ~= Spell.SoothingMist.Id
@@ -280,22 +313,22 @@ local function ChiBurst()
   local spell = Spell.ChiBurst
   if spell:CooldownRemaining() > 0 then return end
 
-  local targetshit = 0
+  local hitcount = 0
 
   for _, enemy in pairs(Combat.Targets) do
     if Me:IsFacing(enemy) then
-      targetshit = targetshit + 1
+      hitcount = hitcount + 1
     end
   end
 
   for _, v in pairs(Heal.PriorityList) do
     local friend = v.Unit
     if Me:IsFacing(friend) then
-      targetshit = targetshit + 1
+      hitcount = hitcount + 1
     end
   end
 
-  return targetshit > 2 and Spell.ChiBurst:CastEx(Me)
+  return hitcount > 2 and Spell.ChiBurst:CastEx(Me)
 end
 
 local function ChiWave(enemy)
@@ -365,8 +398,6 @@ local function SheilunsGift()
 end
 
 local function MonkMistweaverDamage()
-  if Me:IsSitting() or Me.IsMounted or Me:IsStunned() then return end
-
   local target = Combat.BestTarget
   if not target or not Me:IsFacing(target) then return end
 
@@ -397,12 +428,10 @@ local function MonkMistweaver()
 
   if IsCastingOrChanneling() then return end
 
-  if Dispel() then return end
   if ManaTea() then return end
   if common:DiffuseMagic() then return end
   if common:FortifyingBrew() then return end
   if common:DampenHarm() then return end
-  if common:TigersLust() then return end
   if HealingElixir() then return end
   if Revival() then return end
   if SheilunsGift() then return end
@@ -412,6 +441,7 @@ local function MonkMistweaver()
   for _, v in pairs(Heal.PriorityList) do
     local f = v.Unit
 
+    if HealTrinket(f) then return end
     if LifeCocoon(f) then return end
     if ZenPulse(f) then return end
     if SoothingMist(f) then return end
@@ -420,6 +450,8 @@ local function MonkMistweaver()
     if f.HealthPct < Settings.RenewingPct and Spell.RenewingMist:Apply(f) then return end
   end
 
+  if Dispel() then return end
+  if common:TigersLust() then return end
   if RenewingMist() then return end
 
   if MonkMistweaverDamage() then return end
