@@ -310,9 +310,9 @@ end
 
 local function BlackoutKick(enemy)
   local teachings = Me:GetAura(auras.teachingsofthemonastery)
-  local multikick = teachings and teachings.Stacks == 3
+  local shouldMultikick = teachings and teachings.Stacks > 1 or Me.PowerPct >= 95
 
-  return (Spell.RisingSunKick:CooldownRemaining() > 2000 or multikick) and Spell.BlackoutKick:CastEx(enemy)
+  return (Spell.RisingSunKick:CooldownRemaining() > 2000 and shouldMultikick) and Spell.BlackoutKick:CastEx(enemy)
 end
 
 local function TigerPalm(enemy)
