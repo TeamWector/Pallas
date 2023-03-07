@@ -151,8 +151,8 @@ local function DruidRestoDamage()
 end
 
 local blacklist = {
-      [118] = "Polymorph",
-      [51514] = "Hex"
+  [118] = "Polymorph",
+  [51514] = "Hex"
 }
 
 local function DruidRestoCombat()
@@ -187,6 +187,7 @@ local function DruidRestoHeal()
   if Me:IsStunned() then return end
   if Me.IsCastingOrChanneling then return end
   if Me.StandStance == StandStance.Sit then return end
+  if Me.IsMounted then return end
   if (Me.MovementFlags & MovementFlags.Flying) > 0 then return end
 
   if Me.ShapeshiftForm == ShapeshiftForm.Bear or
@@ -317,8 +318,8 @@ local function DruidRestoHeal()
     -- do lifebloom and rejuv while doing nothing
     local friends = WoWGroup:GetGroupUnits()
     for _, f in pairs(friends) do
-      if Spell.Rejuvenation:Apply(f) then print('Applied Rejuv as a pre-hot on ' .. f.NameUnsafe) return end
-      if Spell.Lifebloom:Apply(f, f ~= Me) then print('Applied Lifebloom as a pre-hot on ' .. f.NameUnsafe) return end
+      if Spell.Rejuvenation:Apply(f, f ~= Me) then return end
+      if Spell.Lifebloom:Apply(f, f ~= Me) then return end
     end
   end
 
@@ -331,7 +332,7 @@ end
 return {
   Options = options,
   Behaviors = {
-        [BehaviorType.Combat] = DruidRestoCombat,
-        [BehaviorType.Heal] = DruidRestoHeal,
+    [BehaviorType.Combat] = DruidRestoCombat,
+    [BehaviorType.Heal] = DruidRestoHeal,
   }
 }
