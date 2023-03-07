@@ -120,7 +120,7 @@ function commonMonk:DiffuseMagic()
     local castingMe = spellInfo.TargetGuid1 == Me.Guid
     local castingRemain = spellInfo.CastEnd - wector.Game.Time
 
-    if castingMe and castingRemain < 200 and Spell.DiffuseMagic:CastEx(Me) then return true end
+    if castingMe and castingRemain < 1000 and spell:CastEx(Me) then return true end
 
     ::continue::
   end
