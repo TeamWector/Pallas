@@ -94,7 +94,7 @@ function commonMonk:LegSweep()
   local count = 0
 
   for _, enemy in pairs(Combat.Targets) do
-    if Me:GetDistance(enemy) <= 6 and not enemy:IsStunned() then
+    if Me:GetDistance(enemy) <= 6 and not enemy:IsStunned() and enemy.IsInterruptible then
       count = count + 1
     end
   end

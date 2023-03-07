@@ -231,16 +231,19 @@ local function EnvelopingMist(friend)
   local chiji = Me:GetAura(auras.invokechiji)
 
   if chiji and chiji.Stacks > 1 then
-    for _, v in pairs(Heal.Tanks) do
-      local f = v.Unit
-      if spell:Apply(f) then return true end
-    end
+    local tanks = WoWGroup:GetTankUnits()
 
     for _, v in pairs(Heal.PriorityList) do
       local f = v.Unit
       if spell:Apply(f) then return true end
     end
+
+    for _, t in pairs(tanks) do
+      if spell:Apply(t) then return true end
+    end
   end
+
+  if not friend then return false end
 
   if friend.HealthPct < Settings.EnvelopPct then
     return spell:Apply(friend)
@@ -290,7 +293,7 @@ local function EssenceFont()
 end
 
 local function SpinningCraneKick()
-  local enemyCount = Combat:GetEnemiesWithinDistance(8)
+  local enemyCount = Combat.EnemiesInMeleeRange
   local hasaoekick = Me:GetAura(auras.ancientconcordance)
 
   if (enemyCount < 7 and hasaoekick or enemyCount < 3) or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
@@ -368,7 +371,9 @@ end
 local function ChijiRedCrane()
   local spell = Spell.InvokeChijiTheRedCrane
   local target = Combat.BestTarget
+  local TTD = Combat:TargetsAverageDeathTime()
   if spell:CooldownRemaining() > 0 or not Me.InCombat or not target then return false end
+  if TTD == 9999 or TTD < 12 then return false end
 
   return Me:InMeleeRange(target) and spell:CastEx(Me)
 end
@@ -424,6 +429,16 @@ local function AoEHeal()
   return false
 end
 
+local function BirdRotation()
+  local target = Combat.BestTarget
+
+  if EnvelopingMist() then return true end
+  if FaelineStomp(target) then return true end
+  if RisingSunKick(target) then return true end
+  if BlackoutKick(target) then return true end
+  if TigerPalm(target) then return true end
+end
+
 local function MonkMistweaverDamage()
   local target = Combat.BestTarget
   if not target or not Me:IsFacing(target) then return false end
@@ -455,11 +470,19 @@ local function MonkMistweaver()
 
   if IsCastingOrChanneling() then return end
 
+  local birdExists = Me:GetAura(auras.chijibird)
+
   if ManaTea() then return end
   if common:DiffuseMagic() then return end
   if common:FortifyingBrew() then return end
   if common:DampenHarm() then return end
   if HealingElixir() then return end
+
+  if birdExists and Combat.EnemiesInMeleeRange > 0 then
+    if BirdRotation() then return end
+    return
+  end
+
   if AoEHeal() then return end
 
   for _, v in pairs(Heal.PriorityList) do
