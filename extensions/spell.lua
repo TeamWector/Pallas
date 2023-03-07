@@ -86,6 +86,7 @@ function WoWSpell:CastEx(a1, ...)
       return false
     end
 
+    wector.Console:Log('Cast ' .. self.Name)
     return self:Cast(x, y, z)
   end
 end

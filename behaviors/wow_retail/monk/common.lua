@@ -40,6 +40,14 @@ commonMonk.widgets = {
     max = 100
   },
   {
+    type = "slider",
+    uid = "MonkExpelHarmPct",
+    text = "Expel Harm (%)",
+    default = 0,
+    min = 0,
+    max = 100
+  },
+  {
     type = "combobox",
     uid = "CommonDispels",
     text = "Dispel",
@@ -124,6 +132,13 @@ function commonMonk:DiffuseMagic()
 
     ::continue::
   end
+end
+
+function commonMonk:ExpelHarm()
+  local spell = Spell.ExpelHarm
+  if spell:CooldownRemaining() > 0 then return end
+
+  return Me.HealthPct < Settings.MonkExpelHarmPct and spell:CastEx(Me)
 end
 
 return commonMonk
