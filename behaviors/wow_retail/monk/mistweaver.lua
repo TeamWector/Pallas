@@ -396,10 +396,6 @@ local function ManaTea()
   if count >= 2 and Spell.ManaTea:CastEx(Me) then return true end
 end
 
-for _, aura in pairs(Me.Auras) do
-  print(aura.Name .. " ID: " .. aura.Id)
-end
-
 local function SheilunsGift()
   local spell = Spell.SheilunsGift
   local sheilun = Me:GetAura(auras.sheilunsgift)
@@ -424,6 +420,8 @@ local function AoEHeal()
   elseif essenceCount >= Settings.EssenceFontCount and EssenceFont() then
     return true
   end
+
+  return false
 end
 
 local function MonkMistweaverDamage()
