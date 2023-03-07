@@ -7,6 +7,21 @@ commonPaladin.widgets = {
     text = "Interrupt With Rebuke",
     default = false
   },
+  {
+    type = "combobox",
+    uid = "CommonInterrupts",
+    text = "Interrupt",
+    default = 0,
+    options = { "Disabled", "Any", "Whitelist" }
+  },
+    {
+    type = "slider",
+    uid = "CommonInterruptPct",
+    text = "Kick Cast Left (%)",
+    default = 0,
+    min = 0,
+    max = 100
+  },
 }
 
 commonPaladin.auras = {
