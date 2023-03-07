@@ -178,10 +178,10 @@ function WoWSpell:Interrupt()
   return false
 end
 
----@param dispelTypes table dispeltypes that we have access to Magic, Curse, Disease, Poison
+---@param ... table dispeltypes that we have access to Magic, Curse, Disease, Poison
 ---@param friends boolean if we are supposed to use this spell on our friends, otherwise will use it on enemies (Soothe, Purge, Tranq Shot)
 ---@return boolean casted if we casted dispel.
-function WoWSpell:Dispel(friends, dispelTypes)
+function WoWSpell:Dispel(friends, ...)
   if self:CooldownRemaining() > 0 then return false end
   -- We create a combobox with uid CommonDispels that has three values, disabled, any, whitelist.
   local dispel = Settings.CommonDispels or 0
@@ -195,7 +195,7 @@ function WoWSpell:Dispel(friends, dispelTypes)
     return false
   end
 
-  local types = { dispelTypes }
+  local types = { ... }
 
   for _, unit in pairs(list) do
     local auras = unit.VisibleAuras

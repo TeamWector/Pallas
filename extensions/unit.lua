@@ -184,9 +184,10 @@ function WoWUnit:AngleTo(target)
   return self:AngleToPos(Me.Position, target.Position)
 end
 
-function WoWUnit:IsFacing(target)
+function WoWUnit:IsFacing(target, ang)
   local angle = Me:AngleTo(target)
-  return math.abs(angle) < 90
+  ang = ang or 90
+  return math.abs(angle) < ang
 end
 
 local ttdHistory = {}

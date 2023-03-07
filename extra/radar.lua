@@ -228,6 +228,19 @@ local function Radar()
   DrawColoredLines()
 end
 
+function DrawDebug(...)
+  local add = 10
+
+  local debugs = { ... }
+
+  for _, debug in pairs(debugs) do
+    local textBasePos = World2Screen(Vec3(Me.Position.x, Me.Position.y, Me.Position.z + add))
+    add = add -0.5
+
+    DrawText(textBasePos, colors.chartreuse, debug)
+  end
+end
+
 local behaviors = {
   [BehaviorType.Extra] = Radar
 }
