@@ -137,4 +137,22 @@ function Heal:GetMembersBelow(pct)
   return members, count
 end
 
+---@param threshold? integer check if unit is below health (Optional)
+---@param friend WoWUnit Unit to check around
+---@param dist integer Distance from unit to check
+function Heal:GetMembersAround(friend, dist, threshold)
+  local count = 0
+  local members = {}
+
+  for _, v in pairs(self.PriorityList) do
+    local f = v.Unit
+    if friend:GetDistance(f) <= dist and not threshold or f.HealthPct < threshold then
+      count = count + 1
+      table.insert(members, f)
+    end
+  end
+
+  return count, members
+end
+
 return Heal

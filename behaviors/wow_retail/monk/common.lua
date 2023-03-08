@@ -1,5 +1,4 @@
 local commonMonk = {}
-local dispels = require('data.dispels')
 
 commonMonk.widgets = {
   {
