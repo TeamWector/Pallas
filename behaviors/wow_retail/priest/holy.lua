@@ -10,6 +10,14 @@ local options = {
     },
     {
       type = "slider",
+      uid = "HolyInstantFlashHealPct",
+      text = "Instant Flash Heal (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
       uid = "HolyFlashHealPct",
       text = "Flash Heal (%)",
       default = 0,
@@ -139,7 +147,8 @@ for k, v in pairs(common.widgets) do
 end
 
 local auras = {
-  improvedpurify = 390632
+  improvedpurify = 390632,
+  instantflashheal = 114255
 }
 
 local function Dispel()
@@ -165,7 +174,7 @@ local function Shadowfiend(enemy)
 
   local TTD = Combat:TargetsAverageDeathTime()
 
-  return TTD ~= 9999 and TTD > 20 and Me.PowerPct < 95 and spell:CastEx(enemy)
+  return TTD ~= 9999 and TTD > 20 and Me.PowerPct < 85 and spell:CastEx(enemy)
 end
 
 local function HolyFire(enemy)
@@ -256,6 +265,16 @@ end
 
 local function FlashHeal(friend)
   local spell = Spell.FlashHeal
+  local instant = Me:GetAura(auras.instantflashheal)
+
+  if instant and friend.HealthPct < Settings.HolyInstantFlashHealPct then
+    if spell:CastEx(friend) then return true end
+  end
+
+  if instant and instant.Remaining < 3000 then
+    if spell:CastEx(friend) then return true end
+  end
+
   return friend.HealthPct < Settings.HolyFlashHealPct and spell:CastEx(friend)
 end
 

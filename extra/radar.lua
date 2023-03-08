@@ -46,7 +46,7 @@ local options = {
       type = "checkbox",
       uid = "ExtraRadarDrawLines",
       text = "Draw Lines",
-      default = true
+      default = false
     },
     {
       type = "checkbox",

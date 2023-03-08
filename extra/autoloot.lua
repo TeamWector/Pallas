@@ -6,7 +6,7 @@ local options = {
       type = "checkbox",
       uid = "ExtraAutoloot",
       text = "Enable Autoloot",
-      default = true
+      default = false
     },
     {
       type = "checkbox",
