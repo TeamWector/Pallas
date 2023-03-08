@@ -146,8 +146,6 @@ local function Dispel()
   local spell = Spell.Purify
   if spell:CooldownRemaining() > 0 then return false end
 
-
-
   if Me:GetAura(auras.improvedpurify) then
     spell:Dispel(true, WoWDispelType.Magic, WoWDispelType.Disease)
   else
@@ -294,13 +292,13 @@ local function DivineStar()
   for _, v in pairs(Heal.PriorityList) do
     local friend = v.Unit
 
-    if Me:IsFacing(friend) then
+    if Me:GetDistance(friend) <= 27 and Me:IsFacing(friend) then
       hits = hits + 1
     end
   end
 
   for _, enemy in pairs(Combat.Targets) do
-    if Me:IsFacing(enemy) then
+    if Me:GetDistance(enemy) <= 27 and Me:IsFacing(enemy) then
       hits = hits + 1
     end
   end
@@ -326,6 +324,8 @@ local function PriestHolyDamage()
 end
 
 local function PriestHoly()
+  common:MovementUpdate()
+
   if Me.IsCastingOrChanneling then return end
 
   if common:Fade() then return end
@@ -335,7 +335,6 @@ local function PriestHoly()
   if HolyWordSanctify() then return end
   if CircleOfHealing() then return end
   if PrayerOfHealing() then return end
-  if PrayerOfMending() then return end
 
   for _, v in pairs(Heal.PriorityList) do
     local f = v.Unit
@@ -348,7 +347,9 @@ local function PriestHoly()
     if PrayerOfMending(f) then return end
   end
 
+  if PrayerOfMending() then return end
   if Dispel() then return end
+  if common:AngelicFeather() then return end
   if PriestHolyDamage() then return end
 end
 

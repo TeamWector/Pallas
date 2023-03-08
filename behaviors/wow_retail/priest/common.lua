@@ -27,7 +27,28 @@ commonPriest.widgets = {
     text = "PW: Fortitude Friends",
     default = false
   },
+  {
+    type = "checkbox",
+    uid = "PriestAngelicFeather",
+    text = "Angelic Feather",
+    default = false
+  },
 }
+
+local moveTime = 0
+local startedMoving = 0
+function commonPriest:MovementUpdate()
+  if not Me:IsMoving() then
+    moveTime = 0
+    startedMoving = 0
+  else
+    if startedMoving == 0 then
+      startedMoving = wector.Game.Time
+    else
+      moveTime = wector.Game.Time - startedMoving
+    end
+  end
+end
 
 function commonPriest:DesperatePrayer()
   local spell = Spell.DesperatePrayer
@@ -57,6 +78,13 @@ function commonPriest:Fade()
       if spell:CastEx(Me) then return true end
     end
   end
+end
+
+function commonPriest:AngelicFeather()
+  local spell = Spell.AngelicFeather
+  if spell.Charges == 0 then return false end
+
+  return Settings.PriestAngelicFeather and not Me:HasAura(spell.Name) and moveTime > 1000 and spell:CastEx(Me.Position)
 end
 
 return commonPriest
