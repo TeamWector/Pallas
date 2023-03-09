@@ -34,6 +34,14 @@ local options = {
     },
     {
       type = "slider",
+      uid = "HolyLightweaveHealPct",
+      text = "Lightweave Heal (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
       uid = "HolySerenityPct",
       text = "Word: Serenity (%)",
       default = 0,
@@ -148,7 +156,8 @@ end
 
 local auras = {
   improvedpurify = 390632,
-  instantflashheal = 114255
+  instantflashheal = 114255,
+  lightweaver = 390993
 }
 
 local function Dispel()
@@ -266,6 +275,9 @@ end
 local function FlashHeal(friend)
   local spell = Spell.FlashHeal
   local instant = Me:GetAura(auras.instantflashheal)
+  local lightweaver = Me:GetAura(auras.lightweaver)
+
+  if lightweaver and lightweaver.Stacks == 2 then return false end
 
   if instant and friend.HealthPct < Settings.HolyInstantFlashHealPct then
     if spell:CastEx(friend) then return true end
@@ -280,6 +292,16 @@ end
 
 local function HealSpell(friend)
   local spell = Spell.Heal
+  local lightweave = Me:GetAura(auras.lightweaver)
+
+  if lightweave and lightweave.Stacks == 2 then
+    if friend.HealthPct < Settings.HolyLightweaveHealPct and spell:CastEx(friend) then
+      return true
+    end
+
+    return false
+  end
+
   return friend.HealthPct < Settings.HolyHealPct and spell:CastEx(friend)
 end
 
@@ -328,12 +350,11 @@ end
 local function PriestHolyDamage()
   local target = Combat.BestTarget
   if not target then return false end
-  local GCD = wector.SpellBook.GCD
   local lowest = Heal:GetLowestMember()
   local shouldDPS = not lowest or
       lowest.HealthPct >= Settings.HolyFlashHealPct and lowest.HealthPct >= Settings.HolyHealPct
 
-  if GCD:CooldownRemaining() > 0 or not shouldDPS then return false end
+  if not shouldDPS then return false end
 
   if Shadowfiend(target) then return true end
   if DivineStar() then return true end
@@ -347,12 +368,15 @@ local function PriestHoly()
 
   common:MovementUpdate()
 
-  if Me.IsCastingOrChanneling then return end
+  local GCD = wector.SpellBook.GCD
+
+  if Me.IsCastingOrChanneling or GCD:CooldownRemaining() > 0 then return end
 
   if common:Fade() then return end
   if common:PowerWordFortitude() then return end
   if common:DesperatePrayer() then return end
   if DivineHymn() then return end
+  if common:PowerWordLife() then return end
   if HolyWordSanctify() then return end
   if CircleOfHealing() then return end
   if PrayerOfHealing() then return end
@@ -362,8 +386,8 @@ local function PriestHoly()
 
     if GuardianSpirit(f) then return end
     if HolyWordSerenity(f) then return end
-    if FlashHeal(f) then return end
     if HealSpell(f) then return end
+    if FlashHeal(f) then return end
     if Renew(f) then return end
     if PrayerOfMending(f) then return end
   end
@@ -371,6 +395,7 @@ local function PriestHoly()
   if PrayerOfMending() then return end
   if Dispel() then return end
   if common:AngelicFeather() then return end
+  if common:DispelMagic() then return end
   if PriestHolyDamage() then return end
 end
 

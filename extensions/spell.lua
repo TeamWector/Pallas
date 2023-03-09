@@ -201,7 +201,7 @@ function WoWSpell:Dispel(friends, ...)
   for _, unit in pairs(list) do
     local auras = unit.VisibleAuras
     for _, aura in pairs(auras) do
-      if (aura.IsDebuff or not friends) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
+      if (friends and aura.IsDebuff or not friends and aura.IsBuff) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
         for _, dispelType in pairs(types) do
           if aura.DispelType == dispelType then
             -- Let 777 ms pass on aura for no instant dispel.

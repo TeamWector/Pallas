@@ -89,4 +89,23 @@ function commonPriest:AngelicFeather()
   return Settings.PriestAngelicFeather and not Me:HasAura(spell.Name) and moveTime > 1000 and spell:CastEx(Me.Position)
 end
 
+function commonPriest:PowerWordLife()
+  local spell = Spell.PowerWordLife
+  if spell:CooldownRemaining() > 0 then return false end
+
+  if Me.HealthPct < 35 and spell:CastEx(Me) then return true end
+
+  for _, v in pairs(Heal.PriorityList) do
+    local friend = v.Unit
+
+    if friend.HealthPct < 35 and spell:CastEx(friend) then return true end
+  end
+end
+
+function commonPriest:DispelMagic()
+  local spell = Spell.DispelMagic
+
+  if spell:Dispel(false, WoWDispelType.Magic) then return true end
+end
+
 return commonPriest
