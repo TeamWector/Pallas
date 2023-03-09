@@ -38,7 +38,9 @@ commonPriest.widgets = {
 local moveTime = 0
 local startedMoving = 0
 function commonPriest:MovementUpdate()
-  if not Me:IsMoving() then
+  local MovingForward = (Me.MovementFlags & MovementFlags.Forward) > 0
+
+  if not MovingForward then
     moveTime = 0
     startedMoving = 0
   else
