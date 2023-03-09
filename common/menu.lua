@@ -34,7 +34,15 @@ function Menu:Initialize()
   attackooc.OnClick = function(_, _, newValue) Settings.PallasAttackOOC = newValue end
   Menu.CombatGroup:Add(attackooc)
 
+  Menu.SpellGroup = ImGroupbox("Spell")
+
+  if Settings.PallasWorldLatency == nil then Settings.PallasWorldLatency = 0 end
+  local spellDelay = ImSlider("Spell Global Delay", Settings.PallasWorldLatency, 0, 500)
+  spellDelay.OnValueChanged = function(_, _, newValue) Settings.PallasWorldLatency = newValue end
+  Menu.SpellGroup:Add(spellDelay)
+
   Menu.MainMenu:Add(Menu.CombatGroup)
+  Menu.MainMenu:Add(Menu.SpellGroup)
 end
 
 function Menu:AddOptionMenu(options)

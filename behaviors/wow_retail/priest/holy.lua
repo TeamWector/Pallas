@@ -73,6 +73,14 @@ local options = {
       max = 100
     },
     {
+      type = "slider",
+      uid = "HolyPowerWordShieldPct",
+      text = "PW: Shield (%)",
+      default = 0,
+      min = 0,
+      max = 100
+    },
+    {
       type = "checkbox",
       uid = "HolyMendingCD",
       text = "Spread Mending on CD",
@@ -283,8 +291,14 @@ local function FlashHeal(friend)
     if spell:CastEx(friend) then return true end
   end
 
+  -- Let's do everything to not waste instant free flash of light.
   if instant and instant.Remaining < 3000 then
     if spell:CastEx(friend) then return true end
+
+    local tanks = WoWGroup:GetTankUnits()
+    for _, tank in pairs(tanks) do
+      if spell:CastEx(tank) then return true end
+    end
   end
 
   return friend.HealthPct < Settings.HolyFlashHealPct and spell:CastEx(friend)
@@ -294,7 +308,7 @@ local function HealSpell(friend)
   local spell = Spell.Heal
   local lightweave = Me:GetAura(auras.lightweaver)
 
-  if lightweave and lightweave.Stacks == 2 then
+  if lightweave and lightweave.Stacks > 0 then
     if friend.HealthPct < Settings.HolyLightweaveHealPct and spell:CastEx(friend) then
       return true
     end
@@ -310,11 +324,24 @@ local function Renew(friend)
   return friend.HealthPct < Settings.HolyRenewPct and spell:Apply(friend)
 end
 
+local function PowerWordShield(friend)
+  local spell = Spell.PowerWordShield
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return friend.HealthPct < Settings.HolyPowerWordShieldPct and spell:CastEx(friend)
+end
+
 local function HolyWordSerenity(friend)
   local spell = Spell.HolyWordSerenity
   if spell:CooldownRemaining() > 0 then return false end
 
-  return friend.HealthPct < Settings.HolySerenityPct and spell:CastEx(friend)
+  local shouldUse = friend.HealthPct < Settings.HolySerenityPct
+
+  if shouldUse and spell.IsUsable then
+    Spell.HolyWord:CastEx(Me)
+  end
+
+  return shouldUse and spell:CastEx(friend)
 end
 
 local function GuardianSpirit(friend)
@@ -388,6 +415,7 @@ local function PriestHoly()
     if HolyWordSerenity(f) then return end
     if HealSpell(f) then return end
     if FlashHeal(f) then return end
+    if PowerWordShield(f) then return end
     if Renew(f) then return end
     if PrayerOfMending(f) then return end
   end
