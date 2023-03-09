@@ -29,6 +29,12 @@ commonPriest.widgets = {
   },
   {
     type = "checkbox",
+    uid = "PriestPurgeEnemies",
+    text = "Dispel Magic (Purge)",
+    default = false
+  },
+  {
+    type = "checkbox",
     uid = "PriestAngelicFeather",
     text = "Angelic Feather",
     default = false
@@ -104,6 +110,8 @@ end
 
 function commonPriest:DispelMagic()
   local spell = Spell.DispelMagic
+
+  if not Settings.PriestPurgeEnemies then return false end
 
   if spell:Dispel(false, WoWDispelType.Magic) then return true end
 end

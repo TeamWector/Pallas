@@ -24,7 +24,7 @@ function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castGuid, SpellID)
     castTarget = nil
   end
 
-  spellDelay[SpellID] = wector.Game.Time + math.random(150, 300)
+  spellDelay[SpellID] = wector.Game.Time + math.random(150, 500)
 end
 
 local exclusions = {
