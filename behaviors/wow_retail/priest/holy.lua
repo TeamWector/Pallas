@@ -205,6 +205,15 @@ local function HolyFire(enemy)
   for _, e in pairs(Combat.Targets) do
     if spell:Apply(e) then return true end
   end
+
+  return spell:CastEx(enemy)
+end
+
+local function HolyWordChastise(enemy)
+  local spell = Spell.HolyWordChastise
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return spell:CastEx(enemy)
 end
 
 local function ShadowWordPain(enemy)
@@ -338,7 +347,7 @@ local function HolyWordSerenity(friend)
   local shouldUse = friend.HealthPct < Settings.HolySerenityPct
 
   if shouldUse and spell.IsUsable then
-    Spell.HolyWord:CastEx(Me)
+    Spell.DivineWord:CastEx(Me)
   end
 
   return shouldUse and spell:CastEx(friend)
@@ -385,6 +394,7 @@ local function PriestHolyDamage()
 
   if Shadowfiend(target) then return true end
   if DivineStar() then return true end
+  if HolyWordChastise(target) then return true end
   if HolyFire(target) then return true end
   if ShadowWordPain(target) then return true end
   if Smite(target) then return true end
