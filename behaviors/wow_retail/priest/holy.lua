@@ -343,6 +343,8 @@ local function PriestHolyDamage()
 end
 
 local function PriestHoly()
+  if Me:IsSitting() or Me.IsMounted or Me:IsStunned() then return end
+
   common:MovementUpdate()
 
   if Me.IsCastingOrChanneling then return end
