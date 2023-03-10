@@ -389,7 +389,7 @@ local function Dispel()
   local DispelType = WoWDispelType
 
   if Me:GetAura(auras.improvedDetox) then
-    if Spell.Detox:Dispel(true, DispelType.Magic, DispelType.Disease, WoWDispelType.Poison or 4) then return true end
+    if Spell.Detox:Dispel(true, DispelType.Magic, DispelType.Disease, WoWDispelType.Poison) then return true end
     return
   end
 
