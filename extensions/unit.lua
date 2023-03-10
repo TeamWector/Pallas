@@ -1,3 +1,5 @@
+local immunes = require("data.immunes")
+
 ---@enum Classification
 Classification = {
   Normal = 0,
@@ -130,6 +132,12 @@ function WoWUnit:IsStunned()
 end
 
 function WoWUnit:IsImmune()
+  for _, immune in pairs(immunes) do
+    if self:HasAura(immune) then
+      return true
+    end
+  end
+
   return (self.UnitFlags & UnitFlags.Unk31 > 0)
 end
 
