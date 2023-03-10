@@ -11,6 +11,7 @@ SpellCastExFlags = {
 local randomModifier = 0
 local castTarget = nil
 local spellDelay = {}
+local globalDelay = 0
 
 function WoWSpell:GetCastTarget()
   return castTarget
@@ -18,13 +19,25 @@ end
 
 SpellListener = wector.FrameScript:CreateListener()
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
+SpellListener:RegisterEvent('UNIT_SPELLCAST_SENT')
+
+local spellIdCast = 0
+local targetCast
+function SpellListener:UNIT_SPELLCAST_SENT(unit, target, castguid, spellID)
+  spellIdCast = spellID
+  targetCast = target
+end
 
 function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castGuid, SpellID)
+  if SpellID ~= spellIdCast or not targetCast == unitTarget then return end
+
   if unitTarget == Me then
     castTarget = nil
   end
 
   spellDelay[SpellID] = wector.Game.Time + math.random(150, 500)
+  local latency = math.random() * Settings.PallasWorldLatency + Settings.PallasWorldLatency * 1.25
+  globalDelay = wector.Game.Time + latency
 end
 
 local exclusions = {
@@ -39,6 +52,7 @@ function WoWSpell:CastEx(a1, ...)
 
   -- delay
   if spellDelay[self.Id] and spellDelay[self.Id] > wector.Game.Time then return false end
+  if globalDelay > wector.Game.Time then return false end
 
   -- is spell ready?
   if not self.IsReady then return false end
@@ -86,6 +100,7 @@ function WoWSpell:CastEx(a1, ...)
       return false
     end
 
+    wector.Console:Log('Cast ' .. self.Name)
     return self:Cast(x, y, z)
   end
 end
@@ -200,7 +215,7 @@ function WoWSpell:Dispel(friends, ...)
   for _, unit in pairs(list) do
     local auras = unit.VisibleAuras
     for _, aura in pairs(auras) do
-      if (aura.IsDebuff or not friends) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
+      if (friends and aura.IsDebuff or not friends and aura.IsBuff) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
         for _, dispelType in pairs(types) do
           if aura.DispelType == dispelType then
             -- Let 777 ms pass on aura for no instant dispel.

@@ -189,7 +189,8 @@ local auras = {
   ancientteachings = 388026,
   ancientconcordance = 389391,
   invokechiji = 343820,
-  sheilunsgift = 399510
+  sheilunsgift = 399510,
+  chijibird = 325197
 }
 
 local function HealTrinket(friend)
@@ -230,16 +231,19 @@ local function EnvelopingMist(friend)
   local chiji = Me:GetAura(auras.invokechiji)
 
   if chiji and chiji.Stacks > 1 then
-    for _, v in pairs(Heal.Tanks) do
-      local f = v.Unit
-      if spell:Apply(f) then return true end
-    end
+    local tanks = WoWGroup:GetTankUnits()
 
     for _, v in pairs(Heal.PriorityList) do
       local f = v.Unit
       if spell:Apply(f) then return true end
     end
+
+    for _, t in pairs(tanks) do
+      if spell:Apply(t) then return true end
+    end
   end
+
+  if not friend then return false end
 
   if friend.HealthPct < Settings.EnvelopPct then
     return spell:Apply(friend)
@@ -254,7 +258,7 @@ end
 
 -- todo add logic for damage prevention
 local function LifeCocoon(friend)
-  if Spell.LifeCocoon:CooldownRemaining() > 0 then return end
+  if Spell.LifeCocoon:CooldownRemaining() > 0 then return false end
 
   if friend.HealthPct < Settings.CocoonPct then
     return #friend:GetUnitsAround(8) > 0 and Spell.LifeCocoon:CastEx(friend)
@@ -270,7 +274,7 @@ local function Vivify(friend)
 end
 
 local function ZenPulse(friend)
-  if Spell.ZenPulse:CooldownRemaining() > 0 then return end
+  if Spell.ZenPulse:CooldownRemaining() > 0 then return false end
 
   if friend.HealthPct < Settings.ZenPulsePct then
     local enemy8 = #friend:GetUnitsAround(8)
@@ -283,14 +287,13 @@ local function ZenPulse(friend)
 end
 
 local function EssenceFont()
-  if Spell.EssenceFont:CooldownRemaining() > 0 then return end
+  if Spell.EssenceFont:CooldownRemaining() > 0 then return false end
 
-  local below, count = Heal:GetMembersBelow(Settings.EssenceFontPct)
-  return count >= Settings.EssenceFontCount and Me:IsMoving() and Spell.EssenceFont:CastEx(Me)
+  return Me:IsMoving() and Spell.EssenceFont:CastEx(Me)
 end
 
 local function SpinningCraneKick()
-  local enemyCount = Combat:GetEnemiesWithinDistance(8)
+  local enemyCount = Combat.EnemiesInMeleeRange
   local hasaoekick = Me:GetAura(auras.ancientconcordance)
 
   if (enemyCount < 7 and hasaoekick or enemyCount < 3) or Spell.RisingSunKick:CooldownRemaining() == 0 then return false end
@@ -321,7 +324,7 @@ end
 
 local function ChiBurst()
   local spell = Spell.ChiBurst
-  if spell:CooldownRemaining() > 0 then return end
+  if spell:CooldownRemaining() > 0 then return false end
 
   local hitcount = 0
 
@@ -368,20 +371,18 @@ end
 local function ChijiRedCrane()
   local spell = Spell.InvokeChijiTheRedCrane
   local target = Combat.BestTarget
-  if spell:CooldownRemaining() > 0 or not Me.InCombat or not target then return end
+  local TTD = Combat:TargetsAverageDeathTime()
+  if spell:CooldownRemaining() > 0 or not Me.InCombat or not target then return false end
+  if TTD == 9999 or TTD < 12 then return false end
 
-  local below, count = Heal:GetMembersBelow(Settings.ChijiPct)
-
-  return Me:InMeleeRange(target) and count >= Settings.ChijiCount and spell:CastEx(Me)
+  return Me:InMeleeRange(target) and spell:CastEx(Me)
 end
 
 local function Revival()
   local spell = Spell.Revival
-  if spell:CooldownRemaining() > 0 then return end
+  if spell:CooldownRemaining() > 0 then return false end
 
-  local below, count = Heal:GetMembersBelow(Settings.RevivalPct)
-
-  return count >= Settings.RevivalCount and spell:CastEx(Me)
+  return spell:CastEx(Me)
 end
 
 local function Dispel()
@@ -403,32 +404,60 @@ end
 local function SheilunsGift()
   local spell = Spell.SheilunsGift
   local sheilun = Me:GetAura(auras.sheilunsgift)
-  if not sheilun or sheilun.Stacks == 0 then return end
+  if not sheilun or sheilun.Stacks == 0 then return false end
+  local lowest = Heal:GetLowestMember() or Me
 
-  local below, count = Heal:GetMembersBelow(Settings.SheilunPct)
+  return sheilun.Stacks > 2 and spell:CastEx(lowest)
+end
 
-  return sheilun.Stacks > 2 and count >= Settings.SheilunCount and spell:CastEx(Me)
+local function AoEHeal()
+  local revivalBelow, revivalCount = Heal:GetMembersBelow(Settings.RevivalPct)
+  local sheilunBelow, sheilunCount = Heal:GetMembersBelow(Settings.SheilunPct)
+  local chijiBelow, chijiCount = Heal:GetMembersBelow(Settings.ChijiPct)
+  local essenceBelow, essenceCount = Heal:GetMembersBelow(Settings.EssenceFontPct)
+
+  if revivalCount >= Settings.RevivalCount and Revival() then
+    return true
+  elseif chijiCount >= Settings.ChijiCount and ChijiRedCrane() then
+    return true
+  elseif sheilunCount >= Settings.SheilunCount and SheilunsGift() then
+    return true
+  elseif essenceCount >= Settings.EssenceFontCount and EssenceFont() then
+    return true
+  end
+
+  return false
+end
+
+local function BirdRotation()
+  local target = Combat.BestTarget
+
+  if EnvelopingMist() then return true end
+  if FaelineStomp(target) then return true end
+  if RisingSunKick(target) then return true end
+  if BlackoutKick(target) then return true end
+  if TigerPalm(target) then return true end
 end
 
 local function MonkMistweaverDamage()
   local target = Combat.BestTarget
-  if not target or not Me:IsFacing(target) then return end
+  if not target or not Me:IsFacing(target) then return false end
 
-  if IsCastingOrChanneling() or not Me:IsFacing(target) then return end
+  if IsCastingOrChanneling() or not Me:IsFacing(target) then return false end
 
   local lowest = Heal:GetLowestMember()
-  if lowest and lowest.HealthPct < Settings.VivifyPct and Spell.Vivify:IsUsable() then return end
+  if lowest and lowest.HealthPct < Settings.VivifyPct and Spell.Vivify:IsUsable() then return false end
 
-  if common:LegSweep() then return end
-  if common:TouchOfDeath() then return end
-  if FaelineStomp(target) then return end
-  if ChiBurst() then return end
-  if ChiWave(target) then return end
-  if SpinningCraneKick() then return end
-  if RisingSunKick(target) then return end
-  if BlackoutKick(target) then return end
-  if TigerPalm(target) then return end
-  if CracklingJadeLightning(target) then return end
+  if common:LegSweep() then return true end
+  if common:TouchOfDeath() then return true end
+  if FaelineStomp(target) then return true end
+  if ChiBurst() then return true end
+  if ChiWave(target) then return true end
+  if SpinningCraneKick() then return true end
+  if RisingSunKick(target) then return true end
+  if BlackoutKick(target) then return true end
+  if TigerPalm(target) then return true end
+  if CracklingJadeLightning(target) then return true end
 end
 
 local function MonkMistweaver()
@@ -441,15 +470,20 @@ local function MonkMistweaver()
 
   if IsCastingOrChanneling() then return end
 
+  local birdExists = Me:GetAura(auras.chijibird)
+
   if ManaTea() then return end
   if common:DiffuseMagic() then return end
   if common:FortifyingBrew() then return end
   if common:DampenHarm() then return end
   if HealingElixir() then return end
-  if Revival() then return end
-  if SheilunsGift() then return end
-  if ChijiRedCrane() then return end
-  if EssenceFont() then return end
+
+  if birdExists and Combat.EnemiesInMeleeRange > 0 then
+    if BirdRotation() then return end
+    return
+  end
+
+  if AoEHeal() then return end
 
   for _, v in pairs(Heal.PriorityList) do
     local f = v.Unit
@@ -465,6 +499,7 @@ local function MonkMistweaver()
 
   if Dispel() then return end
   if common:TigersLust() then return end
+  if common:ExpelHarm() then return end
   if RenewingMist() then return end
 
   if MonkMistweaverDamage() then return end
