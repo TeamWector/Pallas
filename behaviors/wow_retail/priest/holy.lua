@@ -240,7 +240,7 @@ local function EmpyrealBlaze()
   local HolyFireData = WoWSpell(14914)
   if spell:CooldownRemaining() > 0 or HolyFireData:CooldownRemaining() == 0 then return false end
 
-  return Combat:GetEnemiesWithinDistance(30) > 2 and spell:CastEx(Me)
+  return spell:CastEx(Me)
 end
 
 local function HolyWordChastise(enemy)
@@ -269,7 +269,10 @@ local function HolyWordSanctify()
     local count, below = Heal:GetMembersAround(friend, 10, Settings.HolySanctifyPct)
 
     if count >= Settings.HolySanctifyCount then
-      spell:CastEx(friend)
+      if spell.IsUsable then
+        Spell.DivineWord:CastEx(Me)
+      end
+      if spell:CastEx(friend) then return true end
     end
   end
 
