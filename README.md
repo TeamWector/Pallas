@@ -37,7 +37,7 @@ After installation the path to Pallas should be `<Wector root>/scripts/Pallas`
 | Restoration       | :large_blue_diamond: |                   |                      |                   |                      |
 | **Evoker**        |                      | **Priest**        |                      |                   |                      |
 | Devastation       |         :x:          | Discipline        |         :x:          |                   |                      |
-| Preservation      |         :x:          | Holy              |         :x:          |                   |                      |
+| Preservation      |         :x:          | Holy              | :heavy_check_mark:   |                   |                      |
 |                   |                      | Shadow            |         :x:          |                   |                      |
 | **Hunter**        |                      | **Rogue**         |                      |                   |                      |
 | Beast Mastery     | :large_blue_diamond: | Assassination     |         :x:          |                   |                      |

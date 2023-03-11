@@ -83,7 +83,7 @@ elseif wector.CurrentScript.Game == 'wow_retail' then
       [1447] = 'Initial'
     },
 
-    Evoker = {
+    evoker = {
       [1467] = 'Devastation',
       [1468] = 'Preservation',
       [1465] = 'Initial'

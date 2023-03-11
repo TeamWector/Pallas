@@ -1,5 +1,4 @@
 local commonMonk = {}
-local dispels = require('data.dispels')
 
 commonMonk.widgets = {
   {
@@ -35,6 +34,14 @@ commonMonk.widgets = {
     type = "slider",
     uid = "MonkDiffuseMagicPct",
     text = "Diffuse Magic (%)",
+    default = 0,
+    min = 0,
+    max = 100
+  },
+  {
+    type = "slider",
+    uid = "MonkExpelHarmPct",
+    text = "Expel Harm (%)",
     default = 0,
     min = 0,
     max = 100
@@ -86,7 +93,7 @@ function commonMonk:LegSweep()
   local count = 0
 
   for _, enemy in pairs(Combat.Targets) do
-    if Me:GetDistance(enemy) <= 6 and not enemy:IsStunned() then
+    if Me:GetDistance(enemy) <= 6 and not enemy:IsStunned() and enemy.IsInterruptible then
       count = count + 1
     end
   end
@@ -120,10 +127,17 @@ function commonMonk:DiffuseMagic()
     local castingMe = spellInfo.TargetGuid1 == Me.Guid
     local castingRemain = spellInfo.CastEnd - wector.Game.Time
 
-    if castingMe and castingRemain < 200 and Spell.DiffuseMagic:CastEx(Me) then return true end
+    if castingMe and castingRemain < 1000 and spell:CastEx(Me) then return true end
 
     ::continue::
   end
+end
+
+function commonMonk:ExpelHarm()
+  local spell = Spell.ExpelHarm
+  if spell:CooldownRemaining() > 0 then return end
+
+  return Me.HealthPct < Settings.MonkExpelHarmPct and spell:CastEx(Me)
 end
 
 return commonMonk
