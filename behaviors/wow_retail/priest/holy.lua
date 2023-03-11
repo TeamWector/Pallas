@@ -203,7 +203,7 @@ local function HolyFire(enemy)
   if spell:Apply(enemy) then return true end
 
   for _, e in pairs(Combat.Targets) do
-    if spell:Apply(e) then return true end
+    if Me:IsFacing(e) and spell:Apply(e) then return true end
   end
 
   return spell:CastEx(enemy)
