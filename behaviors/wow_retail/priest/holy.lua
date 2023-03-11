@@ -224,9 +224,21 @@ local function Mindgames(enemy)
   return spell:CastEx(enemy)
 end
 
+local function ShadowWordDeath()
+  local spell = Spell.ShadowWordDeath
+  if spell:CooldownRemaining() > 0 then return false end
+
+  for _, e in pairs(Combat.Targets) do
+    if e.HealthPct < 20 and spell:CastEx(e) then return true end
+  end
+
+  return false
+end
+
 local function EmpyrealBlaze()
   local spell = Spell.EmpyrealBlaze
-  if spell:CooldownRemaining() > 0 then return false end
+  local HolyFireData = WoWSpell(14914)
+  if spell:CooldownRemaining() > 0 or HolyFireData:CooldownRemaining() == 0 then return false end
 
   return Combat:GetEnemiesWithinDistance(30) > 2 and spell:CastEx(Me)
 end
@@ -419,6 +431,7 @@ local function PriestHolyDamage()
 
   if not Me:IsFacing(target) then return false end
 
+  if ShadowWordDeath() then return true end
   if Mindgames(target) then return true end
   if HolyWordChastise(target) then return true end
   if HolyFire(target) then return true end
