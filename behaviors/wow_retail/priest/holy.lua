@@ -224,6 +224,13 @@ local function Mindgames(enemy)
   return spell:CastEx(enemy)
 end
 
+local function EmpyrealBlaze()
+  local spell = Spell.EmpyrealBlaze
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return Combat:GetEnemiesWithinDistance(30) > 2 and spell:CastEx(Me)
+end
+
 local function HolyWordChastise(enemy)
   local spell = Spell.HolyWordChastise
   if spell:CooldownRemaining() > 0 then return false end
@@ -415,6 +422,7 @@ local function PriestHolyDamage()
   if Mindgames(target) then return true end
   if HolyWordChastise(target) then return true end
   if HolyFire(target) then return true end
+  if EmpyrealBlaze() then return true end
   if ShadowWordPain(target) then return true end
   if Smite(target) then return true end
 end
