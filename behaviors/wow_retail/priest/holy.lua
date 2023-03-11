@@ -269,7 +269,7 @@ local function HolyWordSanctify()
     local count, below = Heal:GetMembersAround(friend, 10, Settings.HolySanctifyPct)
 
     if count >= Settings.HolySanctifyCount then
-      if spell.IsUsable then
+      if spell:IsUsable() then
         Spell.DivineWord:CastEx(Me)
       end
       if spell:CastEx(friend) then return true end
@@ -383,7 +383,7 @@ local function HolyWordSerenity(friend)
 
   local shouldUse = friend.HealthPct < Settings.HolySerenityPct
 
-  if shouldUse and spell.IsUsable then
+  if shouldUse and spell:IsUsable() then
     Spell.DivineWord:CastEx(Me)
   end
 

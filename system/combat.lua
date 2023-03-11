@@ -181,4 +181,39 @@ function Combat:CheckTargetsForAuraByMe(aura, duration)
   return count > 0, count
 end
 
+---@return number targetsaround number of targets around our unit
+---@param unit WoWUnit Unit to check for targets
+---@param distance integer Distance from unit to check for targets
+function Combat:GetTargetsAround(unit, distance)
+  local count = 0
+
+  for _, target in pairs(self.Targets) do
+    if unit:GetDistance(target) <= distance then
+      count = count + 1
+    end
+  end
+
+  return count
+end
+
+---@return boolean gathered if all targets are gathered near eachother.
+---@param distance integer how far in yrds from each other do the targets have to be.
+function Combat:AllTargetsGathered(distance)
+  if table.length(self.Targets) < 2 then return true end
+
+  local gathered = true
+
+  for _, target in pairs(self.Targets) do
+    if not target.IsCastingOrChanneling then
+      for _, otarget in pairs(self.Targets) do
+        if otarget:GetDistance(target) > distance then
+          gathered = false
+        end
+      end
+    end
+  end
+
+  return gathered
+end
+
 return Combat

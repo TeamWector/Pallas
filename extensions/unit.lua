@@ -86,7 +86,7 @@ end
 ---@param identifier any aura name or id
 ---@return WoWAura?
 function WoWUnit:GetAuraByMe(identifier)
-  local auras = self.Auras
+  local auras = self.VisibleAuras
   local typ = type(identifier)
 
   for _, aura in pairs(auras) do

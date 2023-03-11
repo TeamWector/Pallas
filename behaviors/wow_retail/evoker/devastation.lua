@@ -28,7 +28,7 @@ local function EternitySurge(enemy)
   local enemyCount = #enemy:GetUnitsAround(12)
   local empowerLevel = math.ceil(enemyCount / 2)
 
-  if spell.IsUsable and not Me:IsMoving() then
+  if spell:IsUsable() and not Me:IsMoving() then
     Spell.ShatteringStar:CastEx(enemy)
   end
 
@@ -89,7 +89,7 @@ end
 
 local function Pyre(enemy)
   local spell = Spell.Pyre
-  if not spell.IsUsable then return false end
+  if not spell:IsUsable() then return false end
 
   local enemiesAround = #enemy:GetUnitsAround(8)
   local eb = Me:GetAura(auras.essenceburst)
@@ -101,7 +101,7 @@ end
 
 local function Disintegrate(enemy)
   local spell = Spell.Disintegrate
-  if not spell.IsUsable then return false end
+  if not spell:IsUsable() then return false end
 
   return spell:CastEx(enemy)
 end
