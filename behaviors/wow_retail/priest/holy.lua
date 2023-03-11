@@ -209,6 +209,21 @@ local function HolyFire(enemy)
   return spell:CastEx(enemy)
 end
 
+local function Mindgames(enemy)
+  local spell = Spell.Mindgames
+  if spell:CooldownRemaining() > 0 then return false end
+
+  for _, e in pairs(Combat.Targets) do
+    for _, friend in pairs(Heal.DPS) do
+      if e.Target == friend then
+        if spell:CastEx(e) then return true end
+      end
+    end
+  end
+
+  return spell:CastEx(enemy)
+end
+
 local function HolyWordChastise(enemy)
   local spell = Spell.HolyWordChastise
   if spell:CooldownRemaining() > 0 then return false end
@@ -397,6 +412,7 @@ local function PriestHolyDamage()
 
   if not Me:IsFacing(target) then return false end
 
+  if Mindgames(target) then return true end
   if HolyWordChastise(target) then return true end
   if HolyFire(target) then return true end
   if ShadowWordPain(target) then return true end
