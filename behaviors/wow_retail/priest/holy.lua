@@ -394,6 +394,9 @@ local function PriestHolyDamage()
 
   if Shadowfiend(target) then return true end
   if DivineStar() then return true end
+
+  if not Me:IsFacing(target) then return false end
+
   if HolyWordChastise(target) then return true end
   if HolyFire(target) then return true end
   if ShadowWordPain(target) then return true end
