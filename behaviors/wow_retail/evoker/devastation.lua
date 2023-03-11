@@ -50,6 +50,7 @@ local function FireBreath(enemy)
   local empowerLevel = 1
 
   if enemiesAround >= 5 then
+    Spell.TipTheScales:CastEx(Me)
     empowerLevel = 4
   elseif enemiesAround == 4 then
     empowerLevel = 3
