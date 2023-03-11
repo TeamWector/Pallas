@@ -43,6 +43,9 @@ end
 local exclusions = {
   117952, -- Crackling Jade Lightning
   115175, -- Soothing Mist
+  357208, -- Fire Breath
+  356995, -- Disintegrate,
+  359073, -- Eternity Surge
 }
 
 function WoWSpell:CastEx(a1, ...)

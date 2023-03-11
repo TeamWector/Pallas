@@ -240,7 +240,7 @@ function WoWUnit:GetThreatPct(target)
   return 0
 end
 
----@return WoWUnit[]
+---@return WoWUnit[] units returns all units in and out of combat around the unit.
 ---@param dist integer Distance from unit to check for other attackable units
 function WoWUnit:GetUnitsAround(dist)
   local units = wector.Game.Units
