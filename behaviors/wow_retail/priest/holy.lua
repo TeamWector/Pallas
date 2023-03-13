@@ -185,14 +185,7 @@ local function Smite(enemy)
   return spell:CastEx(enemy)
 end
 
-local function Shadowfiend(enemy)
-  local spell = Spell.Shadowfiend
-  if spell:CooldownRemaining() > 0 then return false end
 
-  local TTD = Combat:TargetsAverageDeathTime()
-
-  return TTD ~= 9999 and TTD > 20 and Me.PowerPct < 85 and spell:CastEx(enemy)
-end
 
 local function HolyFire(enemy)
   local spellData = WoWSpell(14914)
@@ -207,32 +200,6 @@ local function HolyFire(enemy)
   end
 
   return spell:CastEx(enemy)
-end
-
-local function Mindgames(enemy)
-  local spell = Spell.Mindgames
-  if spell:CooldownRemaining() > 0 then return false end
-
-  for _, e in pairs(Combat.Targets) do
-    for _, friend in pairs(Heal.DPS) do
-      if e.Target == friend then
-        if spell:CastEx(e) then return true end
-      end
-    end
-  end
-
-  return spell:CastEx(enemy)
-end
-
-local function ShadowWordDeath()
-  local spell = Spell.ShadowWordDeath
-  if spell:CooldownRemaining() > 0 then return false end
-
-  for _, e in pairs(Combat.Targets) do
-    if e.HealthPct < 20 and spell:CastEx(e) then return true end
-  end
-
-  return false
 end
 
 local function EmpyrealBlaze()
@@ -429,13 +396,13 @@ local function PriestHolyDamage()
 
   if not shouldDPS then return false end
 
-  if Shadowfiend(target) then return true end
+  if common:Shadowfiend(target) then return true end
   if DivineStar() then return true end
 
   if not Me:IsFacing(target) then return false end
 
-  if ShadowWordDeath() then return true end
-  if Mindgames(target) then return true end
+  if common:ShadowWordDeath() then return true end
+  if common:Mindgames(target) then return true end
   if HolyWordChastise(target) then return true end
   if HolyFire(target) then return true end
   if EmpyrealBlaze() then return true end

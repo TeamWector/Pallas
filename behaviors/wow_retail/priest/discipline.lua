@@ -1,10 +1,251 @@
+local common = require("behaviors.wow_retail.priest.common")
+
 local options = {
+  Name = "Priest (Discipline) PVP",
+  Widgets = {
+    {
+      type = "slider",
+      uid = "DiscPowerWordBarrierPct",
+      text = "PW: Barrier (%)",
+      default = 40,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "DiscPowerWordShieldPct",
+      text = "PW: Shield (%)",
+      default = 80,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "DiscPowerWordRadiancePct",
+      text = "PW: Radiance (%)",
+      default = 55,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "DiscPenancePct",
+      text = "Penance (%)",
+      default = 69,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "DiscFlashHealPct",
+      text = "Flash Heal (%)",
+      default = 75,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "DiscPainSuppressionPct",
+      text = "Pain Suppression (%)",
+      default = 34,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "DiscRapturePct",
+      text = "Rapture (%)",
+      default = 28,
+      min = 0,
+      max = 100
+    },
+  }
 }
 
+for k, v in pairs(common.widgets) do
+  table.insert(options.Widgets, v)
+end
+
+local auras = {
+  painSuppression = 33206,
+  powerOfTheDarkSide = 198068,
+  purgeTheWicked = 204213
+}
+
+local function PowerWordBarrier(friend)
+  local spell = Spell.PowerWordBarrier
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return friend.HealthPct < Settings.DiscPowerWordBarrierPct and spell:CastEx(friend)
+end
+
+
+local function PowerWordShield(friend)
+  local spell = Spell.PowerWordShield
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return friend.HealthPct < Settings.DiscPowerWordShieldPct and spell:CastEx(friend)
+end
+
+local function PowerWordRadiance(friend)
+  local spell = Spell.PowerWordRadiance
+  if spell:CooldownRemaining() > 0 or Spell.Charges < 2 then return false end
+  return friend.HealthPct < Settings.DiscPowerWordRadiancePct and spell:CastEx(friend)
+end
+
+local function PowerWordRadianceOneCharge(friend)
+  local spell = Spell.PowerWordRadiance
+  if spell:CooldownRemaining() > 0 or Spell.Charges < 1 then return false end
+  return friend.HealthPct < Settings.DiscPowerWordRadiancePct and spell:CastEx(friend)
+end
+
+
+local function Penance(friend)
+  local spell = Spell.Penance
+  if spell:CooldownRemaining() > 0 then return false end
+  return friend.HealthPct < Settings.DiscPenancePct and spell:CastEx(friend)
+end
+
+local function FlashHeal(friend)
+  local spell = Spell.FlashHeal
+  if spell:CooldownRemaining() > 0 then return false end
+  return friend.HealthPct < Settings.DiscFlashHealPct and spell:CastEx(friend)
+end
+
+local function PainSuppression(friend)
+  local spell = Spell.PainSuppression
+  if spell:CooldownRemaining() > 0 or friend:GetAura(auras.painSuppression) ~= nil then return false end
+  return friend.HealthPct < Settings.DiscPainSuppressionPct and spell:CastEx(friend)
+end
+
+local function Rapture(friend)
+  local spell = Spell.Rapture
+  if spell:CooldownRemaining() > 0 or friend:GetAura(auras.painSuppression) ~= nil then return false end
+  return friend.HealthPct < Settings.DiscRapturePct and spell:CastEx(friend)
+end
+
+local function PenanceOffensive(target)
+  local spell = Spell.Penance
+  if spell:CooldownRemaining() > 0 or Me:GetAura(auras.powerOfTheDarkSide) == nil then return false end
+  return spell:CastEx(target)
+end
+
+local function PurgeTheWicked(target)
+  local spell = Spell.PurgeTheWicked
+  if spell:CooldownRemaining() > 0 or target:GetAura(auras.purgeTheWicked) ~= nil then return false end
+  return spell:CastEx(target)
+end
+
+local function PowerInfusionMyself()
+  local spell = Spell.PowerInfusion
+  if spell:CooldownRemaining() > 0 then return false end
+  return spell:CastEx(Me)
+end
+
+local function Schism(target)
+  local spell = Spell.Schism
+  if spell:CooldownRemaining() > 0 then return false end
+  return spell:CastEx(target)
+end
+
+local function PowerWordSolace(target)
+  local spell = Spell.PowerWordSolace
+  if spell:CooldownRemaining() > 0 then return false end
+  return spell:CastEx(target)
+end
+
+local function MindBlast(target)
+  local spell = Spell.MindBlast
+  if spell:CooldownRemaining() > 0 then return false end
+  return spell:CastEx(target)
+end
+
+local function Smite(target)
+  local spell = Spell.Smite
+  if spell:CooldownRemaining() > 0 then return false end
+  return spell:CastEx(target)
+end
+
+
+-- TODO REVISIT ME
+local function MaintainAtonement()
+  if not Me:InArena() or Me:HasArenaPreparation() then return false end
+
+  local friends = WoWGroup:GetGroupUnits()
+  for _, f in pairs(friends) do
+
+  end
+end
+
+local function PriestDiscDamage()
+  local target = Me.Target
+  if not target then return false end
+
+  -- copy-paste from combat.lua
+  if not Me:CanAttack(target) then
+    return false
+  elseif not target.InCombat or (not Settings.PallasAttackOOC and not target.InCombat) then
+    return false
+  elseif target.Dead or target.Health <= 0 then
+    return false
+  elseif target:GetDistance(Me.ToUnit) > 40 then
+    return false
+  elseif target.IsTapDenied and (not target.Target or target.Target ~= Me) then
+    return false
+  elseif target:IsImmune() then
+    return false
+  end
+
+
+
+  if not target then return false end
+  local lowest = Heal:GetLowestMember()
+  local shouldDPS = not lowest or lowest.HealthPct >= Settings.DiscFlashHealPct
+
+  if not shouldDPS then return false end
+
+  if PurgeTheWicked(target) then return true end
+  if PowerInfusionMyself() then return true end
+  if common:Shadowfiend(target) then return true end
+  if Schism(target) then return true end
+  if common:Mindgames(target) then return true end
+  if common:ShadowWordDeath() then return true end
+  if PenanceOffensive(target) then return true end
+  if MindBlast(target) then return true end
+  if Smite(target) then return true end
+end
+
 local function PriestDiscipline()
+  if Me:IsSitting() or Me.IsMounted or Me:IsStunned() then return end
+
+  common:MovementUpdate()
+
+  local GCD = wector.SpellBook.GCD
+  if Me.IsCastingOrChanneling or GCD:CooldownRemaining() > 0 then return end
+
+  if common:PowerWordLife() then return end
+
+  -- BURST HEALING
+  for _, v in pairs(Heal.PriorityList) do
+    local f = v.Unit
+
+    if PainSuppression(f) then return end
+    if Rapture(f) then return end
+    if PowerWordBarrier(f) then return end
+    if PowerWordShield(f) then return end
+    if PowerWordRadiance(f) then return end
+    if Penance(f) then return end
+    if FlashHeal(f) then return end
+    if PowerWordRadianceOneCharge(f) then return end
+  end
+
+  if MaintainAtonement() then return end
+
+  if PriestDiscDamage() then return end
 end
 
 local behaviors = {
+  [BehaviorType.Heal] = PriestDiscipline,
   [BehaviorType.Combat] = PriestDiscipline
 }
 
