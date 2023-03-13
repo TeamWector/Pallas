@@ -89,13 +89,13 @@ end
 
 local function PowerWordRadiance(friend)
   local spell = Spell.PowerWordRadiance
-  if spell:CooldownRemaining() > 0 or Spell.Charges < 2 then return false end
+  if spell:CooldownRemaining() > 0 or spell.Charges < 2 then return false end
   return friend.HealthPct < Settings.DiscPowerWordRadiancePct and spell:CastEx(friend)
 end
 
 local function PowerWordRadianceOneCharge(friend)
   local spell = Spell.PowerWordRadiance
-  if spell:CooldownRemaining() > 0 or Spell.Charges < 1 then return false end
+  if spell:CooldownRemaining() > 0 or spell.Charges < 1 then return false end
   return friend.HealthPct < Settings.DiscPowerWordRadiancePct and spell:CastEx(friend)
 end
 
