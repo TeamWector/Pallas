@@ -166,6 +166,23 @@ local function Smite(target)
   return spell:CastEx(target)
 end
 
+local function Dispel()
+  local spell = Spell.Purify
+  if spell:CooldownRemaining() > 0 then return false end
+  spell:Dispel(true, WoWDispelType.Magic)
+end
+
+local function MassDispel()
+  local spell = Spell.MassDispel
+  if spell:CooldownRemaining() > 0 then return false end
+  for _, enemy in pairs(Combat.Targets) do
+    if enemy:HasAura("Ice Block") or enemy:HasAura("Divine Shield") then
+      if spell:CastEx(enemy) then return true end
+    end
+  end
+end
+
+
 
 -- TODO REVISIT ME
 local function MaintainAtonement()
@@ -204,6 +221,8 @@ local function PriestDiscDamage()
 
   if not shouldDPS then return false end
 
+  if common:DispelMagic() then return end
+
   if PurgeTheWicked(target) then return true end
   if PowerInfusionMyself() then return true end
   if common:Shadowfiend(target) then return true end
@@ -224,6 +243,7 @@ local function PriestDiscipline()
   if Me.IsCastingOrChanneling or GCD:CooldownRemaining() > 0 then return end
 
   if common:PowerWordLife() then return end
+  if MassDispel() then return end
 
   -- BURST HEALING
   for _, v in pairs(Heal.PriorityList) do
@@ -238,6 +258,8 @@ local function PriestDiscipline()
     if FlashHeal(f) then return end
     if PowerWordRadianceOneCharge(f) then return end
   end
+
+  if Dispel() then return end
 
   if MaintainAtonement() then return end
 
