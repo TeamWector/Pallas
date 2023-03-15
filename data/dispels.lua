@@ -36,12 +36,20 @@ local dispels = {
   -- PURGE
   [1022] = "Magic", -- Paladin - Blessing of Protection
   [1044] = "Magic", -- Paladin - Blessing of Freedom
+  [383648] = "Magic", -- Shaman - Earth Shield
+  [21562] = "Magic", -- Priest - Powerword Fortitude
+  [17] = "Magic", -- Priest - Powerword Shield
+  [11426] = "Magic",    -- Mage - Ice Barrier
+
+
+
   -- FRIEND DISPEL
   [358385] = "Magic", -- Evoker - Land Slide
   [217832] = "Magic", -- Demon Hunter - Imprison
   [339] = "Magic",    -- Druid - Entangling Roots
   [2637] = "Magic",   -- Druid - Hibernate
   [102359] = "Magic", -- Druid - Mass Entanglement
+  [467] = "Magic",    -- Druid - Thorns
   [209790] = "Magic", -- Hunter - Freezing Arrow
   [3355] = "Magic",   -- Hunter - Freezing Trap
   [19386] = "Poison", -- Hunter - Wyvern Sting
@@ -61,6 +69,7 @@ local dispels = {
   [853] = "Magic",    -- Paladin - Hammer of Justice
   [8122] = "Magic",   -- Priest - Psychic Scream
   [9484] = "Magic",   -- Priest - Shackle Undead
+  [375901] = "Magic", -- Priest - Mindgames
   [64695] = "Magic",  -- Shaman - Earthgrab Totem
   [211015] = "Curse", -- Shaman - Hex (Cockroach)
   [210873] = "Curse", -- Shaman - Hex (Compy)

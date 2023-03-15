@@ -182,6 +182,11 @@ local function MassDispel()
   end
 end
 
+local function FlashHealSurgeOfLight(friend)
+  local spell = Spell.FlashHeal
+  if spell:CooldownRemaining() > 0 then return false end
+  return Me:HasAura("Surge of Light") and friend.HealthPct < Settings.DiscFlashHealPct and spell:CastEx(friend)
+end
 
 
 -- TODO REVISIT ME
@@ -254,6 +259,7 @@ local function PriestDiscipline()
     if PowerWordBarrier(f) then return end
     if PowerWordShield(f) then return end
     if PowerWordRadiance(f) then return end
+    if FlashHealSurgeOfLight(f) then return end
     if Penance(f) then return end
     if FlashHeal(f) then return end
     if PowerWordRadianceOneCharge(f) then return end
