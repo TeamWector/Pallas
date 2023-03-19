@@ -69,7 +69,8 @@ end
 local auras = {
   painSuppression = 33206,
   powerOfTheDarkSide = 198068,
-  purgeTheWicked = 204213
+  purgeTheWicked = 204213,
+  powerWordShield = 17,
 }
 
 local function PowerWordBarrier(friend)
@@ -84,7 +85,8 @@ local function PowerWordShield(friend)
   local spell = Spell.PowerWordShield
   if spell:CooldownRemaining() > 0 then return false end
 
-  return friend.HealthPct < Settings.DiscPowerWordShieldPct and spell:CastEx(friend)
+  return friend.HealthPct < Settings.DiscPowerWordShieldPct and (not friend:HasAura(auras.powerWordShield)) and
+  spell:CastEx(friend)
 end
 
 local function PowerWordRadiance(friend)
@@ -232,7 +234,9 @@ local function PriestDiscDamage()
   if PowerInfusionMyself() then return true end
   if common:Shadowfiend(target) then return true end
   if Schism(target) then return true end
-  if common:Mindgames(target) then return true end
+  if (target.HealthPct < 50) then
+    if common:Mindgames(target) then return true end
+  end
   if common:ShadowWordDeath() then return true end
   if PenanceOffensive(target) then return true end
   if MindBlast(target) then return true end
