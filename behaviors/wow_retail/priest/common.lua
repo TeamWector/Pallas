@@ -116,4 +116,39 @@ function commonPriest:DispelMagic()
   if spell:Dispel(false, WoWDispelType.Magic) then return true end
 end
 
+function commonPriest:Shadowfiend(enemy)
+  local spell = Spell.Shadowfiend
+  if spell:CooldownRemaining() > 0 then return false end
+
+  local TTD = Combat:TargetsAverageDeathTime()
+
+  return TTD ~= 9999 and TTD > 20 and Me.PowerPct < 85 and spell:CastEx(enemy)
+end
+
+function commonPriest:Mindgames(enemy)
+  local spell = Spell.Mindgames
+  if spell:CooldownRemaining() > 0 then return false end
+
+  for _, e in pairs(Combat.Targets) do
+    for _, friend in pairs(Heal.DPS) do
+      if e.Target == friend then
+        if spell:CastEx(e) then return true end
+      end
+    end
+  end
+
+  return spell:CastEx(enemy)
+end
+
+function commonPriest:ShadowWordDeath()
+  local spell = Spell.ShadowWordDeath
+  if spell:CooldownRemaining() > 0 then return false end
+
+  for _, e in pairs(Combat.Targets) do
+    if e.HealthPct < 20 and spell:CastEx(e) then return true end
+  end
+
+  return false
+end
+
 return commonPriest

@@ -185,14 +185,7 @@ local function Smite(enemy)
   return spell:CastEx(enemy)
 end
 
-local function Shadowfiend(enemy)
-  local spell = Spell.Shadowfiend
-  if spell:CooldownRemaining() > 0 then return false end
 
-  local TTD = Combat:TargetsAverageDeathTime()
-
-  return TTD ~= 9999 and TTD > 20 and Me.PowerPct < 85 and spell:CastEx(enemy)
-end
 
 local function HolyFire(enemy)
   local spellData = WoWSpell(14914)
@@ -203,10 +196,18 @@ local function HolyFire(enemy)
   if spell:Apply(enemy) then return true end
 
   for _, e in pairs(Combat.Targets) do
-    if spell:Apply(e) then return true end
+    if Me:IsFacing(e) and spell:Apply(e) then return true end
   end
 
   return spell:CastEx(enemy)
+end
+
+local function EmpyrealBlaze()
+  local spell = Spell.EmpyrealBlaze
+  local HolyFireData = WoWSpell(14914)
+  if spell:CooldownRemaining() > 0 or HolyFireData:CooldownRemaining() == 0 then return false end
+
+  return spell:CastEx(Me)
 end
 
 local function HolyWordChastise(enemy)
@@ -235,7 +236,10 @@ local function HolyWordSanctify()
     local count, below = Heal:GetMembersAround(friend, 10, Settings.HolySanctifyPct)
 
     if count >= Settings.HolySanctifyCount then
-      spell:CastEx(friend)
+      if spell:IsUsable() then
+        Spell.DivineWord:CastEx(Me)
+      end
+      if spell:CastEx(friend) then return true end
     end
   end
 
@@ -346,7 +350,7 @@ local function HolyWordSerenity(friend)
 
   local shouldUse = friend.HealthPct < Settings.HolySerenityPct
 
-  if shouldUse and spell.IsUsable then
+  if shouldUse and spell:IsUsable() then
     Spell.DivineWord:CastEx(Me)
   end
 
@@ -392,13 +396,16 @@ local function PriestHolyDamage()
 
   if not shouldDPS then return false end
 
-  if Shadowfiend(target) then return true end
+  if common:Shadowfiend(target) then return true end
   if DivineStar() then return true end
 
   if not Me:IsFacing(target) then return false end
 
+  if common:ShadowWordDeath() then return true end
+  if common:Mindgames(target) then return true end
   if HolyWordChastise(target) then return true end
   if HolyFire(target) then return true end
+  if EmpyrealBlaze() then return true end
   if ShadowWordPain(target) then return true end
   if Smite(target) then return true end
 end

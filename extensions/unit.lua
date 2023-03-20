@@ -86,7 +86,7 @@ end
 ---@param identifier any aura name or id
 ---@return WoWAura?
 function WoWUnit:GetAuraByMe(identifier)
-  local auras = self.Auras
+  local auras = self.VisibleAuras
   local typ = type(identifier)
 
   for _, aura in pairs(auras) do
@@ -240,7 +240,7 @@ function WoWUnit:GetThreatPct(target)
   return 0
 end
 
----@return WoWUnit[]
+---@return WoWUnit[] units returns all units in and out of combat around the unit.
 ---@param dist integer Distance from unit to check for other attackable units
 function WoWUnit:GetUnitsAround(dist)
   local units = wector.Game.Units

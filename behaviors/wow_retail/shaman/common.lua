@@ -21,6 +21,21 @@ commonShaman.widgets = {
     min = 0,
     max = 2000
   },
+  {
+    type = "combobox",
+    uid = "CommonInterrupts",
+    text = "Interrupt",
+    default = 0,
+    options = { "Disabled", "Any", "Whitelist" }
+  },
+    {
+    type = "slider",
+    uid = "CommonInterruptPct",
+    text = "Kick Cast Left (%)",
+    default = 0,
+    min = 0,
+    max = 100
+  },
 }
 
 function commonShaman:DoInterrupt()
