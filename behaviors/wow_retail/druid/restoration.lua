@@ -52,6 +52,22 @@ local options = {
       default = false
     },
     {
+      type = "slider",
+      uid = "DruidRestoBarkskinPct",
+      text = "Barkskin (self) Percent (%)",
+      default = 34,
+      min = 0,
+      max = 100
+    },
+    {
+      type = "slider",
+      uid = "DruidRestoIronbarkPct",
+      text = "Ironbark Percent (%)",
+      default = 27,
+      min = 0,
+      max = 100
+    },
+    {
       type = "checkbox",
       uid = "DruidRestoPvPMode",
       text = "PVP Enabled - some extra casts",
@@ -252,6 +268,8 @@ local function DruidRestoHeal()
     end
   end
 
+
+
   for _, v in pairs(Heal.PriorityList) do
     ---@type WoWUnit
     local u = v.Unit
@@ -282,22 +300,23 @@ local function DruidRestoHeal()
 
     if Dispel() then return end
 
-    -- Some PVP stuff AND if there are no tanks, do heals prepared for tanks below
-    if #Heal.Tanks == 0 or Settings.DruidRestoPvPMode then
-      if u.HealthPct < 25 and Spell.Ironbark:CastEx(u) then return end
+    if u.HealthPct < Settings.DruidRestoIronbarkPct and Spell.Ironbark:CastEx(u) then return end
+
+    if Settings.DruidRestoBarkskin and Me.HealthPct < Settings.DruidRestoBarkskinPct and Spell.Barkskin:CastEx(Me) then return end
+
+
+    -- Some PVP stuff, do heals prepared for tanks below
+    if Settings.DruidRestoPvPMode then
       if u.HealthPct < 60 and u:GetAuraByMe("Rejuvenation") and u:GetAuraByMe("Rejuvenation").Remaining < 3000
           and u:GetAuraByMe("Lifebloom") and u:GetAuraByMe("Lifebloom").Remaining < 3000
           and Spell.Invigorate:CastEx(u) then
         return
       end
       if u.HealthPct < 60 and Spell.AdaptiveSwarm:CastEx(u) then return end
-
-      if Settings.DruidRestoBarkskin and Me.HealthPct < 30 and Spell.Barkskin:CastEx(Me) then return end
-
-      if u.HealthPct < 85 and not u:GetAuraByMe("Lifebloom") and Spell.Lifebloom:CastEx(u) then return end
+      if u.HealthPct < 65 and not u:GetAuraByMe("Lifebloom") and Spell.Lifebloom:CastEx(u) then return end
     end
 
-    if u.HealthPct < 65 and wildgrowth and Spell.WildGrowth:CastEx(u) then return end
+    if u.HealthPct < 75 and wildgrowth and Spell.WildGrowth:CastEx(u) then return end
 
 
     -- Max level uses Nourish as filler, low level uses Regrowth
