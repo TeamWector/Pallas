@@ -86,15 +86,17 @@ end
 ---@param identifier any aura name or id
 ---@return WoWAura?
 function WoWUnit:GetAuraByMe(identifier)
-  local auras = self.VisibleAuras
+  local auras = self.Auras
   local typ = type(identifier)
 
   for _, aura in pairs(auras) do
-    if (typ == "string" and aura.Name == identifier or typ == "number" and aura.Id == identifier)
-        and aura.Caster and aura.Caster == Me.ToUnit then
-      -- Undocumented copy-constructor
-      ---@diagnostic disable-next-line: undefined-global
-      return WoWAura(aura)
+    if aura.IsScalable then
+      if (typ == "string" and aura.Name == identifier or typ == "number" and aura.Id == identifier)
+          and aura.Caster and aura.Caster == Me.ToUnit then
+        -- Undocumented copy-constructor
+        ---@diagnostic disable-next-line: undefined-global
+        return WoWAura(aura)
+      end
     end
   end
 end
