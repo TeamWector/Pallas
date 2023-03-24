@@ -26,23 +26,14 @@ local dispels = {
   -- Dragonflight --
   -- The Azure Vault
   [384978] = "Magic", -- Dragon Strike
-
-
-
-
-
-
   -- ***** PVP *****
   -- PURGE
-  [1022] = "Magic", -- Paladin - Blessing of Protection
-  [1044] = "Magic", -- Paladin - Blessing of Freedom
+  [1022] = "Magic",   -- Paladin - Blessing of Protection
+  [1044] = "Magic",   -- Paladin - Blessing of Freedom
   [383648] = "Magic", -- Shaman - Earth Shield
-  [21562] = "Magic", -- Priest - Powerword Fortitude
-  [17] = "Magic", -- Priest - Powerword Shield
-  [11426] = "Magic",    -- Mage - Ice Barrier
-
-
-
+  [21562] = "Magic",  -- Priest - Powerword Fortitude
+  [17] = "Magic",     -- Priest - Powerword Shield
+  [11426] = "Magic",  -- Mage - Ice Barrier
   -- FRIEND DISPEL
   [358385] = "Magic", -- Evoker - Land Slide
   [217832] = "Magic", -- Demon Hunter - Imprison
