@@ -88,14 +88,13 @@ local function FireBreath(enemy)
   local spell = Spell.FireBreath
   local spelldata = WoWSpell(Spell.FireBreath.OverrideId)
   if spelldata:CooldownRemaining() > 0 or not Combat:AllTargetsGathered(10) or Me:GetDistance(enemy) > 25 then return false end
+  if not Me:IsFacing(enemy, 30) then return false end
 
   if spell:IsUsable() then
     Spell.TipTheScales:CastEx(Me)
   end
 
-  if not Me:IsFacing(enemy, 30) then return false end
-
-  return spell:CastEx(Me)
+  return spell:CastEx(Me) and common:EmpowerTo(4)
 end
 
 local function VerdantEmbrace(friend)
@@ -167,11 +166,7 @@ local function PreservationDamage()
 
   if not Me:IsFacing(target) then return false end
 
-  if FireBreath(target) then
-    common:EmpowerTo(4)
-    return true
-  end
-
+  if FireBreath(target) then return true end
   if Disintegrate(target) then return true end
   if Me:IsMoving() and Spell.AzureStrike:CastEx(target) then return true end
   if Spell.LivingFlame:CastEx(target) then return true end

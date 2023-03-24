@@ -68,7 +68,7 @@ function Combat:ExclusionFilter()
       self.Targets[k] = nil
     elseif not u.InCombat or (not Settings.PallasAttackOOC and not u.InCombat) then
       self.Targets[k] = nil
-    elseif u.Dead or u.Health <= 0 then
+    elseif u.DeadOrGhost or u.Health <= 0 then
       self.Targets[k] = nil
     elseif u:GetDistance(Me.ToUnit) > 40 then
       self.Targets[k] = nil
@@ -92,7 +92,7 @@ function Combat:InclusionFilter()
 
     if not target.IsEnemy and Me:GetReaction(target) > UnitReaction.Neutral then
       return
-    elseif target.Dead or target.Health <= 0 then
+    elseif target.DeadOrGhost or target.Health <= 0 then
       return
     end
 

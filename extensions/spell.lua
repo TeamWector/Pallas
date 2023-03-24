@@ -216,7 +216,7 @@ function WoWSpell:Dispel(friends, ...)
   local types = { ... }
 
   for _, unit in pairs(list) do
-    local auras = unit.VisibleAuras
+    local auras = unit.IsActivePlayer and unit.VisibleAuras or unit.Auras
     for _, aura in pairs(auras) do
       if (friends and aura.IsDebuff or not friends and aura.IsBuff) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
         for _, dispelType in pairs(types) do

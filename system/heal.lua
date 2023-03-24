@@ -46,7 +46,7 @@ function Heal:ExclusionFilter()
       self.HealTargets[k] = nil
     elseif u.HealthPct == 100 then
       self.HealTargets[k] = nil
-    elseif u.Dead or u.Health <= 1 then
+    elseif u.DeadOrGhost or u.Health <= 1 then
       self.HealTargets[k] = nil
     elseif Me:GetDistance(u) > 40 then
       self.HealTargets[k] = nil

@@ -1,3 +1,4 @@
+local gametype = wector.CurrentScript.Game
 local options = {
   Name = "Autoloot",
   -- widgets
@@ -23,7 +24,7 @@ local options = {
     {
       type = "slider",
       uid = "LootCacheReset",
-      text = "Cache Reset (MS)",
+      text = gametype == "wow_wrath" and "Cache Reset (MS)" or gametype == "wow_retail" and "Pulse Time (MS)",
       default = 1500,
       min = 0,
       max = 10000
@@ -35,6 +36,24 @@ local function isInStealth()
   local stealth = Me.ShapeshiftForm == ShapeshiftForm.Stealth
   local prowl = Me.ShapeshiftForm == ShapeshiftForm.Cat and Me:HasAura("Prowl")
   return stealth or prowl
+end
+
+local function GetLootableUnit()
+  local units = wector.Game.Units
+  for _, u in pairs(units) do
+    local lootable = u.IsLootable
+    local skinnable = (u.UnitFlags & UnitFlags.Skinnable) > 0
+    local inrange = Me:InInteractRange(u)
+    local valid = u and u.Dead
+
+    if valid and inrange and lootable then
+      return u
+    end
+
+    if Settings.ExtraSkinning and inrange and skinnable then
+      return u
+    end
+  end
 end
 
 local looted = {}
@@ -57,16 +76,27 @@ local function Autoloot()
     lastloot = wector.Game.Time
   end
 
-  for _, u in pairs(units) do
-    local lootable = u.IsLootable
-    local skinnable = u.UnitFlags == UnitFlags.Skinnable
-    local inrange = Me:InInteractRange(u)
-    local alreadylooted = table.contains(looted, u.Guid)
-    local valid = u and u.Dead
+  if gametype == 'wow_wrath' then
+    for _, u in pairs(units) do
+      local lootable = u.IsLootable
+      local skinnable = (u.UnitFlags & UnitFlags.Skinnable) > 0
+      local inrange = Me:InInteractRange(u)
+      local alreadylooted = table.contains(looted, u.Guid)
+      local valid = u and u.Dead
 
-    if valid and (Settings.ExtraSkinning and skinnable or lootable) and not alreadylooted and inrange then
-      u:Interact()
-      table.insert(looted, u.Guid)
+      if valid and (Settings.ExtraSkinning and skinnable or lootable) and not alreadylooted and inrange then
+        u:Interact()
+        table.insert(looted, u.Guid)
+        return
+      end
+    end
+  end
+
+  if gametype == 'wow_retail' then
+    local lootunit = GetLootableUnit()
+    if lootunit and wector.Game.Time > lastloot then
+      lootunit:Interact()
+      lastloot = wector.Game.Time + Settings.LootCacheReset
       return
     end
   end
