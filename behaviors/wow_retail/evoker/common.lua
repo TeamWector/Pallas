@@ -20,6 +20,7 @@ local empowerWanted = 0
 ---@param level number level to release our empowered spell at.
 function commonEvoker:EmpowerTo(level)
   empowerWanted = level
+  return true
 end
 
 ---Handles empower spells, releases them at the right timing.
@@ -61,7 +62,7 @@ function commonEvoker:GetEmpowerLevel()
   local castDuration = cSpell.CastEnd - cSpell.CastStart
   local castPct = cSpell:CastRemaining() / castDuration * 100
 
-  if castPct <= 0 then
+  if castPct <= 1 then
     return 4
   elseif castPct <= 25 then
     return 3
