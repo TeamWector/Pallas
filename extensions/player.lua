@@ -51,6 +51,9 @@ end
 local ARENA_PERIODIC_AURA = 74410
 local ARENA_PREPARATION = { 32727, 32728 }
 
+--CHALLENGERS BURDEN
+local CHALLENGERS_BURDEN = 206151
+
 ---returns true if you are in arena, false otherwise
 ---@return boolean
 function WoWActivePlayer:InArena()
@@ -69,4 +72,11 @@ function WoWActivePlayer:HasArenaPreparation()
     end
   end
   return false
+end
+
+--experimental, if you are in a mythic plus
+--@return boolean
+function WoWActivePlayer:IsMythicPlus()
+  local arenaAura = self:GetAura(CHALLENGERS_BURDEN)
+  return arenaAura ~= nil
 end

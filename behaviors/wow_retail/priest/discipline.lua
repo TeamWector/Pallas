@@ -269,6 +269,7 @@ local function PriestDiscipline()
 
   if common:PowerWordLife() then return end
   if MassDispel() then return end
+  if common:DesperatePrayer() then return end
 
   -- BURST HEALING
   for _, v in pairs(Heal.PriorityList) do
