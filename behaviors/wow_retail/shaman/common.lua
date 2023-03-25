@@ -14,14 +14,6 @@ commonShaman.widgets = {
     default = false
   },
   {
-    type = "slider",
-    uid = "InterruptTime",
-    text = "Interrupt Time (MS)",
-    default = 500,
-    min = 0,
-    max = 2000
-  },
-  {
     type = "combobox",
     uid = "CommonInterrupts",
     text = "Interrupt",
@@ -35,6 +27,13 @@ commonShaman.widgets = {
     default = 0,
     min = 0,
     max = 100
+  },
+  {
+    type = "combobox",
+    uid = "CommonDispels",
+    text = "Dispel",
+    default = 0,
+    options = { "Disabled", "Any", "Whitelist" }
   },
 }
 

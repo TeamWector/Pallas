@@ -59,6 +59,15 @@ local options = {
       min = 0,
       max = 100
     },
+    {
+      type = "slider",
+      uid = "DiscVoidShift",
+      text = "Void Shift (%)",
+      default = 24,
+      min = 0,
+      max = 100
+    },
+
   }
 }
 
@@ -86,7 +95,7 @@ local function PowerWordShield(friend)
   if spell:CooldownRemaining() > 0 then return false end
 
   return friend.HealthPct < Settings.DiscPowerWordShieldPct and (not friend:HasAura(auras.powerWordShield)) and
-  spell:CastEx(friend)
+      spell:CastEx(friend)
 end
 
 local function PowerWordRadiance(friend)
@@ -174,6 +183,13 @@ local function Dispel()
   spell:Dispel(true, WoWDispelType.Magic)
 end
 
+local function VoidShift(friend)
+  if (friend == Me) then return false end
+  local spell = Spell.VoidShift
+  if spell:CooldownRemaining() > 0 then return false end
+  return friend.HealthPct < Settings.DiscVoidShift and spell:CastEx(friend)
+end
+
 local function MassDispel()
   local spell = Spell.MassDispel
   if spell:CooldownRemaining() > 0 then return false end
@@ -253,6 +269,7 @@ local function PriestDiscipline()
 
   if common:PowerWordLife() then return end
   if MassDispel() then return end
+  if common:DesperatePrayer() then return end
 
   -- BURST HEALING
   for _, v in pairs(Heal.PriorityList) do
@@ -260,6 +277,7 @@ local function PriestDiscipline()
 
     if PainSuppression(f) then return end
     if Rapture(f) then return end
+    if VoidShift(f) then return end
     if PowerWordBarrier(f) then return end
     if PowerWordShield(f) then return end
     if PowerWordRadiance(f) then return end
