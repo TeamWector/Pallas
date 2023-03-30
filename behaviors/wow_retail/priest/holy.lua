@@ -173,9 +173,9 @@ local function Dispel()
   if spell:CooldownRemaining() > 0 then return false end
 
   if Me:GetAura(auras.improvedpurify) then
-    spell:Dispel(true, WoWDispelType.Magic, WoWDispelType.Disease)
+    spell:Dispel(true, 1, WoWDispelType.Magic, WoWDispelType.Disease)
   else
-    spell:Dispel(true, WoWDispelType.Magic)
+    spell:Dispel(true, 1, WoWDispelType.Magic)
   end
 end
 

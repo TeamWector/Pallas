@@ -55,7 +55,7 @@ local options = {
       type = "slider",
       uid = "DiscRapturePct",
       text = "Rapture (%)",
-      default = 28,
+      default = 38,
       min = 0,
       max = 100
     },
@@ -125,25 +125,25 @@ end
 
 local function PainSuppression(friend)
   local spell = Spell.PainSuppression
-  if spell:CooldownRemaining() > 0 or friend:GetAura(auras.painSuppression) ~= nil then return false end
+  if spell:CooldownRemaining() > 0 or friend:HasAura(auras.painSuppression) then return false end
   return friend.HealthPct < Settings.DiscPainSuppressionPct and spell:CastEx(friend)
 end
 
 local function Rapture(friend)
   local spell = Spell.Rapture
-  if spell:CooldownRemaining() > 0 or friend:GetAura(auras.painSuppression) ~= nil then return false end
+  if spell:CooldownRemaining() > 0 or friend:HasAura(auras.painSuppression) then return false end
   return friend.HealthPct < Settings.DiscRapturePct and spell:CastEx(friend)
 end
 
 local function PenanceOffensive(target)
   local spell = Spell.Penance
-  if spell:CooldownRemaining() > 0 or Me:GetAura(auras.powerOfTheDarkSide) == nil then return false end
+  if spell:CooldownRemaining() > 0 or not Me:HasAura(auras.powerOfTheDarkSide) == nil then return false end
   return spell:CastEx(target)
 end
 
 local function PurgeTheWicked(target)
   local spell = Spell.PurgeTheWicked
-  if spell:CooldownRemaining() > 0 or target:GetAura(auras.purgeTheWicked) ~= nil then return false end
+  if spell:CooldownRemaining() > 0 or target:HasAura(auras.purgeTheWicked) then return false end
   return spell:CastEx(target)
 end
 
@@ -177,10 +177,10 @@ local function Smite(target)
   return spell:CastEx(target)
 end
 
-local function Dispel()
+local function Dispel(priority)
   local spell = Spell.Purify
   if spell:CooldownRemaining() > 0 then return false end
-  spell:Dispel(true, WoWDispelType.Magic)
+  spell:Dispel(true, priority or 1, WoWDispelType.Magic)
 end
 
 local function VoidShift(friend)
@@ -244,7 +244,7 @@ local function PriestDiscDamage()
 
   if not shouldDPS then return false end
 
-  if common:DispelMagic() then return end
+  if common:DispelMagic(2) then return end
 
   if PurgeTheWicked(target) then return true end
   if PowerInfusionMyself() then return true end
@@ -255,6 +255,7 @@ local function PriestDiscDamage()
   end
   if common:ShadowWordDeath() then return true end
   if PenanceOffensive(target) then return true end
+  if common:DispelMagic(1) then return end
   if MindBlast(target) then return true end
   if Smite(target) then return true end
 end
@@ -282,12 +283,14 @@ local function PriestDiscipline()
     if PowerWordShield(f) then return end
     if PowerWordRadiance(f) then return end
     if FlashHealSurgeOfLight(f) then return end
+    if Dispel(3) then return end
+    if common:DispelMagic(3) then return end
     if Penance(f) then return end
     if FlashHeal(f) then return end
     if PowerWordRadianceOneCharge(f) then return end
   end
 
-  if Dispel() then return end
+  if Dispel(1) then return end
 
   if MaintainAtonement() then return end
 

@@ -73,8 +73,8 @@ local function Dispel()
   if naturalize:CooldownRemaining() > 0 and cauterize:CooldownRemaining() > 0 then return false end
 
   local types = WoWDispelType
-  if naturalize:Dispel(types.Magic, types.Poison) then return true end
-  if cauterize:Dispel(types.Bleed, types.Curse, types.Disease) then return true end
+  if naturalize:Dispel(true, 1, types.Magic, types.Poison) then return true end
+  if cauterize:Dispel(true, 1, types.Bleed, types.Curse, types.Disease) then return true end
 end
 
 local function Disintegrate(enemy)

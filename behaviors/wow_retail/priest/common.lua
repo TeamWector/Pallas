@@ -108,12 +108,12 @@ function commonPriest:PowerWordLife()
   end
 end
 
-function commonPriest:DispelMagic()
+function commonPriest:DispelMagic(priority)
   local spell = Spell.DispelMagic
 
   if not Settings.PriestPurgeEnemies then return false end
 
-  if spell:Dispel(false, WoWDispelType.Magic) then return true end
+  if spell:Dispel(false, priority, WoWDispelType.Magic) then return true end
 end
 
 function commonPriest:Shadowfiend(enemy)
