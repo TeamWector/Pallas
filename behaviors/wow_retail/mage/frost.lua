@@ -1,4 +1,3 @@
--- TODO
 local common = require('behaviors.wow_retail.mage.common')
 
 local options = {
@@ -101,7 +100,7 @@ local function MageFrostCombat()
 
     if IceBarrier() then return end
 
-    -- do interrupt here
+    if common:DoInterrupt() then return end
 
     if RuneOfPower() then return end
     if IcyVeins() then return end

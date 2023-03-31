@@ -77,7 +77,7 @@ local function DemonhunterVengeanceCombat()
   -- only melee spells from here on
   if not Me:InMeleeRange(target) or not Me:IsFacing(target) then return end
 
-  -- if common:DoInterrupt() then return end
+   if common:DoInterrupt() then return end
   if FieryBrand(target) then return end
   -- -- todo optional infernalStrike
   if SpiritBomb() then return end
@@ -85,9 +85,9 @@ local function DemonhunterVengeanceCombat()
   if FelDevastation(target) then return end
   if SoulCarver(target) then return end
 
-  -- if Combat.EnemiesInMeleeRange > 1 then
-  --   if common:UseTrinkets() then return end
-  -- end
+  if Combat.EnemiesInMeleeRange > 1 then
+    if common:UseTrinkets() then return end
+  end
 
    if SoulCleave(target) then return end
   if common:SigilOfFlame(target) then return end
