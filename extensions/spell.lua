@@ -201,6 +201,7 @@ end
 ---@param priority number the priority level for the dispel. Defaults to 1 if not provided.
 ---@return boolean casted if we casted dispel.
 function WoWSpell:Dispel(friends, priority, ...)
+
   if self:CooldownRemaining() > 0 then return false end
   -- We create a combobox with uid CommonDispels that has three values, disabled, any, whitelist.
   local dispel = Settings.CommonDispels or 0
@@ -215,7 +216,7 @@ function WoWSpell:Dispel(friends, priority, ...)
   end
 
   local types = { ... }
-  priority = priority or 1
+  priority = priority or DispelPriority.Low
 
   for _, unit in pairs(list) do
     local auras = unit.IsActivePlayer and unit.VisibleAuras or unit.Auras

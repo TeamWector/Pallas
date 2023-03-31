@@ -195,7 +195,7 @@ local function Dispel(priority)
   local spell = Spell.NaturesCure
   if spell:CooldownRemaining() > 0 then return false end
   local types = WoWDispelType
-  spell:Dispel(true, priority or 1, types.Magic, types.Poison, types.Curse)
+  spell:Dispel(true, priority or DispelPriority.Low, types.Magic, types.Poison, types.Curse)
 end
 
 
@@ -302,7 +302,7 @@ local function DruidRestoHeal()
 
     if u.HealthPct < Settings.DruidRestoIronbarkPct and Spell.Ironbark:CastEx(u) then return end
 
-    if Dispel(3) then return end
+    if Dispel(DispelPriority.High) then return end
 
     if Settings.DruidRestoBarkskin and Me.HealthPct < Settings.DruidRestoBarkskinPct and Spell.Barkskin:CastEx(Me) then return end
 
@@ -319,7 +319,7 @@ local function DruidRestoHeal()
       if u.HealthPct < 65 and not u:GetAuraByMe("Lifebloom") and Spell.Lifebloom:CastEx(u) then return end
     end
 
-    if Dispel(2) then return end
+    if Dispel(DispelPriority.Medium) then return end
 
     if u.HealthPct < 75 and wildgrowth and Spell.WildGrowth:CastEx(u) then return end
 
@@ -366,7 +366,7 @@ local function DruidRestoHeal()
     ::continue::
   end
 
-  if Dispel(1) then return end
+  if Dispel(DispelPriority.Low) then return end
 
 
 

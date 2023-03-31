@@ -220,7 +220,7 @@ local function ShamanElementalCombat()
 
 
   if common:DoInterrupt() then return end
-  if Purge(3) then return end
+  if Purge(DispelPriority.High) then return end
   if GroundingTotem() then return end
   if StormElemental() then return end
   if PrimordialWave(target) then return end
@@ -234,9 +234,9 @@ local function ShamanElementalCombat()
   if EarthShock(target) then return end
   if Earthquake(target) then return end
   if LavaBurst(target) then return end
-  if Purge(2) then return end
+  if Purge(DispelPriority.Medium) then return end
   if LightningBolt(target) then return end
-  if Purge(1) then return end
+  if Purge(DispelPriority.Low) then return end
   if FlameOrFrostShockMoving(target) then return end
 end
 

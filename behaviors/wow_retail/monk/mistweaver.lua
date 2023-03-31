@@ -389,11 +389,11 @@ local function Dispel()
   local DispelType = WoWDispelType
 
   if Me:GetAura(auras.improvedDetox) then
-    if Spell.Detox:Dispel(true, 1, DispelType.Magic, DispelType.Disease, WoWDispelType.Poison) then return true end
+    if Spell.Detox:Dispel(true, DispelPriority.Low, DispelType.Magic, DispelType.Disease, WoWDispelType.Poison) then return true end
     return
   end
 
-  if Spell.Detox:Dispel(true, 1, DispelType.Magic) then return true end
+  if Spell.Detox:Dispel(true, DispelPriority.Low, DispelType.Magic) then return true end
 end
 
 local function ManaTea()

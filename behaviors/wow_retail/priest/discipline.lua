@@ -244,10 +244,10 @@ local function PriestDiscDamage()
 
   if not shouldDPS then return false end
 
-  if common:DispelMagic(2) then return end
+  if common:DispelMagic(DispelPriority.Medium) then return end
 
   if PurgeTheWicked(target) then return true end
-  if PowerInfusionMyself() then return true end
+  --if PowerInfusionMyself() then return true end
   if common:Shadowfiend(target) then return true end
   if Schism(target) then return true end
   if (target.HealthPct < 50) then
@@ -255,7 +255,7 @@ local function PriestDiscDamage()
   end
   if common:ShadowWordDeath() then return true end
   if PenanceOffensive(target) then return true end
-  if common:DispelMagic(1) then return end
+  if common:DispelMagic(DispelPriority.Low) then return end
   if MindBlast(target) then return true end
   if Smite(target) then return true end
 end
@@ -283,14 +283,14 @@ local function PriestDiscipline()
     if PowerWordShield(f) then return end
     if PowerWordRadiance(f) then return end
     if FlashHealSurgeOfLight(f) then return end
-    if Dispel(3) then return end
-    if common:DispelMagic(3) then return end
+    if Dispel(DispelPriority.High) then return end
+    if common:DispelMagic(DispelPriority.High) then return end
     if Penance(f) then return end
     if FlashHeal(f) then return end
     if PowerWordRadianceOneCharge(f) then return end
   end
 
-  if Dispel(1) then return end
+  if Dispel(DispelPriority.Low) then return end
 
   if MaintainAtonement() then return end
 
