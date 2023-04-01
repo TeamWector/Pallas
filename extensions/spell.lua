@@ -198,7 +198,7 @@ end
 
 ---@param ... table dispeltypes that we have access to Magic, Curse, Disease, Poison
 ---@param friends boolean if we are supposed to use this spell on our friends, otherwise will use it on enemies (Soothe, Purge, Tranq Shot)
----@param priority number the priority level for the dispel. Defaults to 1 if not provided.
+---@param priority DispelPriority the priority level for the dispel. Defaults to Low if not provided.
 ---@return boolean casted if we casted dispel.
 function WoWSpell:Dispel(friends, priority, ...)
 
@@ -222,8 +222,7 @@ function WoWSpell:Dispel(friends, priority, ...)
     local auras = unit.IsActivePlayer and unit.VisibleAuras or unit.Auras
     for _, aura in pairs(auras) do
       if (friends and aura.IsDebuff or not friends and aura.IsBuff) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
-        local dispelInfo = dispels[aura.Id]
-        local dispelPriority = dispelInfo[2]
+        local dispelPriority = dispels[aura.Id]
         if dispelPriority >= priority then
           for _, dispelType in pairs(types) do
             if aura.DispelType == dispelType then
