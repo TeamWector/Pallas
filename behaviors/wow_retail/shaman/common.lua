@@ -24,7 +24,7 @@ commonShaman.widgets = {
     type = "slider",
     uid = "CommonInterruptPct",
     text = "Kick Cast Left (%)",
-    default = 0,
+    default = 20,
     min = 0,
     max = 100
   },

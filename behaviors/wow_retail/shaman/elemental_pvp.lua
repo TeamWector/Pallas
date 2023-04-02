@@ -2,7 +2,7 @@ local common = require('behaviors.wow_retail.shaman.common')
 
 
 -- TALENTS
--- BYQAfcj78nJtvjmejSqe5Zhm9AAAAAAAoVSSLJJlDItEFEOQBJSAAAAAAQJApkESRUIOgkk0AIJJBB
+-- BYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAgUSr0SSLJgg0okD0SJJEAAAAAAKBkIJhioISLJpBotAJIBA
 
 local options = {
   -- The sub menu name
@@ -42,6 +42,14 @@ local function IsSurgeOfPower()
   return Me:HasVisibleAura("Surge of Power")
 end
 
+local function IsLavaSurge()
+  return Me:HasVisibleAura("Lava Surge")
+end
+
+local function IsStormkeeper()
+  return Me:HasVisibleAura("Stormkeeper")
+end
+
 local function StormElemental()
   if Spell.StormElemental:CastEx(Me) then return true end
 end
@@ -54,10 +62,18 @@ local function LightningBolt(target)
   if Spell.LightningBolt:CastEx(target) then return true end
 end
 
+local function LightningBoltWithStormkeeper(target)
+  if IsStormkeeper() and Spell.LightningBolt:CastEx(target) then return true end
+end
+
 local function FlameOrFrostShockMoving(target)
   if Me:IsMoving() then
     if Spell.FlameShock:CastEx(target) or Spell.FrostShock:CastEx(target) then return true end
   end
+end
+
+local function FlametongueWeapon()
+  if not Me:HasVisibleAura("Improved Flametongue Weapon") and Spell.FlametongueWeapon:CastEx(Me) then return true end
 end
 
 
@@ -73,6 +89,10 @@ end
 
 local function LavaBurstWithSurgeOfPower(target)
   if IsSurgeOfPower() and Spell.LavaBurst:CastEx(target) then return true end
+end
+
+local function LavaBurstWithLavaSurge(target)
+  if IsLavaSurge() and target:HasAura("Flame Shock") and Spell.LavaBurst:CastEx(target) then return true end
 end
 
 local function Stormkeeper()
@@ -115,11 +135,11 @@ local function Earthquake(target)
   if Me:HasAura("Echoes of Great Sundering") and spell:CastEx(target) then return true end
 end
 
-local function Purge(target)
+local function Purge(priority)
   local spell = Spell.Purge
   if not Settings.ShamanPurgeEnemies then return false end
 
-  if spell:Dispel(false, WoWDispelType.Magic) then return true end
+  if spell:Dispel(false, priority, WoWDispelType.Magic) then return true end
 end
 
 local function SkyfuryTotem()
@@ -208,9 +228,11 @@ local function ShamanElementalCombat()
   if AstralShift() then return end
 
   if EarthShield() then return end
+  if FlametongueWeapon() then return end
+
 
   if common:DoInterrupt() then return end
-  if Purge() then return end
+  --if Purge(DispelPriority.High) then return end
   if GroundingTotem() then return end
   if StormElemental() then return end
   if PrimordialWave(target) then return end
@@ -218,13 +240,16 @@ local function ShamanElementalCombat()
   if Icefury(target) then return end
   if FrostShock(target) then return end
   if FlameShockEveryoneElse() then return end
-  if LavaBurstWithSurgeOfPower(target) then return end
+  if LavaBurstWithLavaSurge(target) then return end
   if Stormkeeper() then return end
+  if LightningBoltWithStormkeeper(target) then return end
   if SkyfuryTotem() then return end
   if EarthShock(target) then return end
   if Earthquake(target) then return end
   if LavaBurst(target) then return end
+  --if Purge(DispelPriority.Medium) then return end
   if LightningBolt(target) then return end
+  --if Purge(DispelPriority.Low) then return end
   if FlameOrFrostShockMoving(target) then return end
 end
 

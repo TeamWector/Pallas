@@ -198,8 +198,10 @@ end
 
 ---@param ... table dispeltypes that we have access to Magic, Curse, Disease, Poison
 ---@param friends boolean if we are supposed to use this spell on our friends, otherwise will use it on enemies (Soothe, Purge, Tranq Shot)
+---@param priority DispelPriority the priority level for the dispel. Defaults to Low if not provided.
 ---@return boolean casted if we casted dispel.
-function WoWSpell:Dispel(friends, ...)
+function WoWSpell:Dispel(friends, priority, ...)
+
   if self:CooldownRemaining() > 0 then return false end
   -- We create a combobox with uid CommonDispels that has three values, disabled, any, whitelist.
   local dispel = Settings.CommonDispels or 0
@@ -214,17 +216,24 @@ function WoWSpell:Dispel(friends, ...)
   end
 
   local types = { ... }
+  priority = priority or DispelPriority.Low
 
   for _, unit in pairs(list) do
     local auras = unit.IsActivePlayer and unit.VisibleAuras or unit.Auras
     for _, aura in pairs(auras) do
       if (friends and aura.IsDebuff or not friends and aura.IsBuff) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
-        for _, dispelType in pairs(types) do
-          if aura.DispelType == dispelType then
-            -- Let 777 ms pass on aura for no instant dispel.
-            local durPassed = aura.Duration - aura.Remaining
-            if durPassed > 777 then
-              return self:CastEx(unit)
+        local dispelPriority = dispels[aura.Id]
+        if dispelPriority >= priority then
+          for _, dispelType in pairs(types) do
+            if aura.DispelType == dispelType then
+              -- Let 777 ms pass on aura for no instant dispel.
+              local durPassed = aura.Duration - aura.Remaining
+              if durPassed > 777 then
+                if self:CastEx(unit) then
+                  print('cast dispel on target to remove ' .. aura.Name .. ' with priority ' .. priority)
+                  return true
+                end
+              end
             end
           end
         end

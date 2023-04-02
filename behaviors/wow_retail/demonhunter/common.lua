@@ -23,11 +23,11 @@ commonDemonhunter.widgets = {
     default = 0,
     options = { "Disabled", "Any", "Whitelist" }
   },
-    {
+  {
     type = "slider",
     uid = "CommonInterruptPct",
     text = "Kick Cast Left (%)",
-    default = 0,
+    default = 20,
     min = 0,
     max = 100
   },

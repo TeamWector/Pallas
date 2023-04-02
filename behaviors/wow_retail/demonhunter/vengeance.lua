@@ -60,7 +60,6 @@ local function Fracture(target)
 end
 
 
-
 local function DemonhunterVengeanceCombat()
   if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
@@ -78,9 +77,9 @@ local function DemonhunterVengeanceCombat()
   -- only melee spells from here on
   if not Me:InMeleeRange(target) or not Me:IsFacing(target) then return end
 
-  if common:DoInterrupt() then return end
+   if common:DoInterrupt() then return end
   if FieryBrand(target) then return end
-  -- todo optional infernalStrike
+  -- -- todo optional infernalStrike
   if SpiritBomb() then return end
   if common:ImmolationAura() then return end
   if FelDevastation(target) then return end
@@ -90,7 +89,7 @@ local function DemonhunterVengeanceCombat()
     if common:UseTrinkets() then return end
   end
 
-  if SoulCleave(target) then return end
+   if SoulCleave(target) then return end
   if common:SigilOfFlame(target) then return end
   if Fracture(target) then return end
   if common:ThrowGlaive(target) then return end
@@ -98,7 +97,7 @@ local function DemonhunterVengeanceCombat()
 end
 
 local behaviors = {
-      [BehaviorType.Combat] = DemonhunterVengeanceCombat
+  [BehaviorType.Combat] = DemonhunterVengeanceCombat
 }
 
 return { Options = options, Behaviors = behaviors }
