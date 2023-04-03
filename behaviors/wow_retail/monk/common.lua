@@ -57,7 +57,7 @@ commonMonk.widgets = {
     type = "combobox",
     uid = "CommonInterrupts",
     text = "Interrupt",
-    default = 0,
+    default = 20,
     options = { "Disabled", "Any", "Whitelist" }
   },
 }

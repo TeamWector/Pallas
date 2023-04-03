@@ -2,21 +2,13 @@ local common = require('behaviors.wow_retail.shaman.common')
 
 
 -- TALENTS
--- BYQAfcj78nJtvjmejSqe5Zhm9AAAAAAAoVSSLJJlDItEFEOQBJSAAAAAAQJApkESRUIOgkk0AIJJBB
+-- BYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAgUSr0SSLJgg0okD0SJJEAAAAAAKBkIJhioISLJpBotAJIBA
 
 local options = {
   -- The sub menu name
   Name = "Shaman PVP (Elemental)",
   -- widgets
   Widgets = {
-    {
-      type = "slider",
-      uid = "ShamanAstralShift",
-      text = "Use Astral Shift below HP%",
-      default = 40,
-      min = 0,
-      max = 100
-    },     -- MOVE ME TO COMMON
     {
       type = "checkbox",
       uid = "ShamanUseCooldowns",
@@ -42,6 +34,14 @@ local function IsSurgeOfPower()
   return Me:HasVisibleAura("Surge of Power")
 end
 
+local function IsLavaSurge()
+  return Me:HasVisibleAura("Lava Surge")
+end
+
+local function IsStormkeeper()
+  return Me:HasVisibleAura("Stormkeeper")
+end
+
 local function StormElemental()
   if Spell.StormElemental:CastEx(Me) then return true end
 end
@@ -54,12 +54,15 @@ local function LightningBolt(target)
   if Spell.LightningBolt:CastEx(target) then return true end
 end
 
+local function LightningBoltWithStormkeeper(target)
+  if IsStormkeeper() and Spell.LightningBolt:CastEx(target) then return true end
+end
+
 local function FlameOrFrostShockMoving(target)
   if Me:IsMoving() then
     if Spell.FlameShock:CastEx(target) or Spell.FrostShock:CastEx(target) then return true end
   end
 end
-
 
 -- Loop through all units find one without flame shock or lowest duration to cast Flame Shock
 local function FlameShockEveryoneElse()
@@ -73,6 +76,10 @@ end
 
 local function LavaBurstWithSurgeOfPower(target)
   if IsSurgeOfPower() and Spell.LavaBurst:CastEx(target) then return true end
+end
+
+local function LavaBurstWithLavaSurge(target)
+  if IsLavaSurge() and target:HasAura("Flame Shock") and Spell.LavaBurst:CastEx(target) then return true end
 end
 
 local function Stormkeeper()
@@ -103,23 +110,17 @@ local function Icefury(target)
   if spell:CastEx(target) then return true end
 end
 
-local function EarthShock(target)
-  local spell = Spell.EarthShock
-  if spell:CooldownRemaining() > 0 then return false end
-  if Me.Power > 80 and spell:CastEx(target) then return true end
-end
-
 local function Earthquake(target)
   local spell = Spell.Earthquake
   if spell:CooldownRemaining() > 0 then return false end
   if Me:HasAura("Echoes of Great Sundering") and spell:CastEx(target) then return true end
 end
 
-local function Purge(target)
-  local spell = Spell.Purge
+local function Purge(priority)
+  local spell = Spell.GreaterPurge
   if not Settings.ShamanPurgeEnemies then return false end
 
-  if spell:Dispel(false, WoWDispelType.Magic) then return true end
+  if spell:Dispel(false, priority, WoWDispelType.Magic) then return true end
 end
 
 local function SkyfuryTotem()
@@ -130,13 +131,6 @@ local function SkyfuryTotem()
 end
 
 
-local function EarthShield()
-  if not Me:HasVisibleAura("Earth Shield") and Spell.EarthShield:CastEx(Me) then return true end
-end
-
-local function AstralShift()
-  if Settings.ShamanAstralShift > Me.HealthPct and Spell.AstralShift:CastEx(Me) then return true end
-end
 
 local blacklist = {
   [61305] = "Polymorph (Cat)",
@@ -205,26 +199,32 @@ local function ShamanElementalCombat()
   if not Me:IsFacing(target) then return end
 
 
-  if AstralShift() then return end
+  if common:AstralShift() then return end
+  if common:EarthShield() then return end
+  if common:LightningShield() then return end
+  if common:FlametongueWeapon() then return end
 
-  if EarthShield() then return end
 
   if common:DoInterrupt() then return end
-  if Purge() then return end
+  if Purge(DispelPriority.High) then return end
+  if common:FireElemental(target) then return end
   if GroundingTotem() then return end
   if StormElemental() then return end
   if PrimordialWave(target) then return end
   if FlameShock(target) then return end
+  if common:EarthShock(target) then return end
   if Icefury(target) then return end
   if FrostShock(target) then return end
   if FlameShockEveryoneElse() then return end
-  if LavaBurstWithSurgeOfPower(target) then return end
+  if LavaBurstWithLavaSurge(target) then return end
   if Stormkeeper() then return end
+  if LightningBoltWithStormkeeper(target) then return end
   if SkyfuryTotem() then return end
-  if EarthShock(target) then return end
   if Earthquake(target) then return end
   if LavaBurst(target) then return end
+  if Purge(DispelPriority.Medium) then return end
   if LightningBolt(target) then return end
+  if Purge(DispelPriority.Low) then return end
   if FlameOrFrostShockMoving(target) then return end
 end
 

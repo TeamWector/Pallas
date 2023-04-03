@@ -191,10 +191,11 @@ local blacklist = {
   [211004] = "Hex (Spider)",
 }
 
-local function Dispel()
+local function Dispel(priority)
   local spell = Spell.NaturesCure
   if spell:CooldownRemaining() > 0 then return false end
-  spell:Dispel(true, WoWDispelType.Magic)
+  local types = WoWDispelType
+  spell:Dispel(true, priority or DispelPriority.Low, types.Magic, types.Poison, types.Curse)
 end
 
 
@@ -216,7 +217,7 @@ local function FindAdaptiveSwarm()
   for _, v in pairs(units) do
     local u = v.ToUnit
     if not u then return false end
-    local aura = u:GetVisibleAura("Adaptive Swarm")
+    local aura = u:GetAura("Adaptive Swarm")
     if aura and aura.HasCaster and aura.Caster == Me.ToUnit then return true end
   end
   return false
@@ -298,15 +299,17 @@ local function DruidRestoHeal()
       if u.HealthPct < 92 and not u:HasBuffByMe("Rejuvenation") and Spell.Rejuvenation:CastEx(u) then return end
     end
 
-    if Dispel() then return end
 
     if u.HealthPct < Settings.DruidRestoIronbarkPct and Spell.Ironbark:CastEx(u) then return end
+
+    if Dispel(DispelPriority.High) then return end
 
     if Settings.DruidRestoBarkskin and Me.HealthPct < Settings.DruidRestoBarkskinPct and Spell.Barkskin:CastEx(Me) then return end
 
 
     -- Some PVP stuff, do heals prepared for tanks below
     if Settings.DruidRestoPvPMode then
+      if Spell.Thorns.IsKnown and Spell.Thorns:CastEx(u) then return end
       if u.HealthPct < 60 and u:GetAuraByMe("Rejuvenation") and u:GetAuraByMe("Rejuvenation").Remaining < 3000
           and u:GetAuraByMe("Lifebloom") and u:GetAuraByMe("Lifebloom").Remaining < 3000
           and Spell.Invigorate:CastEx(u) then
@@ -315,6 +318,8 @@ local function DruidRestoHeal()
       if u.HealthPct < 60 and Spell.AdaptiveSwarm:CastEx(u) then return end
       if u.HealthPct < 65 and not u:GetAuraByMe("Lifebloom") and Spell.Lifebloom:CastEx(u) then return end
     end
+
+    if Dispel(DispelPriority.Medium) then return end
 
     if u.HealthPct < 75 and wildgrowth and Spell.WildGrowth:CastEx(u) then return end
 
@@ -360,6 +365,9 @@ local function DruidRestoHeal()
     --end
     ::continue::
   end
+
+  if Dispel(DispelPriority.Low) then return end
+
 
 
   if Settings.DruidRestoPvPMode and Me.ShapeshiftForm == ShapeshiftForm.Normal and Me:InArena() and not Me:HasArenaPreparation() then
