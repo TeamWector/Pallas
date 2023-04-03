@@ -10,14 +10,6 @@ local options = {
   -- widgets
   Widgets = {
     {
-      type = "slider",
-      uid = "ShamanAstralShift",
-      text = "Use Astral Shift below HP%",
-      default = 40,
-      min = 0,
-      max = 100
-    },     -- MOVE ME TO COMMON
-    {
       type = "checkbox",
       uid = "ShamanUseCooldowns",
       text = "Allow the usage of Big Cooldowns",
@@ -72,11 +64,6 @@ local function FlameOrFrostShockMoving(target)
   end
 end
 
-local function FlametongueWeapon()
-  if not Me:HasVisibleAura("Improved Flametongue Weapon") and Spell.FlametongueWeapon:CastEx(Me) then return true end
-end
-
-
 -- Loop through all units find one without flame shock or lowest duration to cast Flame Shock
 local function FlameShockEveryoneElse()
   for _, u in pairs(Combat.Targets) do
@@ -123,12 +110,6 @@ local function Icefury(target)
   if spell:CastEx(target) then return true end
 end
 
-local function EarthShock(target)
-  local spell = Spell.EarthShock
-  if spell:CooldownRemaining() > 0 then return false end
-  if Me.Power > 80 and spell:CastEx(target) then return true end
-end
-
 local function Earthquake(target)
   local spell = Spell.Earthquake
   if spell:CooldownRemaining() > 0 then return false end
@@ -136,7 +117,7 @@ local function Earthquake(target)
 end
 
 local function Purge(priority)
-  local spell = Spell.Purge
+  local spell = Spell.GreaterPurge
   if not Settings.ShamanPurgeEnemies then return false end
 
   if spell:Dispel(false, priority, WoWDispelType.Magic) then return true end
@@ -150,13 +131,6 @@ local function SkyfuryTotem()
 end
 
 
-local function EarthShield()
-  if not Me:HasVisibleAura("Earth Shield") and Spell.EarthShield:CastEx(Me) then return true end
-end
-
-local function AstralShift()
-  if Settings.ShamanAstralShift > Me.HealthPct and Spell.AstralShift:CastEx(Me) then return true end
-end
 
 local blacklist = {
   [61305] = "Polymorph (Cat)",
@@ -225,18 +199,20 @@ local function ShamanElementalCombat()
   if not Me:IsFacing(target) then return end
 
 
-  if AstralShift() then return end
-
-  if EarthShield() then return end
-  if FlametongueWeapon() then return end
+  if common:AstralShift() then return end
+  if common:EarthShield() then return end
+  if common:LightningShield() then return end
+  if common:FlametongueWeapon() then return end
 
 
   if common:DoInterrupt() then return end
-  --if Purge(DispelPriority.High) then return end
+  if Purge(DispelPriority.High) then return end
+  if common:FireElemental(target) then return end
   if GroundingTotem() then return end
   if StormElemental() then return end
   if PrimordialWave(target) then return end
   if FlameShock(target) then return end
+  if common:EarthShock(target) then return end
   if Icefury(target) then return end
   if FrostShock(target) then return end
   if FlameShockEveryoneElse() then return end
@@ -244,12 +220,11 @@ local function ShamanElementalCombat()
   if Stormkeeper() then return end
   if LightningBoltWithStormkeeper(target) then return end
   if SkyfuryTotem() then return end
-  if EarthShock(target) then return end
   if Earthquake(target) then return end
   if LavaBurst(target) then return end
-  --if Purge(DispelPriority.Medium) then return end
+  if Purge(DispelPriority.Medium) then return end
   if LightningBolt(target) then return end
-  --if Purge(DispelPriority.Low) then return end
+  if Purge(DispelPriority.Low) then return end
   if FlameOrFrostShockMoving(target) then return end
 end
 
