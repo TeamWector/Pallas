@@ -14,65 +14,80 @@ local options = {
     }
 }
 
+for k, v in pairs(common.widgets) do
+  table.insert(options.Widgets, v)
+end
+
 local gcd = wector.SpellBook.GCD
-local freewog = 327510
-local consecration = 188370
-local blessing_of_dawn = 385127
-local divine_purpose = 223817
 
-local function EyeOfTyr()
-  if Spell.EyeOfTyr:CooldownRemaining() > 0 or table.length(Combat.Targets) < 2 or Me:IsMoving() then return end
+local auras = {
+  shininglight = 327510,
+  consecration = 188370,
+  divinepurpose = 223817
+}
 
-  local allGathered = true
-  for _, target in pairs(Combat.Targets) do
-    if Me:GetDistance(target) > 8 then
-      allGathered = false
+local function Consecration()
+  local spell = Spell.Consecration
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return not Me:IsMoving() and not Me:HasAura(auras.consecration) and spell:CastEx(Me)
+end
+
+local function ShieldOfTheRighteous()
+  local spell = Spell.ShieldOfTheRighteous
+  local holypower = common:GetHolyPower()
+
+  if holypower < 3 then return false end
+
+  for _, target in pairs(Tank.Targets) do
+    if Me:GetDistance(target) <= 6 and Me:IsFacing(target) then
+      return spell:CastEx(Me)
     end
   end
-
-  return allGathered and Spell.EyeOfTyr:CastEx(Me)
 end
 
-local function HammerOfWrath()
-  if Spell.HammerOfWrath:CooldownRemaining() > 0 then return end
+local function Judgment(enemy)
+  local spell = Spell.Judgment
+  if spell:CooldownRemaining() > 0 then return false end
 
-  for _, target in pairs(Combat.Targets) do
-    if target.HealthPct < 20 and Spell.HammerOfWrath:CastEx(target, SpellCastExFlags.NoUsable) then return end
-  end
-
-  return false
+  return spell:CastEx(enemy)
 end
 
--- Placeholder for now. NYI
-local function GetHolyPower()
-  return Me:GetPowerByType(PowerType.HolyPower)
+local function AvengersShield(enemy)
+  local spell = Spell.AvengersShield
+  if spell:CooldownRemaining() > 0 then return false end
+
+  if spell:Interrupt() then wector.Console:Log("Interrupt Shield") return true end
+
+  return spell:CastEx(enemy)
+end
+
+local function BlessedHammer()
+  local spell = Spell.BlessedHammer
+  if spell:CooldownRemaining() > 0 then return end
+
+  return Combat.EnemiesInMeleeRange > 0 and spell:CastEx(Me)
 end
 
 local function PaladinProtCombat()
   local target = Tank.BestTarget
   if not target then return end
 
-  local dawn = Me:GetAura(blessing_of_dawn)
-  local has_dawn = dawn and dawn.Remaining > 10000
-
-  -- OGCD Spells
-  if has_dawn and Spell.ShieldOfTheRighteous:CastEx(target) then return end
-
   -- Lets do a GCD check so our priority is followed.
   if gcd:CooldownRemaining() > 0 then return end
 
   -- Keep priority down here.
   if common:DoInterrupt() then return end
-  if Spell.Judgment:CastEx(target) then return end
-  if HammerOfWrath() then return end
-  if Spell.AvengersShield:CastEx(target) then return end
-  if not Me:IsMoving() and not Me:GetAura(consecration) and Spell.Consecration:CastEx(Me) then return end
-  if EyeOfTyr() then return end
-  if Spell.BlessedHammer.Charges > 0 and Spell.BlessedHammer:CastEx(target) then return end
+  if Consecration() then return end
+  if ShieldOfTheRighteous() then return end
+  if Judgment(target) then return end
+  if common:HammerOfWrath() then return end
+  if AvengersShield(target) then return end
+  if BlessedHammer() then return end
 end
 
 local function PaladinProtHeal()
-  local shining_light = Me:GetAura(freewog)
+  local shining_light = Me:GetAura(auras.shininglight)
   local lowest = Heal:GetLowestMember()
 
   if Me.HealthPct < Settings.PaladinProtWogSelfPct and Spell.WordOfGlory:CastEx(Me) then return end

@@ -2,10 +2,9 @@ local commonPaladin = {}
 
 commonPaladin.widgets = {
   {
-    type = "checkbox",
-    uid = "PaladinRebuke",
-    text = "Interrupt With Rebuke",
-    default = false
+    type = "text",
+    uid = "PaladinGeneral",
+    text = ">> General <<",
   },
   {
     type = "combobox",
@@ -14,7 +13,7 @@ commonPaladin.widgets = {
     default = 0,
     options = { "Disabled", "Any", "Whitelist" }
   },
-    {
+  {
     type = "slider",
     uid = "CommonInterruptPct",
     text = "Kick Cast Left (%)",
@@ -32,7 +31,10 @@ commonPaladin.auras = {
 }
 
 function commonPaladin:DoInterrupt()
-  if Spell.Rebuke:Interrupt() then return end
+  local spell = Spell.Rebuke
+  if spell:CooldownRemaining() > 0 then return false end
+
+  if spell:Interrupt() then return end
 end
 
 function commonPaladin:GetHolyPower()
@@ -54,8 +56,12 @@ function commonPaladin:HasPurpose()
 end
 
 function commonPaladin:HammerOfWrath()
-  for _, t in pairs(Combat.Targets) do
-    if (t.HealthPct < 20 or Me:HasAura(self.auras.avengingwrath)) and Spell.HammerOfWrath:CastEx(t, SpellCastExFlags.NoUsable) then return true end
+  local units = table.length(Combat.Targets) > 0 and Combat.Targets or Tank.Targets
+  for _, t in pairs(units) do
+    if Me:IsFacing(t) and (t.HealthPct < 20 or Me:HasAura(self.auras.avengingwrath))
+        and Spell.HammerOfWrath:CastEx(t, SpellCastExFlags.NoUsable) then
+      return true
+    end
   end
 end
 
