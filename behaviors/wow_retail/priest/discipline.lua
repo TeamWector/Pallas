@@ -186,7 +186,7 @@ end
 local function VoidShift(friend)
   if (friend == Me) then return false end
   local spell = Spell.VoidShift
-  if spell:CooldownRemaining() > 0 then return false end
+  if spell:CooldownRemaining() > 0 or friend:HasAura(auras.painSuppression) then return false end
   return friend.HealthPct < Settings.DiscVoidShift and spell:CastEx(friend)
 end
 

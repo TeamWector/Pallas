@@ -6,14 +6,6 @@ local options = {
     -- widgets
     Widgets = {
         {
-            type = "slider",
-            uid = "ShamanAstralShift",
-            text = "Use Astral Shift below HP%",
-            default = 25,
-            min = 0,
-            max = 100
-        }, -- MOVE ME TO COMMON
-        {
             type = "checkbox",
             uid = "ShamanUseCooldowns",
             text = "Allow the usage of Big Cooldowns",
@@ -46,10 +38,6 @@ end
 
 local function IsPowerOfTheMaelstrom()
     return Me:HasVisibleAura("Power of the Maelstrom")
-end
-
-local function FireElemental()
-    if Spell.FireElemental:CastEx(Me) then return true end
 end
 
 local function TotemicRecall()
@@ -144,20 +132,6 @@ local function FlameShock()
 end
 
 
-local function EarthShield()
-    if not Me:HasVisibleAura("Earth Shield") and Spell.EarthShield:CastEx(Me) then return true end
-end
-
-local function FlametongueWeapon()
-    if not Me:HasVisibleAura("Improved Flametongue Weapon") and Spell.FlametongueWeapon:CastEx(Me) then return true end
-end
-
-
-local function AstralShift()
-    if Settings.ShamanAstralShift > Me.HealthPct and Spell.AstralShift:CastEx(Me) then return true end
-end
-
-
 local function ShamanElementalCombat()
     if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
     local target = Combat.BestTarget
@@ -166,20 +140,22 @@ local function ShamanElementalCombat()
 
 
 
-    if AstralShift() then return end
 
-    if EarthShield() then return end
-    if FlametongueWeapon() then return end
+    if common:AstralShift() then return end
+    if common:EarthShield() then return end
+    if common:LightningShield() then return end
+    if common:FlametongueWeapon() then return end
 
     if common:DoInterrupt() then return end
 
-    if FireElemental() then return end
+    if common:FireElemental(target) then return end
 
     if #target:GetUnitsAround(20) > 2 then
         --MULTI TARGET
         if Stormkeeper() then return end
         if PrimordialWave() then return end
         if FlameShock() then return end
+        if common:EarthShock(target) then return end
         if LiquidMagmaTotem() then return end
         if LavaBurstWithPrimordialWave() then return end
         if #target:GetUnitsAround(20) > 3 then
@@ -197,6 +173,7 @@ local function ShamanElementalCombat()
         if LiquidMagmaTotem() then return end
         if PrimordialWave() then return end
         if FlameShock() then return end
+        if common:EarthShock(target) then return end
         if StormkeeperNoAscendance() then return end
         if LavaBurstWithStormkeeper(target) then return end
         if LightningBoltWithSurgeOfPower(target) then return end
