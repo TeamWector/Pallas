@@ -309,7 +309,6 @@ local function DruidRestoHeal()
 
     -- Some PVP stuff, do heals prepared for tanks below
     if Settings.DruidRestoPvPMode then
-      if Spell.Thorns.IsKnown and Spell.Thorns:CastEx(u) then return end
       if u.HealthPct < 60 and u:GetAuraByMe("Rejuvenation") and u:GetAuraByMe("Rejuvenation").Remaining < 3000
           and u:GetAuraByMe("Lifebloom") and u:GetAuraByMe("Lifebloom").Remaining < 3000
           and Spell.Invigorate:CastEx(u) then
@@ -317,10 +316,13 @@ local function DruidRestoHeal()
       end
       if u.HealthPct < 60 and Spell.AdaptiveSwarm:CastEx(u) then return end
       if u.HealthPct < 65 and not u:GetAuraByMe("Lifebloom") and Spell.Lifebloom:CastEx(u) then return end
+      if u.HealthPct < 80 and Spell.Thorns.IsKnown and Spell.Thorns:CastEx(u) then return end
     end
 
     if Dispel(DispelPriority.Medium) then return end
 
+
+    if Spell.Regrowth:Apply(u, u.HealthPct < 70) then return end
     if u.HealthPct < 75 and wildgrowth and Spell.WildGrowth:CastEx(u) then return end
 
 
@@ -335,6 +337,7 @@ local function DruidRestoHeal()
       if u.HealthPct < 70 and (not u:HasBuffByMe("Regrowth") or u.HealthPct < 60) and Spell.Regrowth:CastEx(u) then return end
     end
   end
+
 
   --[[
   for _, v in pairs(Heal.PriorityList) do
