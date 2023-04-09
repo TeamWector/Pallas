@@ -131,6 +131,10 @@ function WoWUnit:IsStunned()
   return (self.UnitFlags & UnitFlags.Stunned > 0)
 end
 
+function WoWUnit:IsRooted()
+  return (self.MovementFlags & MovementFlags.Root > 0)
+end
+
 function WoWUnit:IsImmune()
   for _, immune in pairs(immunes) do
     if self:HasAura(immune) then
