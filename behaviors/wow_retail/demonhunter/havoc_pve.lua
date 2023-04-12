@@ -11,14 +11,7 @@ local options = {
       uid = "HavocMomentumDrawText",
       text = "Tells you when to use fel rush / vengeful retreat",
       default = true
-    },
-    {
-      type = "combobox",
-      uid = "CommonDispels",
-      text = "Dispel",
-      default = 2,
-      options = { "Disabled", "Any", "Whitelist" }
-    },
+    }
   }
 }
 
@@ -30,8 +23,7 @@ local useVengefulRetreat = false
 local useFelRush = false
 
 local function TheHunt(target)
-  if Me:IsRooted() then return false end
-  if target.HealthPct < 75 and Spell.TheHunt:CastEx(target) then return true end
+  if Spell.TheHunt:CastEx(target) then return true end
 end
 
 local function DeathSweep()
@@ -42,24 +34,6 @@ end
 
 local function EyeBeam(target)
   if Spell.EyeBeam:CastEx(target) then return true end
-end
-
-local function ConsumeMagic(priority)
- local spell = Spell.ConsumeMagic
-  if spell:Dispel(false, priority, WoWDispelType.Magic) then return true end
-end
-
-local function ReverseMagic(priority)
-  local spell = Spell.ReverseMagic
-   if spell:Dispel(true, priority, WoWDispelType.Magic) then return true end
- end
-
-local function Blur()
-  if 55 > Me.HealthPct and Spell.Blur:CastEx(Me) then return true end
-end
-
-local function Darkness()
-  if 35 > Me.HealthPct and Spell.Darkness:CastEx(Me) then return true end
 end
 
 local function VengefulRetreat()
@@ -88,14 +62,8 @@ local function BladeDance()
 end
 
 local function AnnihilationEssenceBreakDebuff(target)
-  if target:HasAura("Essence Break") then
+  if target:HasVisibleAura("Essence Break") then
     if Spell.Annihilation:CastEx(target) then return true end
-  end
-end
-
-local function ThrowGlaiveSlow(target)
-  if not target:HasAura("Master of the Glaive") then
-    if Spell.ThrowGlaive:CastEx(target) then return true end
   end
 end
 
@@ -158,26 +126,6 @@ local function DrawTextForHavoc()
   DrawInstruction(message)
 end
 
-local function getMyTarget()
-  local target = Me.Target
-  if not target then return end
-
-  -- copy-paste from combat.lua
-  if not Me:CanAttack(target) then
-    return
-  elseif not target.InCombat or (not Settings.PallasAttackOOC and not target.InCombat) then
-    return
-  elseif target.Dead or target.Health <= 0 then
-    return
-  elseif target:GetDistance(Me.ToUnit) > 40 then
-    return
-  elseif target.IsTapDenied and (not target.Target or target.Target ~= Me) then
-    return
-  elseif target:IsImmune() then
-    return
-  end
-  return target
-end
 
 
 local function DemonhunterHavocCombat()
@@ -185,16 +133,9 @@ local function DemonhunterHavocCombat()
 
   if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
-  local target = getMyTarget()
-  if target == nil then
-    target = Combat.BestTarget
-    if (not target) or (not target.IsPlayer) then return end
-  end
+  local target = Combat.BestTarget
+  if not target then return end
   if Me.IsCastingOrChanneling then return end
-
-  if Blur() then return end
-  if Darkness() then return end
-
 
   if TheHunt(target) then return end
 
@@ -202,16 +143,10 @@ local function DemonhunterHavocCombat()
     if Spell.ThrowGlaive:CastEx(target) then return end
   end
 
-  if ConsumeMagic(DispelPriority.High) then return end
-
-
   -- only melee spells from here on
   if not Me:InMeleeRange(target) or not Me:IsFacing(target) then return end
 
   if common:DoInterrupt() then return end
-  if ReverseMagic() then return end
-  common:UseTrinkets()
-  if ThrowGlaiveSlow(target) then return end
   if DeathSweep() then return end
   if EyeBeam(target) then return end
   VengefulRetreat()
@@ -221,10 +156,12 @@ local function DemonhunterHavocCombat()
   if AnnihilationEssenceBreakDebuff(target) then return end
   if common:ImmolationAura() then return end
   FelRushUnboundChaosBuff()
-  if ConsumeMagic(DispelPriority.Medium) then return end
+  if Combat.EnemiesInMeleeRange > 1 then
+    common:UseTrinkets()
+  end
   if ThrowGlaiveOvercap(target) then return end
   if AnnihilationRotation(target) then return end
-  --if common:ThrowGlaive(target) then return end
+  if common:ThrowGlaive(target) then return end
   if Felblade(target) then return end
   if ChaosStrike(target) then return end
   FelRushMomentum()
