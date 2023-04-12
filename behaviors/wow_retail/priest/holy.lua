@@ -443,7 +443,7 @@ local function PriestHoly()
   if PrayerOfMending() then return end
   if Dispel() then return end
   if common:AngelicFeather() then return end
-  if common:DispelMagic() then return end
+  if common:DispelMagic(DispelPriority.Low) then return end
   if PriestHolyDamage() then return end
 end
 

@@ -27,7 +27,8 @@ commonPaladin.auras = {
   blessingofdawn = 385127,
   blessingofdusk = 385126,
   divinepurpose = 223819,
-  avengingwrath = 31884
+  avengingwrath = 31884,
+  sentinel = 389539
 }
 
 function commonPaladin:DoInterrupt()
@@ -41,14 +42,8 @@ function commonPaladin:GetHolyPower()
   return Me:GetPowerByType(PowerType.HolyPower)
 end
 
-function commonPaladin:HasDawn()
-  local dawn = Me:GetAura(self.auras.blessingofdawn)
-  return dawn and dawn.Remaining > 6000
-end
-
-function commonPaladin:HasDusk()
-  local dusk = Me:GetAura(self.auras.blessingofdusk)
-  return dusk and dusk.Remaining > 6000
+function commonPaladin:HasWings()
+  return Me:HasAura(self.auras.avengingwrath) or Me:HasAura(self.auras.sentinel)
 end
 
 function commonPaladin:HasPurpose()
@@ -56,9 +51,9 @@ function commonPaladin:HasPurpose()
 end
 
 function commonPaladin:HammerOfWrath()
-  local units = table.length(Combat.Targets) > 0 and Combat.Targets or Tank.Targets
+  local units = Combat.Targets
   for _, t in pairs(units) do
-    if Me:IsFacing(t) and (t.HealthPct < 20 or Me:HasAura(self.auras.avengingwrath))
+    if Me:IsFacing(t) and (t.HealthPct < 20 or self:HasWings())
         and Spell.HammerOfWrath:CastEx(t, SpellCastExFlags.NoUsable) then
       return true
     end

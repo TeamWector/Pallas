@@ -175,7 +175,7 @@ function WoWSpell:Interrupt()
 
   for _, unit in pairs(units) do
     local cast = unit.IsInterruptible and unit.CurrentSpell
-    local validTarget = self:InRange(unit)
+    local validTarget = self:InRange(unit) and Me:IsFacing(unit)
 
     if (not cast or kick == 2 and not interrupts[cast.Id]) or not validTarget then goto continue end
 
@@ -223,7 +223,7 @@ function WoWSpell:Dispel(friends, priority, ...)
     for _, aura in pairs(auras) do
       if (friends and aura.IsDebuff or not friends and aura.IsBuff) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
         local dispelPriority = dispels[aura.Id]
-        if dispelPriority >= priority then
+        if dispel == 1 or dispelPriority >= priority then
           for _, dispelType in pairs(types) do
             if aura.DispelType == dispelType then
               -- Let 777 ms pass on aura for no instant dispel.

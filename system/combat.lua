@@ -199,7 +199,7 @@ end
 ---@return boolean gathered if all targets are gathered near eachother.
 ---@param distance integer how far in yrds from each other do the targets have to be.
 function Combat:AllTargetsGathered(distance)
-  if table.length(self.Targets) < 2 then return true end
+  if table.length(self.Targets) == 0 then return false end
 
   local gathered = true
 
