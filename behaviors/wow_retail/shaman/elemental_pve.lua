@@ -80,10 +80,6 @@ local function LavaBurst(target)
     if Spell.LavaBurst:CastEx(target) then return true end
 end
 
-local function LightningBolt(target)
-    if Spell.LightningBolt:CastEx(target) then return true end
-end
-
 local function Earthquake(target)
     if Spell.Earthquake:CastEx(target) then return true end
 end
@@ -123,13 +119,7 @@ local function PrimordialWave()
     if (unitToCastAt) and Spell.PrimordialWave:CastEx(unitToCastAt) then return true end
 end
 
--- Loop through all units find one without flame shock or lowest duration to cast Flame Shock
-local function FlameShock()
-    for _, u in pairs(Combat.Targets) do
-        local flameShockAura = u:GetAuraByMe("Flame Shock")
-        if (not flameShockAura or flameShockAura.Remaining < 5400) and Spell.FlameShock:CastEx(u) then return true end
-    end
-end
+
 
 
 local function ShamanElementalCombat()
@@ -154,7 +144,7 @@ local function ShamanElementalCombat()
         --MULTI TARGET
         if Stormkeeper() then return end
         if PrimordialWave() then return end
-        if FlameShock() then return end
+        if common:FlameShock() then return end
         if common:EarthShock(target) then return end
         if LiquidMagmaTotem() then return end
         if LavaBurstWithPrimordialWave() then return end
@@ -172,14 +162,14 @@ local function ShamanElementalCombat()
         if TotemicRecall() then return end
         if LiquidMagmaTotem() then return end
         if PrimordialWave() then return end
-        if FlameShock() then return end
+        if common:FlameShock() then return end
         if common:EarthShock(target) then return end
         if StormkeeperNoAscendance() then return end
         if LavaBurstWithStormkeeper(target) then return end
         if LightningBoltWithSurgeOfPower(target) then return end
         if ElementalBlast(target) then return end
         if LavaBurst(target) then return end
-        if LightningBolt(target) then return end
+        if common:LightningBolt(target) then return end
         if FlameOrFrostShockMoving(target) then return end
     end
 end
