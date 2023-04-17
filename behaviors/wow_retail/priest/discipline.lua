@@ -290,6 +290,7 @@ local function PriestDiscipline()
     if PowerWordRadianceOneCharge(f) then return end
   end
 
+
   if Dispel(DispelPriority.Low) then return end
 
   if MaintainAtonement() then return end

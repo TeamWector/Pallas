@@ -38,24 +38,8 @@ local function IsLavaSurge()
   return Me:HasVisibleAura("Lava Surge")
 end
 
-local function IsStormkeeper()
-  return Me:HasVisibleAura("Stormkeeper")
-end
-
 local function StormElemental()
   if Spell.StormElemental:CastEx(Me) then return true end
-end
-
-local function LavaBurst(target)
-  if Spell.LavaBurst:CastEx(target) then return true end
-end
-
-local function LightningBolt(target)
-  if Spell.LightningBolt:CastEx(target) then return true end
-end
-
-local function LightningBoltWithStormkeeper(target)
-  if IsStormkeeper() and Spell.LightningBolt:CastEx(target) then return true end
 end
 
 local function FlameOrFrostShockMoving(target)
@@ -82,26 +66,13 @@ local function LavaBurstWithLavaSurge(target)
   if IsLavaSurge() and target:HasAura("Flame Shock") and Spell.LavaBurst:CastEx(target) then return true end
 end
 
-local function Stormkeeper()
-  if Spell.Stormkeeper:CastEx(Me) then return true end
-end
 
-local function PrimordialWave(target)
-  local spell = Spell.PrimordialWave
-  if spell:CooldownRemaining() > 0 then return false end
-  if spell:CastEx(target) then return true end
-end
+
 
 local function FlameShock(target)
   local spell = Spell.FlameShock
   if spell:CooldownRemaining() > 0 then return false end
   if spell:CastEx(target) then return true end
-end
-
-local function FrostShock(target)
-  local spell = Spell.FrostShock
-  if spell:CooldownRemaining() > 0 then return false end
-  if Me:HasAura("Icefury") and (not target:HasAura("Frost Shock")) and spell:CastEx(target) then return true end
 end
 
 local function Icefury(target)
@@ -210,20 +181,20 @@ local function ShamanElementalCombat()
   if common:FireElemental(target) then return end
   if GroundingTotem() then return end
   if StormElemental() then return end
-  if PrimordialWave(target) then return end
+  if common:PrimordialWave(target) then return end
   if FlameShock(target) then return end
   if common:EarthShock(target) then return end
+  if common:LightningBoltWithStormkeeper(target) then return end
   if Icefury(target) then return end
-  if FrostShock(target) then return end
+  if common:FrostShock(target) then return end
   if FlameShockEveryoneElse() then return end
   if LavaBurstWithLavaSurge(target) then return end
-  if Stormkeeper() then return end
-  if LightningBoltWithStormkeeper(target) then return end
+  if common:Stormkeeper() then return end
   if SkyfuryTotem() then return end
   if Earthquake(target) then return end
-  if LavaBurst(target) then return end
+  if common:LavaBurst(target) then return end
   if Purge(DispelPriority.Medium) then return end
-  if LightningBolt(target) then return end
+  if common:LightningBolt(target) then return end
   if Purge(DispelPriority.Low) then return end
   if FlameOrFrostShockMoving(target) then return end
 end
