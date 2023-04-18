@@ -222,13 +222,11 @@ function WoWSpell:Dispel(friends, priority, ...)
     for _, aura in pairs(auras) do
       if (friends and aura.IsDebuff or not friends and aura.IsBuff) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
         local dispelPriority = dispels[aura.Id]
-        if dispel == 1 or dispelPriority >= priority then
-          if table.contains(types, aura.DispelType) then
-            local durPassed = aura.Duration - aura.Remaining
-            if durPassed > 777 and self:CastEx(unit) then
-              print('cast dispel on target to remove ' .. aura.Name .. ' with priority ' .. priority)
-              return true
-            end
+        if (dispel == 1 or dispelPriority >= priority) and table.contains(types, aura.DispelType) then
+          local durPassed = aura.Duration - aura.Remaining
+          if durPassed > 777 and self:CastEx(unit) then
+            print('cast dispel on target to remove ' .. aura.Name .. ' with priority ' .. priority)
+            return true
           end
         end
       end
