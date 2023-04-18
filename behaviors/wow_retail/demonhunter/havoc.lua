@@ -72,7 +72,7 @@ local function VengefulRetreat()
 end
 
 local function EssenceBreak(target)
-  if Spell.EssenceBreak:CastEx(target) then return true end
+  if target.HealthPct < 77 and Spell.EssenceBreak:CastEx(target) then return true end
 end
 
 local function Metamorphosis(target)
