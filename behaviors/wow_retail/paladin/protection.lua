@@ -97,8 +97,7 @@ local function BlessingOfFreedom()
 
   local friends = WoWGroup:GetGroupUnits()
   for _, f in pairs(friends) do
-    local rooted = (f.MovementFlags & MovementFlags.Root > 0)
-    if rooted and spell:CastEx(f) then return true end
+    if f:IsRooted() and spell:CastEx(f) then return true end
   end
 end
 
