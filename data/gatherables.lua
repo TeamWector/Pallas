@@ -173,6 +173,7 @@ local treasures = {
   [184930] = "treasure", -- Solid Fel Iron Chest
   [185915] = "treasure", -- Netherwing Egg
   [193997] = "treasure", -- Everfrost Chip
+  [386166] = "treasure", -- Bone Pile
 }
 
 return { herb = herbs, ore = ores, treasure = treasures }

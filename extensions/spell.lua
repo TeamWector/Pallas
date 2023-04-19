@@ -46,6 +46,8 @@ local exclusions = {
   357208, -- Fire Breath
   356995, -- Disintegrate,
   359073, -- Eternity Surge
+  15407, -- Mind Flay
+  391403, -- Mind flay V2
 }
 
 function WoWSpell:CastEx(a1, ...)
