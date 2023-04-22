@@ -103,7 +103,16 @@ function Alert(text, time)
     time = wector.Game.Time + time * 1000
   }
 
-  table.insert(Debugs, draw)
+  local contains = false
+  for _, debug in pairs(Debugs) do
+    if debug.text == draw.text then
+      contains = true
+    end
+  end
+
+  if not contains then
+    table.insert(Debugs, draw)
+  end
 end
 
 local manuallytracked = {}
