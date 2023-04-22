@@ -8,6 +8,12 @@ local options = {
   Widgets = {
     {
       type = "checkbox",
+      uid = "ExtraAlerts",
+      text = "Draw Alerts",
+      default = true
+    },
+    {
+      type = "checkbox",
       uid = "ExtraRadar",
       text = "Enable Radar",
       default = false
@@ -267,9 +273,9 @@ local function DrawColoredText()
 end
 
 local function Radar()
-  if not Settings.ExtraRadar then return end
-
+  if not Settings.ExtraAlerts then return end
   DrawDebugs()
+  if not Settings.ExtraRadar then return end
   CollectVisuals()
   DrawColoredText()
   DrawColoredLines()
