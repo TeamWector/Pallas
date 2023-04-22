@@ -216,4 +216,16 @@ function Combat:AllTargetsGathered(distance)
   return gathered
 end
 
+---@return WoWUnit Explosive The Explosive Unit
+function Combat:GetExplosive()
+  local unit = nil
+  for _, target in pairs(self.Targets) do
+    if target.EntryId == 120651 then
+      unit = target
+    end
+  end
+
+  return unit
+end
+
 return Combat
