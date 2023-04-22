@@ -44,6 +44,12 @@ local options = {
     },
     {
       type = "checkbox",
+      uid = "ExtraRadarTrackInteractables",
+      text = "Track All POI",
+      default = false
+    },
+    {
+      type = "checkbox",
       uid = "ExtraRadarDrawLines",
       text = "Draw Lines",
       default = false
@@ -72,6 +78,33 @@ local objectColors = {
   ["tracked"] = colors.white,
   ["quests"] = colors.pink
 }
+
+local Debugs = {}
+local function DrawDebugs()
+  for k, debug in pairs(Debugs) do
+    if wector.Game.Time > debug.time then
+      table.remove(Debugs, k)
+    end
+  end
+
+  local add = 10
+  for _, debug in pairs(Debugs) do
+    local textBasePos = World2Screen(Vec3(Me.Position.x, Me.Position.y, Me.Position.z + add))
+    add = add - 0.5
+    DrawText(textBasePos, colors.chartreuse, debug.text)
+  end
+end
+
+---@param text string Text to draw as an alert
+---@param time number Seconds to show alert
+function Alert(text, time)
+  local draw = {
+    text = text,
+    time = wector.Game.Time + time * 1000
+  }
+
+  table.insert(Debugs, draw)
+end
 
 local manuallytracked = {}
 local function ManualTrack(name)
@@ -133,6 +166,7 @@ local function CollectVisuals()
     trackTreasures = Settings.ExtraRadarTrackTreasures,
     trackRares = Settings.ExtraRadarTrackRares,
     trackQuests = Settings.ExtraRadarTrackQuests,
+    trackInteractable = Settings.ExtraRadarTrackInteractables,
     trackManual = table.length(manuallytracked) > 0,
     loadRange = Settings.ExtraRadarLoadDistance,
   }
@@ -143,7 +177,7 @@ local function CollectVisuals()
   for _, unit in pairs(units) do
     local distance = Me.Position:DistanceSq2D(unit.Position)
     if distance <= settings.loadRange then
-      if unit.Classification == Classification.Rare and settings.trackRares then
+      if not unit.DeadOrGhost and unit.Classification == Classification.Rare and settings.trackRares then
         AddToScreenList(unit, "rare")
       elseif IsTracked(unit.Name) and settings.trackManual then
         AddToScreenList(unit, "tracked")
@@ -158,6 +192,7 @@ local function CollectVisuals()
       local isHerb = herbs[object.EntryId] and settings.trackHerbs
       local isOre = ores[object.EntryId] and settings.trackOres
       local isTreasure = treasures[object.EntryId] and settings.trackTreasures
+      local isInteractable = object:Interactable() and settings.trackInteractable
 
       if isQuest then
         AddToScreenList(object, "quest")
@@ -166,6 +201,8 @@ local function CollectVisuals()
       elseif isOre then
         AddToScreenList(object, "vein")
       elseif isTreasure then
+        AddToScreenList(object, "treasure")
+      elseif isInteractable then
         AddToScreenList(object, "treasure")
       end
     end
@@ -223,22 +260,10 @@ end
 local function Radar()
   if not Settings.ExtraRadar then return end
 
+  DrawDebugs()
   CollectVisuals()
   DrawColoredText()
   DrawColoredLines()
-end
-
-function DrawDebug(...)
-  local add = 10
-
-  local debugs = { ... }
-
-  for _, debug in pairs(debugs) do
-    local textBasePos = World2Screen(Vec3(Me.Position.x, Me.Position.y, Me.Position.z + add))
-    add = add -0.5
-
-    DrawText(textBasePos, colors.chartreuse, debug)
-  end
 end
 
 local behaviors = {

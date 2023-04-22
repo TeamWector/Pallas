@@ -9,7 +9,7 @@ local spells = {
 local function PriestShadow()
   if Me.IsMounted then return end
 
-  if Me:GetSpellCast().Id == spells.mindflayv2 then return end
+  if Me.IsCastingOrChanneling and Me:GetSpellCast() ~= Spell.MindFlay then return end
 
   if Spell.Shadowform:Apply(Me) then return end
   if Spell.PowerWordShield:Apply(Me) then return end
@@ -24,6 +24,7 @@ local function PriestShadow()
   if Spell.PowerInfusion:CastEx(Me) then return end
   if Spell.Halo:CastEx(Me) then return end
   if Spell.Mindgames:CastEx(target) then return end
+  if Spell.Mindbender:CastEx(target) then return end
   if not target:IsMoving() and Spell.ShadowCrash:CastEx(target) then return end
   for _, t in pairs(Combat.Targets) do
     if Spell.VampiricTouch:Apply(t) then return end
