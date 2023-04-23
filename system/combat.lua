@@ -218,14 +218,22 @@ end
 
 ---@return WoWUnit Explosive The Explosive Unit
 function Combat:GetExplosive()
-  local unit = nil
+  local units = {}
   for _, target in pairs(self.Targets) do
     if target.EntryId == 120651 then
-      unit = target
+      table.insert(units, target)
     end
   end
 
-  return unit
+  if #units > 1 then
+    table.sort(units, function(a, b)
+      local aCastLeft = a.CurrentSpell and a.CurrentSpell.CastEnd - wector.Game.Time or 9999
+      local bCastLeft = a.CurrentSpell and b.CurrentSpell.CastEnd - wector.Game.Time or 9999
+      return aCastLeft < bCastLeft
+    end)
+  end
+
+  return units[1]
 end
 
 return Combat
