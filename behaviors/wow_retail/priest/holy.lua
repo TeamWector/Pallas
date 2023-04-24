@@ -233,14 +233,9 @@ end
 
 local function ShadowWordPain(enemy, explosives)
   local spell = Spell.ShadowWordPain
-  local explosive = Combat:GetExplosive()
 
-  if explosive then
-    Me:SetTarget(explosive)
-    if spell:Apply(explosive) then
-      Alert("Killed Explosive", 3)
-      return true
-    end
+  for _, e in pairs(Combat.Explosives) do
+    if spell:Apply(e) then Me:SetTarget(e) Alert("Killed Explosive", 2) return true end
   end
 
   if explosives then return end

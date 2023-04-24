@@ -85,16 +85,16 @@ local objectColors = {
   ["quests"] = colors.pink
 }
 
-local Debugs = {}
-local function DrawDebugs()
-  for k, debug in pairs(Debugs) do
+local alerts = {}
+local function DrawAlerts()
+  for k, debug in pairs(alerts) do
     if wector.Game.Time > debug.time then
-      table.remove(Debugs, k)
+      table.remove(alerts, k)
     end
   end
 
   local add = 10
-  for _, debug in pairs(Debugs) do
+  for _, debug in pairs(alerts) do
     local textBasePos = World2Screen(Vec3(Me.Position.x, Me.Position.y, Me.Position.z + add))
     add = add - 0.5
     DrawText(textBasePos, colors.chartreuse, debug.text)
@@ -110,14 +110,14 @@ function Alert(text, time)
   }
 
   local contains = false
-  for _, debug in pairs(Debugs) do
+  for _, debug in pairs(alerts) do
     if debug.text == draw.text then
       contains = true
     end
   end
 
   if not contains then
-    table.insert(Debugs, draw)
+    table.insert(alerts, draw)
   end
 end
 
@@ -274,7 +274,7 @@ end
 
 local function Radar()
   if not Settings.ExtraAlerts then return end
-  DrawDebugs()
+  DrawAlerts()
   if not Settings.ExtraRadar then return end
   CollectVisuals()
   DrawColoredText()

@@ -7,6 +7,9 @@ Combat = Combat or Targeting:New()
 Combat.BestTarget = nil
 Combat.EnemiesInMeleeRange = 0
 
+---@type table<WoWUnit[], number>
+Combat.Explosives = {}
+
 Combat.EventListener = wector.FrameScript:CreateListener()
 Combat.EventListener:RegisterEvent("PLAYER_ENTER_COMBAT")
 Combat.EventListener:RegisterEvent("PLAYER_LEAVE_COMBAT")
@@ -33,6 +36,7 @@ end
 function Combat:Reset()
   self.BestTarget = nil -- reset
   self.EnemiesInMeleeRange = 0
+  self.Explosives = {}
 end
 
 function Combat:WantToRun()
@@ -109,12 +113,25 @@ function Combat:WeighFilter()
       self.EnemiesInMeleeRange = self.EnemiesInMeleeRange + 1
     end
 
+    if u.EntryId == 120651 and u.IsCastingOrChanneling then
+      table.insert(self.Explosives, u)
+    end
+
     -- our only priority right now, current target
     if Me.Target and Me.Target == u then
       priority = priority + 50
     end
 
     table.insert(priorityList, { Unit = u, Priority = priority })
+  end
+
+  if #self.Explosives > 1 then
+    table.sort(self.Explosives, function(a, b)
+      local aCastLeft = a.CurrentSpell.CastEnd - wector.Game.Time
+      local bCastLeft = b.CurrentSpell.CastEnd - wector.Game.Time
+
+      return aCastLeft < bCastLeft
+    end)
   end
 
   table.sort(priorityList, function(a, b)
@@ -214,26 +231,6 @@ function Combat:AllTargetsGathered(distance)
   end
 
   return gathered
-end
-
----@return WoWUnit Explosive The Explosive Unit
-function Combat:GetExplosive()
-  local units = {}
-  for _, target in pairs(self.Targets) do
-    if target.EntryId == 120651 then
-      table.insert(units, target)
-    end
-  end
-
-  if #units > 1 then
-    table.sort(units, function(a, b)
-      local aCastLeft = a.CurrentSpell and a.CurrentSpell.CastEnd - wector.Game.Time or 9999
-      local bCastLeft = a.CurrentSpell and b.CurrentSpell.CastEnd - wector.Game.Time or 9999
-      return aCastLeft < bCastLeft
-    end)
-  end
-
-  return units[1]
 end
 
 return Combat
