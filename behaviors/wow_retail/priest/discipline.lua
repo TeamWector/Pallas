@@ -288,7 +288,12 @@ local function PriestDiscipline()
     if Penance(f) then return end
     if FlashHeal(f) then return end
     if PowerWordRadianceOneCharge(f) then return end
+    if (f.Class == 3 and f.Pet) then
+      if f.Pet.HealthPct < 75 and PowerWordShield(f.Pet) then return end
+      if f.Pet.HealthPct < 55 and FlashHeal(f.Pet) then return end
+    end
   end
+
 
 
   if Dispel(DispelPriority.Low) then return end

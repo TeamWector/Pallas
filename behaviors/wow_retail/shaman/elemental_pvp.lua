@@ -101,6 +101,12 @@ local function SkyfuryTotem()
   if Me:HasAura("Stormkeeper") or Me.Power > 79 and spell:CastEx(Me) then return end
 end
 
+local function EarthShield(friend)
+  local spell = Spell.EarthShield
+  if spell:CooldownRemaining() > 0 or friend:HasAura("Earth Shield") or friend.HealthPct > 80 then return false end
+  return spell:Apply(friend)
+end
+
 
 
 local blacklist = {
@@ -158,7 +164,6 @@ end
 
 
 local function ShamanElementalCombat()
-  if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
   local target = getMyTarget()
   if target == nil then
@@ -169,6 +174,9 @@ local function ShamanElementalCombat()
   if Me.IsCastingOrChanneling then return end
   if not Me:IsFacing(target) then return end
 
+  if common:DoInterrupt() then return end
+
+  if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
   if common:AstralShift() then return end
   if common:EarthShield() then return end
@@ -176,24 +184,37 @@ local function ShamanElementalCombat()
   if common:FlametongueWeapon() then return end
 
 
-  if common:DoInterrupt() then return end
   if Purge(DispelPriority.High) then return end
   if common:FireElemental(target) then return end
   if GroundingTotem() then return end
   if StormElemental() then return end
+  if LavaBurstWithLavaSurge(target) then return end
   if common:PrimordialWave(target) then return end
   if FlameShock(target) then return end
   if common:EarthShock(target) then return end
   if common:LightningBoltWithStormkeeper(target) then return end
   if Icefury(target) then return end
-  if common:FrostShock(target) then return end
   if FlameShockEveryoneElse() then return end
-  if LavaBurstWithLavaSurge(target) then return end
   if common:Stormkeeper() then return end
   if SkyfuryTotem() then return end
   if Earthquake(target) then return end
   if common:LavaBurst(target) then return end
   if Purge(DispelPriority.Medium) then return end
+  local friends = {}
+  for _, v in pairs(Heal.PriorityList) do
+    local unit = v.Unit
+    table.insert(friends, unit)
+  end
+
+  table.sort(friends, function(a, b)
+    return a:TimeToDeath() < b:TimeToDeath()
+  end)
+  for _, f in pairs(friends) do
+    local earthShieldTarget = friends[1]
+    if earthShieldTarget and earthShieldTarget == Me then earthShieldTarget = friends[2] end
+    if earthShieldTarget and earthShieldTarget ~= Me and EarthShield(earthShieldTarget) then return end
+  end
+  if common:FrostShock(target) then return end
   if common:LightningBolt(target) then return end
   if Purge(DispelPriority.Low) then return end
   if FlameOrFrostShockMoving(target) then return end

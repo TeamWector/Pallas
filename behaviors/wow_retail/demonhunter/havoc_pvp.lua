@@ -183,7 +183,6 @@ end
 local function DemonhunterHavocCombat()
   DrawTextForHavoc()
 
-  if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
   local target = getMyTarget()
   if target == nil then
@@ -191,6 +190,10 @@ local function DemonhunterHavocCombat()
     if (not target) or (not target.IsPlayer) then return end
   end
   if Me.IsCastingOrChanneling then return end
+
+  if common:DoInterrupt() then return end
+
+  if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
   if Blur() then return end
   if Darkness() then return end
@@ -208,7 +211,6 @@ local function DemonhunterHavocCombat()
   -- only melee spells from here on
   if not Me:InMeleeRange(target) or not Me:IsFacing(target) then return end
 
-  if common:DoInterrupt() then return end
   if ReverseMagic() then return end
   common:UseTrinkets()
   if ThrowGlaiveSlow(target) then return end
