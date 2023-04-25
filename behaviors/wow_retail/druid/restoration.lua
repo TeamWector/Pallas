@@ -226,6 +226,9 @@ end
 local efflorescence_time = 0
 local efflorescence_pos = Vec3(0.0, 0.0, 0.0)
 
+local unrootWithEffloTime = 0
+
+
 local function DruidRestoHeal()
   if Me.Dead then return end
   if Me:IsStunned() then return end
@@ -269,6 +272,7 @@ local function DruidRestoHeal()
     end
   end
 
+  local timeSinceUnRootedWithEfflo = wector.Game.Time - unrootWithEffloTime
 
 
   for _, v in pairs(Heal.PriorityList) do
@@ -336,6 +340,17 @@ local function DruidRestoHeal()
     else
       if u.HealthPct < 70 and (not u:HasBuffByMe("Regrowth") or u.HealthPct < 60) and Spell.Regrowth:CastEx(u) then return end
     end
+
+   -- if Spell.Disentanglement.IsKnown and u:IsRooted() and timeSinceUnRootedWithEfflo > 5000 then
+   --    if Spell.Efflorescence:CastEx(u) then unrootWithEffloTime = wector.Game.Time
+   --     return end
+   --end
+
+    if (u.Class == 3 and u.Pet) then
+      Spell.Rejuvenation:Apply(u.Pet, u.Pet.HealthPct < 99)
+      Spell.Lifebloom:Apply(u.Pet, u.Pet.HealthPct < 50)
+    end
+
   end
 
 

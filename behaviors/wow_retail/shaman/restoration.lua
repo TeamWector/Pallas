@@ -266,26 +266,28 @@ local function ShamanRestoDamage()
   if Purge(DispelPriority.Medium) then return end
   if common:LightningBoltWithStormkeeper(target) then return true end
   if FlameShock(target) then return true end
-  if common:FrostShock(target) then return end
-  --if common:LavaBurst(target) then return true end
-  if Purge(DispelPriority.Low) then return end
+  if Purge(DispelPriority.Low) then return true end
   if common:Stormkeeper() then return true end
+  if common:LavaBurst(target) then return true end
   if (#target:GetUnitsAround(13) > 1) then
     if common:ChainLightning(target) then return true end
   else
     if common:LightningBolt(target) then return true end
   end
+  if common:FrostShock(target) then return end
 end
 
 local function ShamanResto()
   if Me:IsSitting() or Me.IsMounted or Me:IsStunned() then return end
+
+  if common:DoInterrupt() then return end
+
   local GCD = wector.SpellBook.GCD
   if Me.IsCastingOrChanneling or GCD:CooldownRemaining() > 0 then return end
 
   if common:AstralShift() then return end
 
   if common:EarthShield() then return end
-  if common:DoInterrupt() then return end
 
   local friends = {}
   for _, v in pairs(Heal.PriorityList) do

@@ -72,7 +72,13 @@ function commonShaman:IsStormkeeper()
 end
 
 function commonShaman:LightningBoltWithStormkeeper(target)
-  if commonShaman:IsStormkeeper() and commonShaman:LightningBolt(target) then return true end
+  if commonShaman:IsStormkeeper() then
+    if (#target:GetUnitsAround(13) > 1) then
+      if commonShaman:ChainLightning(target) then return true end
+    else
+      if commonShaman:LightningBolt(target) then return true end
+    end
+  end
 end
 
 function commonShaman:PrimordialWave(target)
