@@ -7,6 +7,9 @@ Combat = Combat or Targeting:New()
 Combat.BestTarget = nil
 Combat.EnemiesInMeleeRange = 0
 
+---@type table<WoWUnit[]>
+Combat.Explosives = {}
+
 Combat.EventListener = wector.FrameScript:CreateListener()
 Combat.EventListener:RegisterEvent("PLAYER_ENTER_COMBAT")
 Combat.EventListener:RegisterEvent("PLAYER_LEAVE_COMBAT")
@@ -33,6 +36,7 @@ end
 function Combat:Reset()
   self.BestTarget = nil -- reset
   self.EnemiesInMeleeRange = 0
+  self.Explosives = {}
 end
 
 function Combat:WantToRun()
@@ -109,12 +113,25 @@ function Combat:WeighFilter()
       self.EnemiesInMeleeRange = self.EnemiesInMeleeRange + 1
     end
 
+    if u.EntryId == 120651 and u.IsCastingOrChanneling then
+      table.insert(self.Explosives, u)
+    end
+
     -- our only priority right now, current target
     if Me.Target and Me.Target == u then
       priority = priority + 50
     end
 
     table.insert(priorityList, { Unit = u, Priority = priority })
+  end
+
+  if #self.Explosives > 1 then
+    table.sort(self.Explosives, function(a, b)
+      local aCastLeft = a.CurrentSpell.CastEnd - wector.Game.Time
+      local bCastLeft = b.CurrentSpell.CastEnd - wector.Game.Time
+
+      return aCastLeft < bCastLeft
+    end)
   end
 
   table.sort(priorityList, function(a, b)
@@ -199,7 +216,7 @@ end
 ---@return boolean gathered if all targets are gathered near eachother.
 ---@param distance integer how far in yrds from each other do the targets have to be.
 function Combat:AllTargetsGathered(distance)
-  if table.length(self.Targets) < 2 then return true end
+  if table.length(self.Targets) == 0 then return false end
 
   local gathered = true
 

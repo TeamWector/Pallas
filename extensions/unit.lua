@@ -184,6 +184,16 @@ function WoWUnit:AngleToXY(x1, y1, x2, y2)
   return math.deg(diff)
 end
 
+function WoWUnit:GetSpellCast()
+  local spell = WoWSpell(0)
+
+  if self.CurrentSpell then
+    spell = self.CurrentSpell
+  end
+
+  return spell
+end
+
 function WoWUnit:GetHealthLost()
   return self.HealthMax - self.Health
 end

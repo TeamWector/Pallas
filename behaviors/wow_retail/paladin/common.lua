@@ -2,10 +2,9 @@ local commonPaladin = {}
 
 commonPaladin.widgets = {
   {
-    type = "checkbox",
-    uid = "PaladinRebuke",
-    text = "Interrupt With Rebuke",
-    default = false
+    type = "text",
+    uid = "PaladinGeneral",
+    text = ">> General <<",
   },
   {
     type = "combobox",
@@ -14,7 +13,7 @@ commonPaladin.widgets = {
     default = 0,
     options = { "Disabled", "Any", "Whitelist" }
   },
-    {
+  {
     type = "slider",
     uid = "CommonInterruptPct",
     text = "Kick Cast Left (%)",
@@ -28,25 +27,23 @@ commonPaladin.auras = {
   blessingofdawn = 385127,
   blessingofdusk = 385126,
   divinepurpose = 223819,
-  avengingwrath = 31884
+  avengingwrath = 31884,
+  sentinel = 389539
 }
 
 function commonPaladin:DoInterrupt()
-  if Spell.Rebuke:Interrupt() then return end
+  local spell = Spell.Rebuke
+  if spell:CooldownRemaining() > 0 then return false end
+
+  if spell:Interrupt() then return end
 end
 
 function commonPaladin:GetHolyPower()
   return Me:GetPowerByType(PowerType.HolyPower)
 end
 
-function commonPaladin:HasDawn()
-  local dawn = Me:GetAura(self.auras.blessingofdawn)
-  return dawn and dawn.Remaining > 6000
-end
-
-function commonPaladin:HasDusk()
-  local dusk = Me:GetAura(self.auras.blessingofdusk)
-  return dusk and dusk.Remaining > 6000
+function commonPaladin:HasWings()
+  return Me:HasAura(self.auras.avengingwrath) or Me:HasAura(self.auras.sentinel)
 end
 
 function commonPaladin:HasPurpose()
@@ -54,8 +51,12 @@ function commonPaladin:HasPurpose()
 end
 
 function commonPaladin:HammerOfWrath()
-  for _, t in pairs(Combat.Targets) do
-    if (t.HealthPct < 20 or Me:HasAura(self.auras.avengingwrath)) and Spell.HammerOfWrath:CastEx(t, SpellCastExFlags.NoUsable) then return true end
+  local units = Combat.Targets
+  for _, t in pairs(units) do
+    if Me:IsFacing(t) and (t.HealthPct < 20 or self:HasWings())
+        and Spell.HammerOfWrath:CastEx(t, SpellCastExFlags.NoUsable) then
+      return true
+    end
   end
 end
 

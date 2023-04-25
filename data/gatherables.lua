@@ -173,6 +173,20 @@ local treasures = {
   [184930] = "treasure", -- Solid Fel Iron Chest
   [185915] = "treasure", -- Netherwing Egg
   [193997] = "treasure", -- Everfrost Chip
+  [386166] = "treasure", -- Bone Pile
+  [386580] = "treasure", -- Neltharion Gift token
+  [386578] = "treasure", -- Neltharion Gift token
+  [386583] = "treasure", -- Neltharion Gift token
+  [387501] = "treasure", -- Neltharion Gift token
+  [386582] = "treasure", -- Neltharion Gift token
+  [386581] = "treasure", -- Neltharion Gift token
+  [386579] = "treasure", -- Neltharion Gift token
+  [386054] = "treasure", -- Mysterious Writings
+  [386082] = "treasure", -- Dracthyr Runestone
+  [386174] = "treasure", -- Avian Trove
+  [386208] = "treasure", -- Storm-eater Cairn
+  [386212] = "treasure", -- Stonescaled Cairn
+  [386213] = "treasure", -- Blazing Cairn
 }
 
 return { herb = herbs, ore = ores, treasure = treasures }

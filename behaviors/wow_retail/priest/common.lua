@@ -65,14 +65,16 @@ function commonPriest:DesperatePrayer()
   return Me.HealthPct < Settings.PriestDesperatePrayerPct and spell:CastEx(Me)
 end
 
+local lastUsed = wector.Game.Time
 function commonPriest:PowerWordFortitude()
   local spell = Spell.PowerWordFortitude
   if Me.InCombat or not Settings.PriestPowerWordFortitude then return false end
+  if wector.Game.Time - lastUsed < 5000 then return false end
 
   local friends = WoWGroup:GetGroupUnits()
 
   for _, f in pairs(friends) do
-    if spell:Apply(f) then return true end
+    if spell:Apply(f) then lastUsed = wector.Game.Time return true end
   end
 end
 

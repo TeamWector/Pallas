@@ -46,6 +46,8 @@ local exclusions = {
   357208, -- Fire Breath
   356995, -- Disintegrate,
   359073, -- Eternity Surge
+  15407, -- Mind Flay
+  391403, -- Mind flay V2
 }
 
 function WoWSpell:CastEx(a1, ...)
@@ -175,7 +177,7 @@ function WoWSpell:Interrupt()
 
   for _, unit in pairs(units) do
     local cast = unit.IsInterruptible and unit.CurrentSpell
-    local validTarget = self:InRange(unit)
+    local validTarget = self:InRange(unit) and Me:IsFacing(unit)
 
     if (not cast or kick == 2 and not interrupts[cast.Id]) or not validTarget then goto continue end
 
@@ -201,7 +203,6 @@ end
 ---@param priority DispelPriority the priority level for the dispel. Defaults to Low if not provided.
 ---@return boolean casted if we casted dispel.
 function WoWSpell:Dispel(friends, priority, ...)
-
   if self:CooldownRemaining() > 0 then return false end
   -- We create a combobox with uid CommonDispels that has three values, disabled, any, whitelist.
   local dispel = Settings.CommonDispels or 0
@@ -223,18 +224,11 @@ function WoWSpell:Dispel(friends, priority, ...)
     for _, aura in pairs(auras) do
       if (friends and aura.IsDebuff or not friends and aura.IsBuff) and (dispel == 1 or dispels[aura.Id]) and aura.Remaining > 2000 then
         local dispelPriority = dispels[aura.Id]
-        if dispel == 1 or dispelPriority >= priority then
-          for _, dispelType in pairs(types) do
-            if aura.DispelType == dispelType then
-              -- Let 777 ms pass on aura for no instant dispel.
-              local durPassed = aura.Duration - aura.Remaining
-              if durPassed > 777 then
-                if self:CastEx(unit) then
-                  print('cast dispel on target to remove ' .. aura.Name .. ' with priority ' .. priority)
-                  return true
-                end
-              end
-            end
+        if (dispel == 1 or dispelPriority >= priority) and table.contains(types, aura.DispelType) then
+          local durPassed = aura.Duration - aura.Remaining
+          if durPassed > 777 and self:CastEx(unit) then
+            print('cast dispel on target to remove ' .. aura.Name .. ' with priority ' .. priority)
+            return true
           end
         end
       end

@@ -157,7 +157,7 @@ local function TemporalAnomaly()
     end
   end
 
-  return hits > 1 and spell:CastEx(Me)
+  return hits > 3 and spell:CastEx(Me)
 end
 
 local function PreservationDamage()

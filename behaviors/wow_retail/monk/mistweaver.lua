@@ -277,9 +277,8 @@ local function ZenPulse(friend)
   if Spell.ZenPulse:CooldownRemaining() > 0 then return false end
 
   if friend.HealthPct < Settings.ZenPulsePct then
-    local enemy8 = #friend:GetUnitsAround(8)
-    local reverb = not Settings.ZenReverb or
-        friend:GetAuraByMe(auras.envelopingmist) and friend:GetAuraByMe(auras.renewingmist)
+    local enemy8 = Combat:GetTargetsAround(friend, 8)
+    local reverb = not Settings.ZenReverb or friend:GetAuraByMe(auras.envelopingmist)
     if reverb or enemy8 > 4 then
       return enemy8 > 0 and Spell.ZenPulse:CastEx(friend)
     end
@@ -433,7 +432,7 @@ local function BirdRotation()
   local target = Combat.BestTarget
 
   if EnvelopingMist() then return true end
-  --if FaelineStomp(target) then return true end
+  if FaelineStomp(target) then return true end
   if RisingSunKick(target) then return true end
   if BlackoutKick(target) then return true end
   if TigerPalm(target) then return true end
@@ -450,7 +449,7 @@ local function MonkMistweaverDamage()
 
   if common:LegSweep() then return true end
   if common:TouchOfDeath() then return true end
-  --if FaelineStomp(target) then return true end
+  if FaelineStomp(target) then return true end
   if ChiBurst() then return true end
   if ChiWave(target) then return true end
   if SpinningCraneKick() then return true end

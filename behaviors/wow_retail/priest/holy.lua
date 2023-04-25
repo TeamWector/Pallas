@@ -210,6 +210,20 @@ local function EmpyrealBlaze()
   return spell:CastEx(Me)
 end
 
+-- Beta Test For Leap Of Faith on Knockbacks
+local function LeapOfFaith()
+  local spell = Spell.LeapOfFaith
+  if spell:CooldownRemaining() > 0 then return false end
+
+  local friends = WoWGroup:GetGroupUnits()
+  for _, friend in pairs(friends) do
+    local speed = friend.CurrentSpeed
+    if not friend.IsMounted and speed > 200 and spell:CastEx(friend) then
+      return true
+    end
+  end
+end
+
 local function HolyWordChastise(enemy)
   local spell = Spell.HolyWordChastise
   if spell:CooldownRemaining() > 0 then return false end
@@ -217,8 +231,15 @@ local function HolyWordChastise(enemy)
   return spell:CastEx(enemy)
 end
 
-local function ShadowWordPain(enemy)
+local function ShadowWordPain(enemy, explosives)
   local spell = Spell.ShadowWordPain
+
+  for _, e in pairs(Combat.Explosives) do
+    if spell:Apply(e) then Me:SetTarget(e) Alert("Killed Explosive", 2) return true end
+  end
+
+  if explosives then return end
+  if not enemy then return end
 
   if spell:Apply(enemy) then return true end
 
@@ -419,6 +440,7 @@ local function PriestHoly()
 
   if Me.IsCastingOrChanneling or GCD:CooldownRemaining() > 0 then return end
 
+  if ShadowWordPain(nil, true) then return end
   if common:Fade() then return end
   if common:PowerWordFortitude() then return end
   if common:DesperatePrayer() then return end
@@ -443,7 +465,7 @@ local function PriestHoly()
   if PrayerOfMending() then return end
   if Dispel() then return end
   if common:AngelicFeather() then return end
-  if common:DispelMagic() then return end
+  if common:DispelMagic(DispelPriority.Low) then return end
   if PriestHolyDamage() then return end
 end
 
