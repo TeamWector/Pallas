@@ -7,7 +7,7 @@ Combat = Combat or Targeting:New()
 Combat.BestTarget = nil
 Combat.EnemiesInMeleeRange = 0
 
----@type table<WoWUnit[]>
+---@type WoWUnit[]
 Combat.Explosives = {}
 
 Combat.EventListener = wector.FrameScript:CreateListener()

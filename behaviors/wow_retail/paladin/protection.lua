@@ -30,11 +30,14 @@ local auras = {
   bastionoflight = 378974
 }
 
-local function Consecration()
+local function Consecration(filler)
   local spell = Spell.Consecration
   if spell:CooldownRemaining() > 0 then return false end
 
-  return not Me:IsMoving() and not Me:HasAura(auras.consecration) and spell:CastEx(Me)
+  local gcdr = 1500
+  local fill = filler and Spell.Judgment:CooldownRemaining() > gcdr and Spell.BlessedHammer:CooldownRemaining() > gcdr
+
+  return not Me:IsMoving() and (not Me:HasAura(auras.consecration) or fill) and spell:CastEx(Me)
 end
 
 local function ShieldOfTheRighteous()
@@ -137,12 +140,13 @@ local function BlessingOfSpellwarding()
   end
 end
 
-local function DivineToll()
+local function DivineToll(target)
   local spell = Spell.DivineToll
   if spell:CooldownRemaining() > 0 then return false end
   local HP = common:GetHolyPower()
+  local boss = target.Classification == Classification.Boss
 
-  return HP <= 2 and Combat:GetEnemiesWithinDistance(30) > 2 and spell:CastEx(Me)
+  return HP <= 2 and (Combat:GetEnemiesWithinDistance(30) > 2 or boss) and spell:CastEx(Me)
 end
 
 local function BastionOfLight()
@@ -189,12 +193,13 @@ local function PaladinProtCombat()
   if Spell.HammerOfJustice:Interrupt() then return end
   if EyeOfTyr() then return end
   if BastionOfLight() then return end
-  if DivineToll() then return end
+  if DivineToll(target) then return end
   if Consecration() then return end
   if Judgment(target) then return end
   if common:HammerOfWrath() then return end
   if AvengersShield(target) then return end
   if BlessedHammer() then return end
+  if Consecration(true) then return end
 end
 
 local function PaladinProtHeal()
