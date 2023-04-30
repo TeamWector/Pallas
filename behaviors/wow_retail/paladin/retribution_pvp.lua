@@ -95,6 +95,12 @@ local function DivineShield()
   return Me.HealthPct < 15 and spell:CastEx(Me)
 end
 
+local function DivineProtection()
+  local spell = Spell.DivineProtection
+
+  return Me.HealthPct < 30 and spell:CastEx(Me)
+end
+
 local function Consecration()
   local spell = Spell.Consecration
 
@@ -116,6 +122,28 @@ local function RetributionAura()
   return not Me:HasAura(retribution_aura) and spell:CastEx(Me)
 end
 
+
+local function getMyTarget()
+  local target = Me.Target
+  if not target then return end
+
+  -- copy-paste from combat.lua
+  if not Me:CanAttack(target) then
+    return
+  elseif not target.InCombat or (not Settings.PallasAttackOOC and not target.InCombat) then
+    return
+  elseif target.Dead or target.Health <= 0 then
+    return
+  elseif target:GetDistance(Me.ToUnit) > 40 then
+    return
+  elseif target.IsTapDenied and (not target.Target or target.Target ~= Me) then
+    return
+  elseif target:IsImmune() then
+    return
+  end
+  return target
+end
+
 local function PaladinRetriCombat()
   if Me:IsStunned() or Me.IsCastingOrChanneling then return end
 
@@ -125,12 +153,16 @@ local function PaladinRetriCombat()
 
   if RetributionAura() then return end
 
-  local target = Combat.BestTarget
-  if not target then return end
+  local target = getMyTarget()
+  if target == nil then
+    target = Combat.BestTarget
+    if (not target) or (not target.IsPlayer) then return end
+  end
 
   if common:DoInterrupt() then return end
 
   if DivineShield() then return end
+  if DivineProtection() then return end
 
   local GCD = wector.SpellBook.GCD
   if GCD:CooldownRemaining() > 0 then return end
