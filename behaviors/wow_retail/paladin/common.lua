@@ -28,7 +28,8 @@ commonPaladin.auras = {
   blessingofdusk = 385126,
   divinepurpose = 223819,
   avengingwrath = 31884,
-  sentinel = 389539
+  sentinel = 389539,
+  finalverdict = 383329
 }
 
 function commonPaladin:DoInterrupt()
@@ -53,7 +54,7 @@ end
 function commonPaladin:HammerOfWrath()
   local units = Combat.Targets
   for _, t in pairs(units) do
-    if Me:IsFacing(t) and (t.HealthPct < 20 or self:HasWings())
+    if Me:IsFacing(t) and (t.HealthPct < 20 or self:HasWings() or Me:HasAura(self.auras.finalverdict))
         and Spell.HammerOfWrath:CastEx(t, SpellCastExFlags.NoUsable) then
       return true
     end

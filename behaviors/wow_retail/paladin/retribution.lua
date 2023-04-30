@@ -30,7 +30,7 @@ for k, v in pairs(common.widgets) do
 end
 
 local function TemplarsVerdict(enemy)
-  local spell = Spell.TemplarsVerdict.IsKnown and Spell.TemplarsVerdict or Spell.FinalVerdict
+  local spell = Spell.FinalVerdict.IsKnown and Spell.FinalVerdict or Spell.TemplarsVerdict
 
   return spell:CastEx(enemy)
 end

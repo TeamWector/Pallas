@@ -76,7 +76,13 @@ end
 
 --experimental, if you are in a mythic plus
 --@return boolean
-function WoWActivePlayer:IsMythicPlus()
+function WoWActivePlayer:InMythicPlus()
   local arenaAura = self:GetAura(CHALLENGERS_BURDEN)
   return arenaAura ~= nil
+end
+
+function WoWActivePlayer:InParty()
+  local group = WoWGroup(GroupType.Auto)
+
+  return group.InGroup
 end

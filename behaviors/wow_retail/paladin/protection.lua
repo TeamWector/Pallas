@@ -111,7 +111,7 @@ local function BlessingOfSacrifice()
   for _, t in pairs(Combat.Targets) do
     local target = t.Target
 
-    if target and not target.IsActivePlayer and not target.IsEnemy then
+    if target and not target.IsActivePlayer and not target.IsEnemy and target:InMyGroup() then
       if spell:CastEx(target) then return true end
     end
   end
@@ -131,7 +131,8 @@ local function BlessingOfSpellwarding()
     if castingFriend
         and not castingFriend.IsActivePlayer
         and castingFriend and not castingFriend.ToUnit.IsEnemy
-        and castingRemain < 1000 and
+        and castingRemain < 1000
+        and castingFriend.ToUnit:InMyGroup() and
         spell:CastEx(castingFriend) then
       return true
     end
@@ -169,12 +170,32 @@ local function AuraSwitch()
   if not Me.IsMounted and not Me:HasAura(auras.devotion) and Spell.DevotionAura:CastEx(Me) then return true end
 end
 
+local function PaladinProtHeal()
+  if Me.IsCastingOrChanneling then return end
+
+  local lowest = Heal:GetLowestMember()
+
+  if Me.HealthPct < Settings.PaladinProtWogSelfPct and Spell.WordOfGlory:CastEx(Me) then return end
+
+  if not lowest then return end
+
+  if lowest.HealthPct < 20 and Spell.LayOnHands:CastEx(lowest) then
+    return
+  end
+  -- Heal friend with WoG
+  if lowest.HealthPct < 50 and Spell.WordOfGlory:CastEx(lowest) then
+    return
+  end
+end
+
 local function PaladinProtCombat()
   if Me.IsCastingOrChanneling then return end
 
   if AuraSwitch() then return end
 
   if Me.IsMounted then return end
+
+  if PaladinProtHeal() then return end
 
   if HandOfReckoning() then return end
   if BlessingOfFreedom() then return end
@@ -202,27 +223,9 @@ local function PaladinProtCombat()
   if Consecration(true) then return end
 end
 
-local function PaladinProtHeal()
-  if Me.IsCastingOrChanneling then return end
-
-  local lowest = Heal:GetLowestMember()
-
-  if Me.HealthPct < Settings.PaladinProtWogSelfPct and Spell.WordOfGlory:CastEx(Me) then return end
-
-  if not lowest then return end
-
-  if lowest.HealthPct < 20 and Spell.LayOnHands:CastEx(lowest) then
-    return
-  end
-  -- Heal friend with WoG
-  if lowest.HealthPct < 50 and Spell.WordOfGlory:CastEx(lowest) then
-    return
-  end
-end
-
 local behaviors = {
   [BehaviorType.Combat] = PaladinProtCombat,
-  [BehaviorType.Heal] = PaladinProtHeal
+  [BehaviorType.Heal] = PaladinProtCombat
 }
 
 return { Options = options, Behaviors = behaviors }
