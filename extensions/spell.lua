@@ -59,13 +59,13 @@ function WoWSpell:CastEx(a1, ...)
   if spellDelay[self.Id] and spellDelay[self.Id] > wector.Game.Time then return false end
   if globalDelay > wector.Game.Time then return false end
 
+  if not self.IsKnown and self.Slot > 0 then return false end
+
   -- is spell ready?
   if not self.IsReady then return false end
 
   -- are we already casting (i.e. actionbar button is highlighted)?
   if self.IsActive then return false end
-
-  if not self.IsKnown and self.Slot > 0 then return false end
 
   -- if spell has cast time, are we moving?
   if (self.CastTime > 0 or table.contains(exclusions, self.Id)) and Me:IsMoving() then return false end

@@ -7,6 +7,18 @@ commonPaladin.widgets = {
     text = ">> General <<",
   },
   {
+    type = "checkbox",
+    uid = "PaladinCommonTrinket1",
+    text = "Use Trinket 1",
+    default = false
+  },
+  {
+    type = "checkbox",
+    uid = "PaladinCommonTrinket2",
+    text = "Use Trinket 2",
+    default = false
+  },
+  {
     type = "combobox",
     uid = "CommonInterrupts",
     text = "Interrupt",
@@ -21,6 +33,18 @@ commonPaladin.widgets = {
     min = 0,
     max = 100
   },
+  {
+    type = "checkbox",
+    uid = "CommonHoJInterrupt",
+    text = "HoJ Interrupt",
+    default = false
+  },
+  {
+    type = "checkbox",
+    uid = "CrusaderAura",
+    text = "Crusader Aura [Mounted]",
+    default = false
+  },
 }
 
 commonPaladin.auras = {
@@ -33,10 +57,9 @@ commonPaladin.auras = {
 }
 
 function commonPaladin:DoInterrupt()
-  local spell = Spell.Rebuke
-  if spell:CooldownRemaining() > 0 then return false end
+  if Spell.Rebuke:Interrupt() then return true end
 
-  if spell:Interrupt() then return end
+  if Settings.CommonHoJInterrupt and Spell.HammerOfJustice:Interrupt() then return true end
 end
 
 function commonPaladin:GetHolyPower()
@@ -59,6 +82,31 @@ function commonPaladin:HammerOfWrath()
       return true
     end
   end
+end
+
+local crusader_aura = 32223
+function commonPaladin:CrusaderAura()
+  local spell = Spell.CrusaderAura
+  if not Settings.CrusaderAura then return false end
+
+  return Me.IsMounted and not Me:HasAura(crusader_aura) and spell:CastEx(Me)
+end
+
+function commonPaladin:AvengingWrath()
+  local spell = Spell.AvengingWrath
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return Combat.Burst and spell:CastEx(Me)
+end
+
+function commonPaladin:UseTrinkets()
+  local items = Me.Equipment
+
+  local trinket1 = items[EquipSlot.Trinket1]
+  if Settings.PaladinCommonTrinket1 and trinket1:UseX() then return true end
+
+  local trinket2 = items[EquipSlot.Trinket2]
+  if Settings.PaladinCommonTrinket2 and trinket2:UseX() then return true end
 end
 
 return commonPaladin

@@ -272,7 +272,15 @@ local function DrawColoredText()
   end
 end
 
+local function DrawBurst()
+  if Combat.Burst then
+    local textBasePos = World2Screen(Vec3(Me.Position.x, Me.Position.y, Me.Position.z))
+    DrawText(textBasePos, colors.seashell, "BURSTING")
+  end
+end
+
 local function Radar()
+  DrawBurst()
   if not Settings.ExtraAlerts then return end
   DrawAlerts()
   if not Settings.ExtraRadar then return end

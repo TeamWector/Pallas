@@ -6,6 +6,7 @@ Combat = Combat or Targeting:New()
 ---@type WoWUnit?
 Combat.BestTarget = nil
 Combat.EnemiesInMeleeRange = 0
+Combat.Enemies = 0
 
 ---@type WoWUnit[]
 Combat.Explosives = {}
@@ -13,6 +14,14 @@ Combat.Explosives = {}
 Combat.EventListener = wector.FrameScript:CreateListener()
 Combat.EventListener:RegisterEvent("PLAYER_ENTER_COMBAT")
 Combat.EventListener:RegisterEvent("PLAYER_LEAVE_COMBAT")
+Combat.EventListener:RegisterEvent("CONSOLE_MESSAGE")
+
+Combat.Burst = false
+function Combat.EventListener:CONSOLE_MESSAGE(msg)
+  if string.find(msg, "burst") then
+    Combat.Burst = not Combat.Burst
+  end
+end
 
 local combatStart = 0
 function Combat.EventListener:PLAYER_ENTER_COMBAT()
@@ -36,6 +45,7 @@ end
 function Combat:Reset()
   self.BestTarget = nil -- reset
   self.EnemiesInMeleeRange = 0
+  self.Enemies = 0
   self.Explosives = {}
 end
 
@@ -108,6 +118,8 @@ function Combat:WeighFilter()
   local priorityList = {}
   for _, u in pairs(self.Targets) do
     local priority = 0
+
+    Combat.Enemies = Combat.Enemies + 1
 
     if Me:InMeleeRange(u) then
       self.EnemiesInMeleeRange = self.EnemiesInMeleeRange + 1
