@@ -178,11 +178,10 @@ local function HammerOfWrath(enemy, st)
   end
 end
 
-local retribution_aura = 183435
 local function RetributionAura()
   local spell = Spell.RetributionAura
 
-  return not Me:HasAura(retribution_aura) and spell:CastEx(Me)
+  return spell:Apply(Me)
 end
 
 local function ShieldOfVengeance()

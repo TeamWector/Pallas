@@ -84,12 +84,11 @@ function commonPaladin:HammerOfWrath()
   end
 end
 
-local crusader_aura = 32223
 function commonPaladin:CrusaderAura()
   local spell = Spell.CrusaderAura
   if not Settings.CrusaderAura then return false end
 
-  return Me.IsMounted and not Me:HasAura(crusader_aura) and spell:CastEx(Me)
+  return Me.IsMounted and spell:Apply(Me)
 end
 
 function commonPaladin:AvengingWrath()
