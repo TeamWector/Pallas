@@ -30,11 +30,14 @@ local auras = {
   bastionoflight = 378974
 }
 
-local function Consecration()
+local function Consecration(filler)
   local spell = Spell.Consecration
   if spell:CooldownRemaining() > 0 then return false end
 
-  return not Me:IsMoving() and not Me:HasAura(auras.consecration) and spell:CastEx(Me)
+  local gcdr = 1500
+  local fill = filler and Spell.Judgment:CooldownRemaining() > gcdr and Spell.BlessedHammer:CooldownRemaining() > gcdr
+
+  return not Me:IsMoving() and (not Me:HasAura(auras.consecration) or fill) and spell:CastEx(Me)
 end
 
 local function ShieldOfTheRighteous()
@@ -108,7 +111,7 @@ local function BlessingOfSacrifice()
   for _, t in pairs(Combat.Targets) do
     local target = t.Target
 
-    if target and not target.IsActivePlayer and not target.IsEnemy then
+    if target and not target.IsActivePlayer and not target.IsEnemy and target:InMyGroup() then
       if spell:CastEx(target) then return true end
     end
   end
@@ -128,7 +131,8 @@ local function BlessingOfSpellwarding()
     if castingFriend
         and not castingFriend.IsActivePlayer
         and castingFriend and not castingFriend.ToUnit.IsEnemy
-        and castingRemain < 1000 and
+        and castingRemain < 1000
+        and castingFriend.ToUnit:InMyGroup() and
         spell:CastEx(castingFriend) then
       return true
     end
@@ -137,12 +141,13 @@ local function BlessingOfSpellwarding()
   end
 end
 
-local function DivineToll()
+local function DivineToll(target)
   local spell = Spell.DivineToll
   if spell:CooldownRemaining() > 0 then return false end
   local HP = common:GetHolyPower()
+  local boss = target.Classification == Classification.Boss
 
-  return HP <= 2 and Combat:GetEnemiesWithinDistance(30) > 2 and spell:CastEx(Me)
+  return HP <= 2 and (Combat:GetEnemiesWithinDistance(30) > 2 or boss) and spell:CastEx(Me)
 end
 
 local function BastionOfLight()
@@ -165,38 +170,6 @@ local function AuraSwitch()
   if not Me.IsMounted and not Me:HasAura(auras.devotion) and Spell.DevotionAura:CastEx(Me) then return true end
 end
 
-local function PaladinProtCombat()
-  if Me.IsCastingOrChanneling then return end
-
-  if AuraSwitch() then return end
-
-  if Me.IsMounted then return end
-
-  if HandOfReckoning() then return end
-  if BlessingOfFreedom() then return end
-  if BlessingOfSacrifice() then return end
-  if BlessingOfSpellwarding() then return end
-  if ShieldOfTheRighteous() then return end
-
-  local target = Combat.BestTarget
-  if not target or not Me:IsFacing(target) then return end
-
-  -- Lets do a GCD check so our priority is followed.
-  if gcd:CooldownRemaining() > 0 then return end
-
-  -- Keep priority down here.
-  if common:DoInterrupt() then return end
-  if Spell.HammerOfJustice:Interrupt() then return end
-  if EyeOfTyr() then return end
-  if BastionOfLight() then return end
-  if DivineToll() then return end
-  if Consecration() then return end
-  if Judgment(target) then return end
-  if common:HammerOfWrath() then return end
-  if AvengersShield(target) then return end
-  if BlessedHammer() then return end
-end
-
 local function PaladinProtHeal()
   if Me.IsCastingOrChanneling then return end
 
@@ -215,9 +188,44 @@ local function PaladinProtHeal()
   end
 end
 
+local function PaladinProtCombat()
+  if Me.IsCastingOrChanneling then return end
+
+  if AuraSwitch() then return end
+
+  if Me.IsMounted then return end
+
+  if PaladinProtHeal() then return end
+
+  if HandOfReckoning() then return end
+  if BlessingOfFreedom() then return end
+  if BlessingOfSacrifice() then return end
+  if BlessingOfSpellwarding() then return end
+  if ShieldOfTheRighteous() then return end
+
+  local target = Combat.BestTarget
+  if not target or not Me:IsFacing(target) then return end
+
+  -- Lets do a GCD check so our priority is followed.
+  if gcd:CooldownRemaining() > 0 then return end
+
+  -- Keep priority down here.
+  if common:DoInterrupt() then return end
+  if Spell.HammerOfJustice:Interrupt() then return end
+  if EyeOfTyr() then return end
+  if BastionOfLight() then return end
+  if DivineToll(target) then return end
+  if Consecration() then return end
+  if Judgment(target) then return end
+  if common:HammerOfWrath() then return end
+  if AvengersShield(target) then return end
+  if BlessedHammer() then return end
+  if Consecration(true) then return end
+end
+
 local behaviors = {
   [BehaviorType.Combat] = PaladinProtCombat,
-  [BehaviorType.Heal] = PaladinProtHeal
+  [BehaviorType.Heal] = PaladinProtCombat
 }
 
 return { Options = options, Behaviors = behaviors }

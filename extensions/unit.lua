@@ -267,3 +267,18 @@ function WoWUnit:GetUnitsAround(dist)
 
   return collected
 end
+
+function WoWUnit:InMyGroup()
+  local group = WoWGroup(GroupType.Auto)
+
+  if not group.InGroup then return false end
+  local companions = group.Members
+
+  for _, m in pairs(companions) do
+    if m.Guid == self.Guid then
+      return true
+    end
+  end
+
+  return false
+end

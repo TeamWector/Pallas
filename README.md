@@ -32,8 +32,8 @@ After installation the path to Pallas should be `<Wector root>/scripts/Pallas`
 |                   |                      | Windwalker        |         :x:          | Destruction       |         :x:          |
 | **Druid**         |                      | **Paladin**       |                      | **Warrior**       |                      |
 | Balance           |         :x:          | Holy              | :large_blue_diamond: | Arms              |         :x:          |
-| Feral             | :large_blue_diamond: | Protection        | :large_blue_diamond: | Fury              |  :heavy_check_mark:  |
-| Guardian          |         :x:          | Retribution       |         :x:          | Protection        | :large_blue_diamond: |
+| Feral             | :large_blue_diamond: | Protection        | :heavy_check_mark:   | Fury              |  :heavy_check_mark:  |
+| Guardian          |         :x:          | Retribution       | :heavy_check_mark:   | Protection        | :large_blue_diamond: |
 | Restoration       | :large_blue_diamond: |                   |                      |                   |                      |
 | **Evoker**        |                      | **Priest**        |                      |                   |                      |
 | Devastation       |         :x:          | Discipline        |         :x:          |                   |                      |
