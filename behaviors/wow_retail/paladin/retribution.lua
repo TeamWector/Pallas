@@ -92,10 +92,13 @@ for k, v in pairs(common.widgets) do
   table.insert(options.Widgets, v)
 end
 
+local divine_arbiter = 406975
 local function TemplarsVerdict(enemy)
   local spell = Spell.FinalVerdict.IsKnown and Spell.FinalVerdict or Spell.TemplarsVerdict
+  local arbiter = Me:GetAura(divine_arbiter)
+  local should_use = arbiter and arbiter.Stacks == 25 or Combat:GetEnemiesWithinDistance(8) < 2
 
-  return common:GetHolyPower() > 4 and spell:CastEx(enemy)
+  return should_use and common:GetHolyPower() > 4 and spell:CastEx(enemy)
 end
 
 local function CrusaderStrike(enemy)
@@ -174,7 +177,7 @@ local function HammerOfWrath(enemy, st)
   if spell:CastEx(enemy) then return true end
 
   for _, target in pairs(Combat.Targets) do
-    if target.HealthPct < 20 then return spell:CastEx(target, SpellCastExFlags.NoUsable) end
+    if Me:IsFacing(target) and target.HealthPct < 20 and spell:CastEx(target, SpellCastExFlags.NoUsable) then return true end
   end
 end
 
@@ -220,7 +223,7 @@ local function PaladinRetriDefensive()
 
   local lowest = Heal:GetLowestMember()
 
-  if not lowest then return end
+  if not lowest or lowest ~= Me then return end
 
   if lowest.HealthPct < Settings.PaladinRetBopAssistPct then
     if Spell.BlessingOfProtection:CastEx(lowest) then return true end
@@ -261,8 +264,8 @@ local function PaladinRetriCombat()
 
   if common:AvengingWrath() then return end
   if FinalReckoning(target) then return end
-  if DivineStorm(5) then return end
   if TemplarsVerdict(target) then return end
+  if DivineStorm(5) then return end
   if WakeOfAshes(target) then return end
   if DivineToll(target) then return end
   if HammerOfWrath(target, true) then return end

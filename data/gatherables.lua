@@ -145,6 +145,11 @@ local treasures = {
   [389114] = "treasure", -- Long Lost Cache
   [388911] = "treasure", -- Old Trunk
   [386079] = "treasure", -- Well Chewed Chest
+  [386083] = "treasure", -- Seething Orb
+  [386089] = "treasure", -- Ritual Offering
+  [386088] = "treasure", -- Ritual Offering
+  [386090] = "treasure", -- Ritual Offering
+  [386091] = "treasure", -- Ritual Offering
 }
 
 return { herb = herbs, ore = ores, treasure = treasures }
