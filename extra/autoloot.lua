@@ -24,7 +24,7 @@ local options = {
     {
       type = "slider",
       uid = "LootCacheReset",
-      text = gametype == "wow_wrath" and "Cache Reset (MS)" or gametype == "wow_retail" and "Pulse Time (MS)",
+      text = gametype == "wow_wrath" and "Cache Reset (MS)" or "Pulse Time (MS)",
       default = 1500,
       min = 0,
       max = 10000
