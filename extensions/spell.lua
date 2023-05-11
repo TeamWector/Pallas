@@ -33,7 +33,7 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
   if target and ability then
     ability = Spell[ability]
 
-    if not ability or ability.Slot < 0 or ability:CooldownRemaining() > 3000 then
+    if not ability or ability.Slot < 0 or ability:CooldownRemaining() > Me:GCDCooldown() then
       print("Spell Wasn't Added To Queue")
       return
     end
@@ -45,7 +45,8 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
 
     local spell = {
       target = target,
-      ability = ability
+      ability = ability,
+      timer = wector.Game.Time + 3000
     }
 
     for _, v in pairs(queue) do
@@ -95,13 +96,22 @@ local exclusions = {
 
 function WoWSpell:CastEx(a1, ...)
   if queue[1] then
-    self = queue[1].ability
+    local ability = queue[1].ability
     local target = queue[1].target
 
-    a1 = target == "target" and Me.Target or target == "focus" and Me.FocusTarget or Me
-    is_queue_spell = true
-  end
+    if ability:IsUsable() then
+      self = queue[1].ability
+      a1 = target == "target" and Me.Target or target == "focus" and Me.FocusTarget or Me
+      is_queue_spell = true
+    end
 
+    for k, v in pairs(queue) do
+      if v.timer < wector.Game.Time then
+        table.remove(queue, k)
+        return
+      end
+    end
+  end
 
   local arg1, arg2, arg3 = a1, ...
   if not arg1 then return false end

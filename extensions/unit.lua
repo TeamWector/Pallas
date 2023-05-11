@@ -194,6 +194,11 @@ function WoWUnit:GetSpellCast()
   return spell
 end
 
+function WoWUnit:GetHastePercent()
+  local haste = 1 - self.HasteMod
+  return haste * 100 * 1.3
+end
+
 function WoWUnit:GetHealthLost()
   return self.HealthMax - self.Health
 end
