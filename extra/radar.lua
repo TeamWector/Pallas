@@ -39,7 +39,7 @@ local options = {
     {
       type = "checkbox",
       uid = "ExtraRadarTrackQuests",
-      text = "Track QuestObjects",
+      text = "Track Quest Objectives",
       default = false
     },
     {
@@ -56,6 +56,12 @@ local options = {
     },
     {
       type = "checkbox",
+      uid = "ExtraRadarTrackEverything",
+      text = "Track Everything",
+      default = false
+    },
+    {
+      type = "checkbox",
       uid = "ExtraRadarDrawLines",
       text = "Draw Lines",
       default = false
@@ -64,6 +70,12 @@ local options = {
       type = "checkbox",
       uid = "ExtraRadarDrawDistance",
       text = "Draw Distance",
+      default = false
+    },
+    {
+      type = "checkbox",
+      uid = "ExtraRadarDrawDebug",
+      text = "Draw Debug Info",
       default = false
     },
     {
@@ -182,6 +194,7 @@ local function CollectVisuals()
     trackRares = Settings.ExtraRadarTrackRares,
     trackQuests = Settings.ExtraRadarTrackQuests,
     trackInteractable = Settings.ExtraRadarTrackInteractables,
+    trackEverything = Settings.ExtraRadarTrackEverything,
     trackManual = table.length(manuallytracked) > 0,
     loadRange = Settings.ExtraRadarLoadDistance,
   }
@@ -191,8 +204,13 @@ local function CollectVisuals()
 
   for _, unit in pairs(units) do
     local distance = Me.Position:DistanceSq2D(unit.Position)
-    if distance <= settings.loadRange then
-      if not unit.DeadOrGhost and unit.Classification == Classification.Rare and settings.trackRares then
+    local dead = unit.DeadOrGhost
+    if not dead and distance <= settings.loadRange then
+      if settings.trackEverything then
+        AddToScreenList(unit, "tracked")
+      elseif wector.CurrentScript.Game == "wow_retail" and settings.trackQuests and unit.IsRelatedToActiveQuest then
+        AddToScreenList(unit, "quest")
+      elseif not unit.DeadOrGhost and unit.Classification == Classification.Rare and settings.trackRares then
         AddToScreenList(unit, "rare")
       elseif IsTracked(unit.Name) and settings.trackManual then
         AddToScreenList(unit, "tracked")
@@ -208,8 +226,11 @@ local function CollectVisuals()
       local isOre = ores[object.EntryId] and settings.trackOres
       local isTreasure = treasures[object.EntryId] and settings.trackTreasures
       local isInteractable = object:Interactable() and settings.trackInteractable
+      local trackAll = settings.trackEverything
 
-      if isQuest then
+      if trackAll then
+        AddToScreenList(object, "tracked")
+      elseif isQuest then
         AddToScreenList(object, "quest")
       elseif isHerb then
         AddToScreenList(object, "herb")
@@ -266,6 +287,10 @@ local function DrawColoredText()
 
     if Settings.ExtraRadarDrawDistance then
       text = text .. ", Distance: " .. math.floor(Me.Position:DistanceSq(object.Position)) .. "yd"
+    end
+
+    if Settings.ExtraRadarDrawDebug then
+      text = text .. ", ID: " .. object.EntryId
     end
 
     DrawText(textpos, colors.yellow, text)
