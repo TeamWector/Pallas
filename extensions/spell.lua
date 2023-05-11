@@ -20,6 +20,44 @@ end
 SpellListener = wector.FrameScript:CreateListener()
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SENT')
+SpellListener:RegisterEvent('CONSOLE_MESSAGE')
+
+local queue = {}
+local is_queue_spell = false
+function SpellListener:CONSOLE_MESSAGE(msg, color)
+  if not string.find(msg, 'queue') then return end
+
+  local target = string.match(msg, "queue%s*(%a*)%s*(%a+)")
+  local ability = string.match(msg, "queue %a+ (%a+)")
+
+  if target and ability then
+    ability = Spell[ability]
+
+    if not ability or ability.Slot < 0 or ability:CooldownRemaining() > 3000 then
+      print("Spell Wasn't Added To Queue")
+      return
+    end
+
+    if not target or (target == "target" and not Me.Target or target == "focus" and not Me.FocusTarget) then
+      print("Invalid Target")
+      return
+    end
+
+    local spell = {
+      target = target,
+      ability = ability
+    }
+
+    for _, v in pairs(queue) do
+      if v.ability == ability then return end
+    end
+
+    table.insert(queue, spell)
+    Alert("Queued: " .. ability.Name .. " on " .. target, 3)
+  else
+    print("Invalid Macro Expression")
+  end
+end
 
 local spellIdCast = 0
 local targetCast
@@ -35,6 +73,11 @@ function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castGuid, SpellID)
     castTarget = nil
   end
 
+  if is_queue_spell then
+    table.remove(queue, 1)
+    is_queue_spell = false
+  end
+
   spellDelay[SpellID] = wector.Game.Time + math.random(150, 500)
   local latency = math.random() * Settings.PallasWorldLatency + Settings.PallasWorldLatency * 1.25
   globalDelay = wector.Game.Time + latency
@@ -46,11 +89,20 @@ local exclusions = {
   357208, -- Fire Breath
   356995, -- Disintegrate,
   359073, -- Eternity Surge
-  15407, -- Mind Flay
+  15407,  -- Mind Flay
   391403, -- Mind flay V2
 }
 
 function WoWSpell:CastEx(a1, ...)
+  if queue[1] then
+    self = queue[1].ability
+    local target = queue[1].target
+
+    a1 = target == "target" and Me.Target or target == "focus" and Me.FocusTarget or Me
+    is_queue_spell = true
+  end
+
+
   local arg1, arg2, arg3 = a1, ...
   if not arg1 then return false end
   -- generic checks
@@ -86,6 +138,7 @@ function WoWSpell:CastEx(a1, ...)
     if not Me:WithinLineOfSight(unit) then return false end
 
     wector.Console:Log('Cast ' .. self.Name)
+
     castTarget = arg1.ToUnit
     return self:Cast(arg1.ToUnit)
   else
@@ -106,6 +159,7 @@ function WoWSpell:CastEx(a1, ...)
     end
 
     wector.Console:Log('Cast ' .. self.Name)
+
     return self:Cast(x, y, z)
   end
 end
