@@ -47,7 +47,7 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
     local spell = {
       target = target,
       ability = ability,
-      timer = wector.Game.Time + slot * 3000
+      timer = #queue == 0 and wector.Game.Time + 3000 or queue[#queue].timer + 3000
     }
 
     for _, v in pairs(queue) do
