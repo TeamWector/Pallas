@@ -31,6 +31,7 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
   local ability = string.match(msg, "queue %a+ (%a+)")
 
   if target and ability then
+    local slot = #queue + 1
     ability = Spell[ability]
 
     if not ability or ability.Slot < 0 or ability:CooldownRemaining() > Me:GCDCooldown() then
@@ -46,14 +47,14 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
     local spell = {
       target = target,
       ability = ability,
-      timer = wector.Game.Time + 3000
+      timer = wector.Game.Time + slot * 3000
     }
 
     for _, v in pairs(queue) do
       if v.ability == ability then return end
     end
 
-    table.insert(queue, spell)
+    queue[slot] = spell
     Alert("Queued: " .. ability.Name .. " on " .. target, 3)
   else
     print("Invalid Macro Expression")
