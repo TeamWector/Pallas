@@ -86,3 +86,9 @@ function WoWActivePlayer:InParty()
 
   return group.InGroup
 end
+
+---@return integer Miliseconds GCD Cooldown in miliseconds
+function WoWActivePlayer:GCDCooldown()
+  local haste = 1 + (Me.ToUnit:GetHastePercent() / 100)
+  return 1.5 / haste * 1000
+end
