@@ -19,8 +19,8 @@ function Menu:Initialize()
   Menu.MainMenu = ImMenu("Pallas")
 
   -- Combat
-  Menu.CombatBehavior = ImCombobox("Behavior")
-  Menu.MainMenu:Add(Menu.CombatBehavior)
+  --Menu.CombatBehavior = ImCombobox("Behavior")
+  --Menu.MainMenu:Add(Menu.CombatBehavior)
 
   Menu.CombatGroup = ImGroupbox("Combat")
 
@@ -41,8 +41,16 @@ function Menu:Initialize()
   spellDelay.OnValueChanged = function(_, _, newValue) Settings.PallasWorldLatency = newValue end
   Menu.SpellGroup:Add(spellDelay)
 
-  Menu.MainMenu:Add(Menu.CombatGroup)
+  Menu.GeneralGroup = ImGroupbox("General")
+
+  if Settings.PallasHealthstonePct == nil then Settings.PallasHealthstonePct = 30 end
+  local healthstone = ImSlider("Healthstone at %", Settings.PallasHealthstonePct, 0, 100)
+  healthstone.OnValueChanged = function(_, _, newValue) Settings.PallasHealthstonePct = newValue end
+  Menu.GeneralGroup:Add(healthstone)
+
   Menu.MainMenu:Add(Menu.SpellGroup)
+  Menu.MainMenu:Add(Menu.GeneralGroup)
+  Menu.MainMenu:Add(Menu.CombatGroup)
 end
 
 function Menu:AddOptionMenu(options)
