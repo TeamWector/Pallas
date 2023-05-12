@@ -26,3 +26,19 @@ function WoWItem:UseX(unit)
   itemDelay[self.EntryId] = wector.Game.Time + math.random(150, 500)
   return self:Use(unit.ToObject)
 end
+
+
+function WoWItem:UseHealthstone()
+  if Me.HealthPct > Settings.PallasHealthstonePct then return false end
+  local healthstone = nil
+
+  for _, item in pairs(wector.Game.Items) do
+    if item.EntryId == 5512 then
+      healthstone = item
+    end
+  end
+
+  if not healthstone then return false end
+
+  return healthstone:UseX()
+end
