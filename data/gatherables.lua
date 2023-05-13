@@ -171,6 +171,7 @@ local treasures = {
   [386089] = "treasure", -- Ritual Offering
   [386088] = "treasure", -- Ritual Offering
   [386090] = "treasure", -- Ritual Offering
-  [386091] = "treasure", -- Ritual Offering}
+  [386091] = "treasure", -- Ritual Offering
+}
 
 return { herb = herbs, ore = ores, treasure = treasures }
