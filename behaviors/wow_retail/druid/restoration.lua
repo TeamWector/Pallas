@@ -341,10 +341,10 @@ local function DruidRestoHeal()
       if u.HealthPct < 70 and (not u:HasBuffByMe("Regrowth") or u.HealthPct < 60) and Spell.Regrowth:CastEx(u) then return end
     end
 
-   -- if Spell.Disentanglement.IsKnown and u:IsRooted() and timeSinceUnRootedWithEfflo > 5000 then
-   --    if Spell.Efflorescence:CastEx(u) then unrootWithEffloTime = wector.Game.Time
-   --     return end
-   --end
+    if u:IsRooted() and timeSinceUnRootedWithEfflo > 5000 then
+       if Spell.Efflorescence:CastEx(u) then unrootWithEffloTime = wector.Game.Time
+       return end
+   end
 
     if (u.Class == 3 and u.Pet) then
       Spell.Rejuvenation:Apply(u.Pet, u.Pet.HealthPct < 99)

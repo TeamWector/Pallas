@@ -40,7 +40,7 @@ end
 
 function commonDemonhunter:ArcaneTorrent()
   -- TODO FIX ME to use CastEx
-  if Spell.ArcaneTorrent:Cast(Me) then return true end
+  if Spell.ArcaneTorrent:CastEx(Me) then return true end
 end
 
 function commonDemonhunter:ImmolationAura()

@@ -27,7 +27,7 @@ local function FelDevastation(target)
 end
 
 local function SoulCleave(target)
-  if Me.Power > 100 and Spell.SoulCleave:CastEx(target) then return true end
+  if Me.Power > 70 and Spell.SoulCleave:CastEx(target) then return true end
 end
 
 local function DemonSpikes()
@@ -66,6 +66,8 @@ local function DemonhunterVengeanceCombat()
   local target = Combat.BestTarget
   if not target then return end
   if Me.IsCastingOrChanneling then return end
+  if common:DoInterrupt() then return end
+
 
   if DemonSpikes() then return end
   if TheHunt(target) then return end
@@ -77,7 +79,6 @@ local function DemonhunterVengeanceCombat()
   -- only melee spells from here on
   if not Me:InMeleeRange(target) or not Me:IsFacing(target) then return end
 
-   if common:DoInterrupt() then return end
   if FieryBrand(target) then return end
   -- -- todo optional infernalStrike
   if SpiritBomb() then return end

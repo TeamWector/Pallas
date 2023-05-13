@@ -214,9 +214,9 @@ local function ShamanElementalCombat()
     if earthShieldTarget and earthShieldTarget == Me then earthShieldTarget = friends[2] end
     if earthShieldTarget and earthShieldTarget ~= Me and EarthShield(earthShieldTarget) then return end
   end
-  if common:FrostShock(target) then return end
-  if common:LightningBolt(target) then return end
   if Purge(DispelPriority.Low) then return end
+  if common:LightningBolt(target) then return end
+  if common:FrostShock(target) then return end
   if FlameOrFrostShockMoving(target) then return end
 end
 
