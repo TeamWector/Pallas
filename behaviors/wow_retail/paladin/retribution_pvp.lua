@@ -1,3 +1,4 @@
+-- BYEAS+uMNo6HaxL/ztTZBhrdcCAAAQAACKtWSpUOgkSOQSaSAAAAAAAkWIJSJBSiEpEgQkm0KhIJIogWA
 local common = require("behaviors.wow_retail.paladin.common")
 
 local options = {
@@ -29,8 +30,8 @@ for k, v in pairs(common.widgets) do
   table.insert(options.Widgets, v)
 end
 
-local function IsAvengingWrath()
-  return Me:HasVisibleAura("Avenging Wrath")
+local function IsCrusade()
+  return Me:HasVisibleAura("Crusade")
 end
 
 local function TemplarsVerdict(enemy)
@@ -57,13 +58,13 @@ end
 local function FinalReckoning(enemy)
   local spell = Spell.FinalReckoning
 
-  return IsAvengingWrath() and spell:CastEx(enemy)
+  return (IsCrusade() or Spell.Crusade:CooldownRemaining() == 45000) and spell:CastEx(enemy)
 end
 
 local function DivineToll(enemy)
   local spell = Spell.DivineToll
 
-  return IsAvengingWrath() and spell:CastEx(enemy)
+  return (IsCrusade() or Spell.Crusade:CooldownRemaining() == 45000) and spell:CastEx(enemy)
 end
 
 local function DivineStorm()
@@ -82,6 +83,13 @@ local function AvengingWrath()
 
   return Spell.FinalReckoning:CooldownRemaining() == 0 and Spell.DivineToll:CooldownRemaining() == 0 and spell:CastEx(Me)
 end
+
+local function Crusade()
+  local spell = Spell.Crusade
+
+  return Spell.FinalReckoning:CooldownRemaining() == 0  and Spell.DivineToll:CooldownRemaining() == 0 and spell:CastEx(Me)
+end
+
 
 local function ShieldOfVengeance()
   local spell = Spell.ShieldOfVengeance
@@ -120,6 +128,10 @@ local function RetributionAura()
   local spell = Spell.RetributionAura
 
   return not Me:HasAura(retribution_aura) and spell:CastEx(Me)
+end
+
+local function isNotForbearance(friend)
+  return not friend:HasAura("Forbearance")
 end
 
 
@@ -180,14 +192,15 @@ local function PaladinRetriCombat()
   end)
   for _, f in pairs(friends) do
     if f.HealthPct < 40 and Spell.WordOfGlory:CastEx(f) then return end
-    if f.HealthPct < 25 and Spell.BlessingOfProtection:CastEx(f) then return end
+    if isNotForbearance(f) and f.HealthPct < 15 and Spell.LayOnHands:CastEx(f) then return end
+    if isNotForbearance(f) and f.HealthPct < 25 and Spell.BlessingOfProtection:CastEx(f) then return end
     if f.HealthPct < 30 and Me.HealthPct > 75 and Spell.BlessingOfSacrifice:CastEx(f) then return end
     if f ~= Me and f:IsStunned() and Spell.BlessingOfSanctuary:CastEx(f) then return end
     if f ~= Me and f:IsRooted() and Spell.BlessingOfFreedom:CastEx(f) then return end
   end
 
   if Judgment(target) then return end
-  if AvengingWrath() then return end
+  if Crusade() then return end
   if FinalReckoning(target) then return end
   if DivineToll(target) then return end
   if TemplarsVerdict(target) then return end

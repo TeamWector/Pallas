@@ -177,6 +177,33 @@ local function HammerOfWrath(enemy, st)
   if spell:CastEx(enemy) then return true end
 
   for _, target in pairs(Combat.Targets) do
+    if target.HealthPct < 20 then return spell:CastEx(target, SpellCastExFlags.NoUsable) end
+  end
+end
+
+local function WakeOfAshes(enemy)
+  local spell = Spell.WakeOfAshes
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return Me:GetDistance(enemy) < 14 and common:GetHolyPower() <= 2 and spell:CastEx(Me)
+end
+
+local function DivineToll(enemy)
+  local spell = Spell.DivineToll
+  if spell:CooldownRemaining() > 0 then return false end
+  if Me:IsMoving() or not Me:InMeleeRange(enemy) then return false end
+
+  return common:GetHolyPower() < 3 and spell:CastEx(enemy)
+end
+
+local function HammerOfWrath(enemy, st)
+  local spell = Spell.HammerOfWrath
+  if spell:CooldownRemaining() > 0 then return false end
+  if st and Combat.Enemies > 1 then return false end
+
+  if spell:CastEx(enemy) then return true end
+
+  for _, target in pairs(Combat.Targets) do
     if Me:IsFacing(target) and target.HealthPct < 20 and spell:CastEx(target, SpellCastExFlags.NoUsable) then return true end
   end
 end
@@ -185,6 +212,61 @@ local function RetributionAura()
   local spell = Spell.RetributionAura
 
   return spell:Apply(Me)
+end
+
+local function ShieldOfVengeance()
+  local spell = Spell.ShieldOfVengeance
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return Me.HealthPct < Settings.PaladinRetSovPct and spell:CastEx(Me)
+end
+
+local function DivineProtection()
+  local spell = Spell.DivineProtection
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return Me.HealthPct < Settings.PaladinRetDpPct and spell:CastEx(Me)
+end
+
+local function DivineShield()
+  local spell = Spell.DivineShield
+  if spell:CooldownRemaining() > 0 then return false end
+
+  return Me.HealthPct < Settings.PaladinRetDsPct and spell:CastEx(Me)
+end
+
+local function PaladinRetriDefensive()
+  if DivineShield() then return true end
+  if ShieldOfVengeance() then return true end
+  if DivineProtection() then return true end
+
+  if Me.HealthPct < Settings.PaladinRetWogSelfPct then
+    if Spell.WordOfGlory:CastEx(Me) then return true end
+  end
+
+  if Me.HealthPct < Settings.PaladinRetFolSelfPct then
+    if Spell.FlashOfLight:CastEx(Me) then return true end
+  end
+
+  local lowest = Heal:GetLowestMember()
+
+  if not lowest then return end
+
+  if lowest.HealthPct < Settings.PaladinRetBopAssistPct then
+    if Spell.BlessingOfProtection:CastEx(lowest) then return true end
+  end
+
+  if lowest.HealthPct < Settings.PaladinRetBosAssistPct then
+    if Spell.BlessingOfSacrifice:CastEx(lowest) then return true end
+  end
+
+  if lowest.HealthPct < Settings.PaladinRetWogAssistPct then
+    if Spell.WordOfGlory:CastEx(lowest) then return true end
+  end
+
+  if lowest.HealthPct < Settings.PaladinRetFolAssistPct then
+    if Spell.FlashOfLight:CastEx(lowest) then return true end
+  end
 end
 
 local function ShieldOfVengeance()
@@ -264,8 +346,14 @@ local function PaladinRetriCombat()
 
   if common:AvengingWrath() then return end
   if FinalReckoning(target) then return end
+  if DivineStorm(5) then return end
+  if common:UseTrinkets() then return end
+
+  if common:AvengingWrath() then return end
+  if FinalReckoning(target) then return end
   if TemplarsVerdict(target) then return end
   if DivineStorm(5) then return end
+  if TemplarsVerdict(target) then return end
   if WakeOfAshes(target) then return end
   if DivineToll(target) then return end
   if HammerOfWrath(target, true) then return end
