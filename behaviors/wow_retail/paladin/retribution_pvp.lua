@@ -58,13 +58,13 @@ end
 local function FinalReckoning(enemy)
   local spell = Spell.FinalReckoning
 
-  return (IsCrusade() or Spell.Crusade:CooldownRemaining() == 45000) and spell:CastEx(enemy)
+  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 60000) and spell:CastEx(enemy)
 end
 
 local function DivineToll(enemy)
   local spell = Spell.DivineToll
 
-  return (IsCrusade() or Spell.Crusade:CooldownRemaining() == 45000) and spell:CastEx(enemy)
+  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 60000) and spell:CastEx(enemy)
 end
 
 local function DivineStorm()
@@ -200,7 +200,7 @@ local function PaladinRetriCombat()
   end
 
   if Judgment(target) then return end
-  if Crusade() then return end
+  --if Crusade() then return end
   if FinalReckoning(target) then return end
   if DivineToll(target) then return end
   if TemplarsVerdict(target) then return end
