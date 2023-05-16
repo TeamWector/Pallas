@@ -1,6 +1,5 @@
 Behavior = {}
 Behavior.LoadedClass = ''
-Behavior.Routines = {}
 Behavior.Behaviors = {}
 
 ---@enum BehaviorType
@@ -14,31 +13,9 @@ BehaviorType = {
 
 local behavior_map = require('data.specializations')
 
----
---- Loads the behavior that best fits the current character specialization
-function Behavior:Initialize(isReload)
-  local classname = Me.ClassName
-
-  -- remove spaces and makes it all lower-case
-  local class_trim = classname:gsub("%s+", "")
-  class_trim = class_trim:lower()
-
-  -- HAX REMOVE ME
-  self:CollectScriptPaths(class_trim)
-  -- HAX REMOVE ME END
-
-  local specid = self:DecideBestSpecialization()
-  local specname = behavior_map[class_trim:lower()][specid]
-
-  -- remove spaces and makes it all lower-case
-  local specname_trim = specname:gsub("%s+", "")
-  specname_trim = specname_trim:lower()
-
-  if isReload and self.LoadedClass == classname then
-    return
-  end
-
-  print('Initialize Behaviors')
+function Behavior:LoadCoreBehavior(classname, specname)
+  local class_trim = classname:gsub("%s+", ""):lower()
+  local specname_trim = specname:gsub("%s+", ""):lower()
 
   -- reset behaviors
   for k, v in pairs(BehaviorType) do
@@ -56,6 +33,27 @@ function Behavior:Initialize(isReload)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Combat)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Tank)
   self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Rest)
+
+  self.LoadedClass = classname
+end
+
+function Behavior:Initialize(isReload)
+  local classname = Me.ClassName
+  local class_trim = classname:gsub("%s+", "")
+  class_trim = class_trim:lower()
+
+  self:CollectScriptPaths(class_trim)
+
+  local specid = self:DecideBestSpecialization()
+  local specname = behavior_map[class_trim:lower()][specid]
+
+  if isReload and self.LoadedClass == classname then
+    return
+  end
+
+  print('Initialize Behaviors')
+
+  self:LoadCoreBehavior(classname, specname)
 
   -- extra stuff
   local autoloot = require('extra.autoloot')
@@ -83,8 +81,24 @@ function Behavior:Initialize(isReload)
     end
   end
 
-  self.LoadedClass = classname
   print('Loaded ' .. loaded_behaviors .. ' behaviors for ' .. classname)
+end
+
+function Behavior:LoadScript(index)
+  -- Get the script path from the index
+  local scriptPath = self.LoadableScripts[index]
+  if not scriptPath then return end
+
+  -- Split the scriptPath into parts
+  local parts = {}
+  for part in scriptPath:gmatch("[^.]+") do
+    table.insert(parts, part)
+  end
+
+  -- parts[3] is classname, parts[4] is specname
+  if #parts < 4 then return end
+
+  self:LoadCoreBehavior(parts[3], parts[4])
 end
 
 function Behavior:Update()
@@ -126,63 +140,6 @@ function Behavior:CollectScriptPaths(name)
 
   return self.LoadableScripts
 end
-
-function table.tostring(tbl)
-  local result = "{"
-  for k, v in pairs(tbl) do
-    if type(v) == "table" then
-      v = table.tostring(v)
-    end
-    result = result .. tostring(k) .. ": " .. tostring(v) .. ", "
-  end
-  return result .. "}"
-end
-
-function Behavior:LoadScript(index)
-  -- Get the script path from the index
-  local scriptPath = self.LoadableScripts[index]
-  if scriptPath then
-    -- Convert the current state of the Behaviors table to a string and print it
-    print('Behaviors table before loading: ' .. table.tostring(self))
-
-    -- Print the path of the script being loaded
-    print('Loading script: ' .. scriptPath)
-
-    -- Load the script
-    local behavior = require(scriptPath)
-    if type(behavior) == 'table' then
-      -- If the loaded script has options, add them to the menu
-      if behavior.Options then
-        Menu:AddOptionMenu(behavior.Options)
-      end
-
-      -- Add behavior functions for each behavior type
-      self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Heal)
-      self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Combat)
-      self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Tank)
-      self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Rest)
-
-      -- Print a message indicating the number of behaviors loaded
-      local loaded_behaviors = 0
-      for _, v in pairs(BehaviorType) do
-        if #self[v] > 0 then
-          loaded_behaviors = loaded_behaviors + #self[v]
-        end
-      end
-      print('Loaded ' .. loaded_behaviors .. ' behaviors from ' .. scriptPath)
-
-      -- Convert the new state of the Behaviors table to a string and print it
-      print('Behaviors table after loading: ' .. table.tostring(self))
-    else
-      wector.Console:Log('Failed to load "' .. scriptPath .. '"')
-    end
-  else
-    wector.Console:Log('No script at index ' .. index)
-  end
-end
-
-
-
 
 ---@param type BehaviorType
 function Behavior:HasBehavior(type)
