@@ -23,7 +23,26 @@ SpellListener:RegisterEvent('UNIT_SPELLCAST_SENT')
 SpellListener:RegisterEvent('CONSOLE_MESSAGE')
 
 local queue = {}
-local is_queue_spell = false
+
+---@param spell WoWSpell @spell
+---@param target string @target, focus, me
+function WoWSpell:AddToQueue(spell, target)
+  local slot = #queue + 1
+
+  local object = {
+    target = target,
+    ability = spell,
+    timer = #queue == 0 and wector.Game.Time + 3000 or queue[#queue].timer + 3000
+  }
+
+  for _, v in pairs(queue) do
+    if v.ability == spell then return end
+  end
+
+  queue[slot] = object
+  Alert("Queued: " .. spell.Name .. " on " .. target, 3)
+end
+
 function SpellListener:CONSOLE_MESSAGE(msg, color)
   if not string.find(msg, 'queue') then return end
 
@@ -31,7 +50,6 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
   local ability = string.match(msg, "queue %a+ (%a+)")
 
   if target and ability then
-    local slot = #queue + 1
     ability = Spell[ability]
 
     if not ability or ability.Slot < 0 or ability:CooldownRemaining() > Me:GCDCooldown() then
@@ -44,23 +62,13 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
       return
     end
 
-    local spell = {
-      target = target,
-      ability = ability,
-      timer = #queue == 0 and wector.Game.Time + 3000 or queue[#queue].timer + 3000
-    }
-
-    for _, v in pairs(queue) do
-      if v.ability == ability then return end
-    end
-
-    queue[slot] = spell
-    Alert("Queued: " .. ability.Name .. " on " .. target, 3)
+    WoWSpell:AddToQueue(ability, target)
   else
     print("Invalid Macro Expression")
   end
 end
 
+local is_queue_spell = false
 local spellIdCast = 0
 local targetCast
 function SpellListener:UNIT_SPELLCAST_SENT(unit, target, castguid, spellID)
