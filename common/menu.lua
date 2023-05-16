@@ -12,15 +12,41 @@ function Menu.EventListener:PLAYER_LEAVING_WORLD()
   Menu:Initialize()
 end
 
+local Behaviour = require('system.behavior')
+
 function Menu:Initialize()
   if Menu.MainMenu then return end
   print('Initialize menu')
 
   Menu.MainMenu = ImMenu("Pallas")
 
-  -- Combat
-  --Menu.CombatBehavior = ImCombobox("Behavior")
-  --Menu.MainMenu:Add(Menu.CombatBehavior)
+   -- Combat
+   Menu.CombatBehavior = ImCombobox("Behavior")
+   Menu.MainMenu:Add(Menu.CombatBehavior)
+
+   Menu.CombatBehavior:AddOption("Select Behavior") -- Add dummy option at 0th index
+
+   -- Populate the combobox with the loadable scripts
+   -- Get the list of loadable scripts
+   local loadableScripts = Behavior:CollectScriptPaths(Me.ClassName)
+
+   if loadableScripts and type(loadableScripts) == 'table' then
+     -- Add each script as an option to the ImCombobox
+     for _, scriptPath in ipairs(loadableScripts) do
+       Menu.CombatBehavior:AddOption(scriptPath)
+     end
+   else
+     print("Error: No loadable scripts found.")
+   end
+
+   -- Load the selected script when an option is selected
+   Menu.CombatBehavior.OnSelect = function(_, _, _, _, newIdx)
+     if newIdx == 0 then
+       print("No behavior selected.")
+     else
+       Behavior:LoadScript(newIdx) -- No need to add 1 here, indexing should match up correctly now
+     end
+   end
 
   Menu.CombatGroup = ImGroupbox("Combat")
 

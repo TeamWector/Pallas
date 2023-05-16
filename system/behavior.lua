@@ -1,5 +1,6 @@
 Behavior = {}
 Behavior.LoadedClass = ''
+Behavior.Routines = {}
 Behavior.Behaviors = {}
 
 ---@enum BehaviorType
@@ -21,6 +22,10 @@ function Behavior:Initialize(isReload)
   -- remove spaces and makes it all lower-case
   local class_trim = classname:gsub("%s+", "")
   class_trim = class_trim:lower()
+
+  -- HAX REMOVE ME
+  self:CollectScriptPaths(class_trim)
+  -- HAX REMOVE ME END
 
   local specid = self:DecideBestSpecialization()
   local specname = behavior_map[class_trim:lower()][specid]
@@ -95,9 +100,13 @@ function Behavior:Update()
 end
 
 function Behavior:CollectScriptPaths(name)
+  local class_trim = name:gsub("%s+", "")
+  class_trim = class_trim:lower()
   -- <root>\scripts\Pallas\behaviors\<classname>
-  local path = filesystem.Path(string.format('%s\\behaviors\\%s\\%s\\', wector.CurrentScript.Game, wector.script_path,
-    name))
+  local path = filesystem.Path(string.format('%s\\behaviors\\%s\\%s\\', wector.script_path, wector.CurrentScript.Game,
+  class_trim))
+
+  self.LoadableScripts = {} -- Initialize the list of loadable scripts
 
   -- iterate all files in class behaviors directory
   local it = filesystem.Directory(path)
@@ -107,14 +116,73 @@ function Behavior:CollectScriptPaths(name)
     if s:len() > 4 and s:match('.lua', s:len() - 4) then
       local rel = filesystem.relative_base(v, wector.script_path):gsub('\\', '.')
       rel = rel:sub(1, rel:len() - 4)
+
+      -- Add the relative path to the list of loadable scripts
+      table.insert(self.LoadableScripts, rel)
+
       wector.Console:Log(rel)
-      local behavior = require(rel)
-      if type(behavior) == 'boolean' and behavior then
-        wector.Console:Log('Failed to load "' .. rel .. '"')
-      end
     end
   end
+
+  return self.LoadableScripts
 end
+
+function table.tostring(tbl)
+  local result = "{"
+  for k, v in pairs(tbl) do
+    if type(v) == "table" then
+      v = table.tostring(v)
+    end
+    result = result .. tostring(k) .. ": " .. tostring(v) .. ", "
+  end
+  return result .. "}"
+end
+
+function Behavior:LoadScript(index)
+  -- Get the script path from the index
+  local scriptPath = self.LoadableScripts[index]
+  if scriptPath then
+    -- Convert the current state of the Behaviors table to a string and print it
+    print('Behaviors table before loading: ' .. table.tostring(self))
+
+    -- Print the path of the script being loaded
+    print('Loading script: ' .. scriptPath)
+
+    -- Load the script
+    local behavior = require(scriptPath)
+    if type(behavior) == 'table' then
+      -- If the loaded script has options, add them to the menu
+      if behavior.Options then
+        Menu:AddOptionMenu(behavior.Options)
+      end
+
+      -- Add behavior functions for each behavior type
+      self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Heal)
+      self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Combat)
+      self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Tank)
+      self:AddBehaviorFunction(behavior.Behaviors, BehaviorType.Rest)
+
+      -- Print a message indicating the number of behaviors loaded
+      local loaded_behaviors = 0
+      for _, v in pairs(BehaviorType) do
+        if #self[v] > 0 then
+          loaded_behaviors = loaded_behaviors + #self[v]
+        end
+      end
+      print('Loaded ' .. loaded_behaviors .. ' behaviors from ' .. scriptPath)
+
+      -- Convert the new state of the Behaviors table to a string and print it
+      print('Behaviors table after loading: ' .. table.tostring(self))
+    else
+      wector.Console:Log('Failed to load "' .. scriptPath .. '"')
+    end
+  else
+    wector.Console:Log('No script at index ' .. index)
+  end
+end
+
+
+
 
 ---@param type BehaviorType
 function Behavior:HasBehavior(type)
