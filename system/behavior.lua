@@ -110,7 +110,7 @@ function Behavior:ValidateBehavior(behavior)
     return false
   end
 
-  if behavior.Classes ~= Me.Class and not behavior.Classes[Me.Class] then
+  if behavior.Classes ~= Me.Class and (type(behavior.Classes) ~= 'table' or not behavior.Classes[Me.Class]) then
     wector.Console:Log(string.format('Behavior %s does not support %s, skipping', behavior.Name, Me.ClassName))
     return false
   end
