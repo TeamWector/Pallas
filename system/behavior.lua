@@ -103,8 +103,6 @@ function Behavior:LoadScript(index)
   Settings[behaviorSettingKey] = specname_trim
 
   Menu.MainMenu = nil
-  collectgarbage("collect")
-
   Menu:Initialize()
 
   self:LoadBehaviors(class_trim, specname_trim)
