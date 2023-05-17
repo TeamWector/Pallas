@@ -1,7 +1,16 @@
 Behavior = {}
-Behavior.LoadedClass = ''
-Behavior.LoadableScripts = {}
-Behavior.Behaviors = {}
+Behavior.Loaded = {}
+Behavior.Active = nil
+Behavior.Extras = {}
+
+--- XXX: ugly ugly ugly /ejt
+Behavior.EventListener = wector.FrameScript:CreateListener()
+Behavior.EventListener:RegisterEvent('PLAYER_LEAVING_WORLD')
+function Behavior.EventListener:PLAYER_LEAVING_WORLD()
+  Behavior.Loaded = {}
+  Behavior.Active = nil
+  Behavior.Extras = {}
+end
 
 ---@enum BehaviorType
 BehaviorType = {
@@ -12,150 +21,158 @@ BehaviorType = {
   Extra = 5
 }
 
-local function trim_and_lower(input)
-  return input:gsub("%s+", ""):lower()
-end
-
 function Behavior:Initialize(isReload)
-  local class_trim = trim_and_lower(Me.ClassName)
-
-  self:CollectScriptPaths(class_trim)
-
   if isReload and self.LoadedClass == Me.ClassName then
     return
   end
 
   print('Initialize Behaviors')
 
-  for _, scriptPath in ipairs(self.LoadableScripts) do
-    print('Load ' .. scriptPath .. ' ' .. Me.ClassName .. ' Behaviors')
-    local behavior = require(scriptPath)
+  local behaviors = self:CollectScriptPaths()
+  for _, scriptPath in ipairs(behaviors) do
+    -- pcall require so we can catch errors
+    local status, behavior = pcall(require, scriptPath)
+    if status and self:ValidateBehavior(behavior) then
+      if behavior.Options then
+        Menu:AddOptionMenu(behavior.Options)
+      end
 
-    if behavior.Options then
-      Menu:AddOptionMenu(behavior.Options)
+      Menu.CombatBehavior:AddOption(behavior.Name)
+      table.insert(self.Loaded, behavior)
+    else
+      print('Failed to load ' .. scriptPath)
     end
+  end
 
-    for _, behaviorType in pairs(BehaviorType) do
-      self:AddBehaviorFunction(behavior.Behaviors, behaviorType)
+  if table.length(self.Loaded) > 0 then
+    if not Settings.ActiveBehavior then
+      self:setActive(self.Loaded[1])
+    else
+      for k, v in ipairs(self.Loaded) do
+        if v.Name == Settings.ActiveBehavior then
+          self:setActive(self.Loaded[k])
+        end
+      end
+      if not self.Active then
+        Settings.ActiveBehavior = ""
+        print('Could not find behavior found in settings, is it deleted?')
+      end
     end
-
-    Menu.CombatBehavior:AddOption(scriptPath)
   end
 
   self:LoadExtraBehaviors()
 
-  -- Check if the setting exists, if not set the default
-  local behaviorSettingKey = self:getBehaviorSettingKey()
-  local selectedbehavior
-  if Settings[behaviorSettingKey] then
-    selectedbehavior = Settings[behaviorSettingKey]
-  else
-    selectedbehavior = self.LoadableScripts[1]
-    Settings[behaviorSettingKey] = selectedbehavior
-  end
-
-  self:LoadBehavior(selectedbehavior)
-
   self:ReportLoadedBehaviors()
-
-  self.LoadedClass = Me.ClassName
 end
 
-function Behavior:LoadBehavior(scriptPath)
-  -- reset behaviors
-  for k, v in pairs(BehaviorType) do
-    self[v] = {}
-  end
-  local behavior = require(scriptPath)
+function Behavior:Update()
+  local behavior = self.Active
+  -- if no behavior is active, return
+  if not behavior then return end
 
-  for _, behaviorType in pairs(BehaviorType) do
-    self:AddBehaviorFunction(behavior.Behaviors, behaviorType)
+  -- Call all behaviors in whatever order they are in
+  -- Could sort to call them in a specific order
+  for _, k in pairs(BehaviorType) do
+    if behavior.Behaviors[k] then
+      behavior.Behaviors[k]()
+    end
+    for _, v in pairs(self.Extras) do
+      if v.Behaviors[k] then
+        v.Behaviors[k]()
+      end
+    end
   end
+end
+
+function Behavior:setActive(behavior)
+  print(string.format('Setting active behavior to %s', behavior.Name))
+  Settings.ActiveBehavior = behavior.Name
+  self.Active = behavior
+
+  -- XXX: add back when we can change ImText text value
+  --Menu.CurrentBehavior.Text = behavior.Name
+end
+
+function Behavior:onSelectBehavior(idx)
+  if idx <= table.length(self.Loaded) then
+    self:setActive(self.Loaded[idx])
+  end
+end
+
+function Behavior:ValidateBehavior(behavior)
+  if not behavior.Name then
+    print('Invalid behavior, it does not contain a name')
+    return false
+  end
+
+  if not behavior.Classes or not type(behavior.Classes):match('[table|integer]') then
+    print('Invalid behavior, it does not have any supported classes')
+    return false
+  end
+
+  if behavior.Classes ~= Me.Class and not behavior.Classes[Me.Class] then
+    wector.Console:Log(string.format('Behavior %s does not support %s, skipping', behavior.Name, Me.ClassName))
+    return false
+  end
+
+  return true
 end
 
 function Behavior:LoadExtraBehaviors()
   local extras = { 'autoloot', 'antiafk', 'radar' }
 
   for _, extra in ipairs(extras) do
-    local module = require('extra.' .. extra)
-    if module.Options then
-      Menu:AddOptionMenu(module.Options)
+    local status, module = pcall(require, ('extra.' .. extra))
+    if status then
+      if module.Options then
+        Menu:AddOptionMenu(module.Options)
+      end
+      table.insert(self.Extras, module)
+    else
+      print('Failed to load ' .. extra)
     end
-    self:AddBehaviorFunction(module.Behaviors, BehaviorType.Extra)
   end
 end
 
 function Behavior:ReportLoadedBehaviors()
-  local loaded_behaviors = 0
-  for _, v in pairs(BehaviorType) do
-    if #self[v] > 0 then
-      loaded_behaviors = loaded_behaviors + #self[v]
-    end
-  end
-
-  print('Loaded ' .. loaded_behaviors .. ' behaviors for ' .. Me.ClassName)
+  print('Loaded ' .. table.length(self.Loaded) .. ' behavior(s) for ' .. Me.ClassName)
 end
 
-function Behavior:CollectScriptPaths(class_name)
-  local class_trim = trim_and_lower(class_name)
+function Behavior:CollectScriptPaths()
+  local behaviors = {}
 
-  -- <root>\scripts\Pallas\behaviors\<classname>
-  local path = filesystem.Path(string.format('%s\\behaviors\\%s\\%s\\', wector.script_path, wector.CurrentScript.Game,
-    class_trim))
+  -- <root>\behaviors\<game>\
+  local path = filesystem.Path(string.format('%s\\behaviors\\%s\\', wector.script_path, wector.CurrentScript.Game))
 
   -- iterate all files in class behaviors directory
   local it = filesystem.Directory(path)
   for _, v in pairs(it) do
     local s = tostring(v)
-    -- if scriptPath contains "common" skip
-    if s:find(".common") then
-      goto continue
+
+    -- find the last backslash in path to extract the behavior name
+    local idx = s:find("\\[^\\]*$")
+    if idx then
+      local behavior_name = s:sub(idx + 1, s:len())
+
+      local behavior_path = string.format('%s\\%s', s, behavior_name)
+      local rel = filesystem.relative_base(behavior_path, wector.script_path):gsub('\\', '.')
+      wector.Console:Log('Adding behavior to list: ' .. rel)
+      table.insert(behaviors, rel)
     end
-    -- if file has extension '.lua'
-    if s:len() > 4 and s:match('.lua', s:len() - 4) then
-      local rel = filesystem.relative_base(v, wector.script_path):gsub('\\', '.')
-      rel = rel:sub(1, rel:len() - 4)
-      -- Add the processed relative path to the list of loadable scripts
-      table.insert(Behavior.LoadableScripts, rel)
-      wector.Console:Log(rel)
-    end
-    ::continue::
   end
 
-  return Behavior.LoadableScripts
-end
-
-function Behavior:LoadScript(index)
-  -- Get the script path from the index
-  local scriptPath = self.LoadableScripts[index]
-  if not scriptPath then return end
-  local behaviorSettingKey = self:getBehaviorSettingKey()
-  print('setting rotation to ' .. scriptPath)
-  Settings[behaviorSettingKey] = scriptPath
-
-  self:LoadBehavior(scriptPath)
-  self:ReportLoadedBehaviors()
-end
-
-function Behavior:Update()
-  -- Call all behaviors in whatever order they are in
-  -- Could sort to call them in a specific order
-  for _, k in pairs(BehaviorType) do
-    if not self[k] then goto continue end
-    for _, v in ipairs(self[k]) do
-      v()
-    end
-    ::continue::
-  end
+  return behaviors
 end
 
 ---@param type BehaviorType
 function Behavior:HasBehavior(type)
-  if not self[type] then return false end
-  if next(self[type]) ~= nil then
-    return true
-  end
-  return false
+  local behavior = self.Active
+  -- if no behavior is active, return
+  if not behavior then return false end
+
+  if not behavior.Behaviors[type] then return false end
+
+  return true
 end
 
 function Behavior:DecideBestSpecialization()
@@ -173,23 +190,6 @@ function Behavior:DecideBestSpecialization()
     return bestspec
   end
   return -1
-end
-
-function Behavior:AddBehaviorFunction(tbl, type)
-  if not tbl or not tbl[type] then return end
-  local fn = tbl[type]
-  if fn then
-    -- Initialize self[type] as an empty table if it's not initialized yet
-    self[type] = self[type] or {}
-    table.insert(self[type], fn)
-  end
-end
-
-function Behavior:getBehaviorSettingKey()
-  local class_trim = trim_and_lower(Me.ClassName)
-  -- Update the setting
-  local behaviorSettingKey = class_trim
-  return behaviorSettingKey
 end
 
 return Behavior

@@ -20,23 +20,17 @@ function Menu:Initialize()
 
   -- Behavior
   Menu.BehaviorGroup = ImGroupbox("Behavior")
-  -- Fetch pre-selected value from settings
-  local behaviorSettingKey = Behavior:getBehaviorSettingKey()
-  local preSelectedBehavior = Settings[behaviorSettingKey]
-  if (preSelectedBehavior == nil) then
-    preSelectedBehavior = ""
-  end
-  Menu.CurrentBehavior = ImText("Current: " .. preSelectedBehavior)
-  Menu.BehaviorGroup:Add(Menu.CurrentBehavior)
+
+  -- XXX: add back when ImText text value can be changed!
+  --Menu.CurrentBehavior = ImText('')
+  --Menu.BehaviorGroup:Add(Menu.CurrentBehavior)
 
   Menu.CombatBehavior = ImCombobox("Routine")
   Menu.CombatBehavior:AddOption("Change Routine") -- Add dummy option at 0th index
   -- Load the selected script when an option is selected
   Menu.CombatBehavior.OnSelect = function(_, _, _, _, newIdx)
-    if newIdx == 0 then
-      print("No behavior selected.")
-    else
-      Behavior:LoadScript(newIdx)   -- No need to add 1 here, indexing should match up correctly now
+    if newIdx > 0 then
+      Behavior:onSelectBehavior(newIdx)
     end
   end
 
