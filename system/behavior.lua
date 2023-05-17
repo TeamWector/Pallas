@@ -175,21 +175,4 @@ function Behavior:HasBehavior(type)
   return true
 end
 
-function Behavior:DecideBestSpecialization()
-  if wector.CurrentScript.Game == 'wow_retail' then
-    return Me.Talents.ActiveSpecializationId
-  elseif wector.CurrentScript.Game == 'wow_wrath' then
-    local bestspec = -1
-    local bestspecpoints = -1
-    for _, v in pairs(Me.Talents.ActiveTalentGroup.Tabs) do
-      if v.Points > bestspecpoints then
-        bestspec = v.Id
-        bestspecpoints = v.Points
-      end
-    end
-    return bestspec
-  end
-  return -1
-end
-
 return Behavior
