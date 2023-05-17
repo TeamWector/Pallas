@@ -12,8 +12,6 @@ BehaviorType = {
   Extra = 5
 }
 
-local behavior_map = require('data.specializations')
-
 local function trim_and_lower(input)
   return input:gsub("%s+", ""):lower()
 end
@@ -21,20 +19,7 @@ end
 function Behavior:Initialize(isReload)
   local class_trim = trim_and_lower(Me.ClassName)
 
-  local specid = self:DecideBestSpecialization()
-  local defaultspecname = behavior_map[class_trim][specid]
-
-  self:CollectScriptPaths(class_trim, defaultspecname)
-
-  -- Check if the setting exists, if not set the default
-  local behaviorSettingKey = self:getBehaviorSettingKey()
-  local specname_trim
-  if Settings[behaviorSettingKey] then
-    specname_trim = Settings[behaviorSettingKey]
-  else
-    specname_trim = trim_and_lower(defaultspecname)
-    Settings[behaviorSettingKey] = specname_trim
-  end
+  self:CollectScriptPaths(class_trim)
 
   if isReload and self.LoadedClass == Me.ClassName then
     return
@@ -42,31 +27,50 @@ function Behavior:Initialize(isReload)
 
   print('Initialize Behaviors')
 
-  self:LoadBehaviors(class_trim, specname_trim)
+  for _, scriptPath in ipairs(self.LoadableScripts) do
+    print('Load ' .. scriptPath .. ' ' .. Me.ClassName .. ' Behaviors')
+    local behavior = require(scriptPath)
+
+    if behavior.Options then
+      Menu:AddOptionMenu(behavior.Options)
+    end
+
+    for _, behaviorType in pairs(BehaviorType) do
+      self:AddBehaviorFunction(behavior.Behaviors, behaviorType)
+    end
+
+    Menu.CombatBehavior:AddOption(scriptPath)
+  end
 
   self:LoadExtraBehaviors()
 
+  -- Check if the setting exists, if not set the default
+  local behaviorSettingKey = self:getBehaviorSettingKey()
+  local selectedbehavior
+  if Settings[behaviorSettingKey] then
+    selectedbehavior = Settings[behaviorSettingKey]
+  else
+    selectedbehavior = self.LoadableScripts[1]
+    Settings[behaviorSettingKey] = selectedbehavior
+  end
+
+  self:LoadBehavior(selectedbehavior)
+
   self:ReportLoadedBehaviors()
+
+  self.LoadedClass = Me.ClassName
 end
 
-function Behavior:LoadBehaviors(class_trim, specname_trim)
-   -- reset behaviors
+function Behavior:LoadBehavior(scriptPath)
+  -- reset behaviors
   for k, v in pairs(BehaviorType) do
     self[v] = {}
   end
-
-  print('Load ' .. specname_trim .. ' ' .. Me.ClassName .. ' Behaviors')
-  local behavior = require('behaviors.' .. wector.CurrentScript.Game .. '.' .. class_trim .. '.' .. specname_trim)
-
-  if behavior.Options then
-    Menu:AddOptionMenu(behavior.Options)
-  end
+  local behavior = require(scriptPath)
 
   for _, behaviorType in pairs(BehaviorType) do
     self:AddBehaviorFunction(behavior.Behaviors, behaviorType)
   end
-
-  self.LoadedClass = Me.ClassName
 end
 
 function Behavior:LoadExtraBehaviors()
@@ -92,23 +96,44 @@ function Behavior:ReportLoadedBehaviors()
   print('Loaded ' .. loaded_behaviors .. ' behaviors for ' .. Me.ClassName)
 end
 
+function Behavior:CollectScriptPaths(class_name)
+  local class_trim = trim_and_lower(class_name)
+
+  -- <root>\scripts\Pallas\behaviors\<classname>
+  local path = filesystem.Path(string.format('%s\\behaviors\\%s\\%s\\', wector.script_path, wector.CurrentScript.Game,
+    class_trim))
+
+  -- iterate all files in class behaviors directory
+  local it = filesystem.Directory(path)
+  for _, v in pairs(it) do
+    local s = tostring(v)
+    -- if scriptPath contains "common" skip
+    if s:find(".common") then
+      goto continue
+    end
+    -- if file has extension '.lua'
+    if s:len() > 4 and s:match('.lua', s:len() - 4) then
+      local rel = filesystem.relative_base(v, wector.script_path):gsub('\\', '.')
+      rel = rel:sub(1, rel:len() - 4)
+      -- Add the processed relative path to the list of loadable scripts
+      table.insert(Behavior.LoadableScripts, rel)
+      wector.Console:Log(rel)
+    end
+    ::continue::
+  end
+
+  return Behavior.LoadableScripts
+end
+
 function Behavior:LoadScript(index)
   -- Get the script path from the index
-  local specname_trim = self.LoadableScripts[index]
-  if not specname_trim then return end
-
-  local class_trim = trim_and_lower(Me.ClassName)
+  local scriptPath = self.LoadableScripts[index]
+  if not scriptPath then return end
   local behaviorSettingKey = self:getBehaviorSettingKey()
-  print('setting rotation to ' .. specname_trim)
-  Settings[behaviorSettingKey] = specname_trim
+  print('setting rotation to ' .. scriptPath)
+  Settings[behaviorSettingKey] = scriptPath
 
-  Menu.MainMenu = nil
-  Menu:Initialize()
-
-  self:LoadBehaviors(class_trim, specname_trim)
-
-  self:LoadExtraBehaviors()
-
+  self:LoadBehavior(scriptPath)
   self:ReportLoadedBehaviors()
 end
 
@@ -122,38 +147,6 @@ function Behavior:Update()
     end
     ::continue::
   end
-end
-
-function Behavior:CollectScriptPaths(class_name, spec_name)
-  local class_trim = trim_and_lower(class_name)
-  local spec_trim = trim_and_lower(spec_name)
-
-  -- <root>\scripts\Pallas\behaviors\<classname>
-  local path = filesystem.Path(string.format('%s\\behaviors\\%s\\%s\\', wector.script_path, wector.CurrentScript.Game,
-  class_trim))
-
-  -- iterate all files in class behaviors directory
-  local it = filesystem.Directory(path)
-  for _, v in pairs(it) do
-    local s = tostring(v)
-    -- if file has extension '.lua'
-    if s:len() > 4 and s:match('.lua', s:len() - 4) then
-      local rel = filesystem.relative_base(v, wector.script_path):gsub('\\', '.')
-      rel = rel:sub(1, rel:len() - 4)
-
-      -- Process rel one more time, capture everything after the last "."
-      rel = rel:match(".*%.(.*)")
-
-      -- If rel contains spec_trim, add the processed relative path to the list of loadable scripts
-      if rel:find(spec_trim) then
-        table.insert(Behavior.LoadableScripts, rel)
-        Menu.CombatBehavior:AddOption(rel)
-        wector.Console:Log(rel)
-      end
-    end
-  end
-
-  return Behavior.LoadableScripts
 end
 
 ---@param type BehaviorType
@@ -186,17 +179,16 @@ function Behavior:AddBehaviorFunction(tbl, type)
   if not tbl or not tbl[type] then return end
   local fn = tbl[type]
   if fn then
+    -- Initialize self[type] as an empty table if it's not initialized yet
+    self[type] = self[type] or {}
     table.insert(self[type], fn)
   end
 end
 
 function Behavior:getBehaviorSettingKey()
   local class_trim = trim_and_lower(Me.ClassName)
-  local specid = self:DecideBestSpecialization()
-
   -- Update the setting
-  local behaviorSettingKey = class_trim .. specid .. 'rotation'
-
+  local behaviorSettingKey = class_trim
   return behaviorSettingKey
 end
 
