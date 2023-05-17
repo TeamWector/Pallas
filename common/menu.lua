@@ -12,44 +12,39 @@ function Menu.EventListener:PLAYER_LEAVING_WORLD()
   Menu:Initialize()
 end
 
-local Behaviour = require('system.behavior')
-
 function Menu:Initialize()
   if Menu.MainMenu then return end
   print('Initialize menu')
 
   Menu.MainMenu = ImMenu("Pallas")
 
-   -- Combat
-   Menu.CombatBehavior = ImCombobox("Behavior")
-   Menu.MainMenu:Add(Menu.CombatBehavior)
+  -- Behavior
+  Menu.BehaviorGroup = ImGroupbox("Behavior")
+  -- Fetch pre-selected value from settings
+  local behaviorSettingKey = Behavior:getBehaviorSettingKey()
+  local preSelectedBehavior = Settings[behaviorSettingKey]
+  if (preSelectedBehavior == nil) then
+    preSelectedBehavior = ""
+  end
+  Menu.CurrentBehavior = ImText("Current: " .. preSelectedBehavior)
+  Menu.BehaviorGroup:Add(Menu.CurrentBehavior)
 
-   Menu.CombatBehavior:AddOption("Select Behavior") -- Add dummy option at 0th index
+  Menu.CombatBehavior = ImCombobox("Routine")
+  Menu.CombatBehavior:AddOption("Change Routine") -- Add dummy option at 0th index
+  -- Load the selected script when an option is selected
+  Menu.CombatBehavior.OnSelect = function(_, _, _, _, newIdx)
+    if newIdx == 0 then
+      print("No behavior selected.")
+    else
+      Behavior:LoadScript(newIdx)   -- No need to add 1 here, indexing should match up correctly now
+    end
+  end
 
-   -- Populate the combobox with the loadable scripts
-   -- Get the list of loadable scripts
-   local loadableScripts = Behavior:CollectScriptPaths(Me.ClassName)
+  Menu.BehaviorGroup:Add(Menu.CombatBehavior)
+  -- End Behavior
 
-   if loadableScripts and type(loadableScripts) == 'table' then
-     -- Add each script as an option to the ImCombobox
-     for _, scriptPath in ipairs(loadableScripts) do
-       Menu.CombatBehavior:AddOption(scriptPath)
-     end
-   else
-     print("Error: No loadable scripts found.")
-   end
-
-   -- Load the selected script when an option is selected
-   Menu.CombatBehavior.OnSelect = function(_, _, _, _, newIdx)
-     if newIdx == 0 then
-       print("No behavior selected.")
-     else
-       Behavior:LoadScript(newIdx) -- No need to add 1 here, indexing should match up correctly now
-     end
-   end
-
+  -- Combat
   Menu.CombatGroup = ImGroupbox("Combat")
-
   if Settings.PallasAutoTarget == nil then Settings.PallasAutoTarget = false end
   local autotarget = ImCheckbox("Auto-target", Settings.PallasAutoTarget)
   autotarget.OnClick = function(_, _, newValue) Settings.PallasAutoTarget = newValue end
@@ -74,6 +69,7 @@ function Menu:Initialize()
   healthstone.OnValueChanged = function(_, _, newValue) Settings.PallasHealthstonePct = newValue end
   Menu.GeneralGroup:Add(healthstone)
 
+  Menu.MainMenu:Add(Menu.BehaviorGroup)
   Menu.MainMenu:Add(Menu.SpellGroup)
   Menu.MainMenu:Add(Menu.GeneralGroup)
   Menu.MainMenu:Add(Menu.CombatGroup)
