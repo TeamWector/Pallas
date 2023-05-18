@@ -58,13 +58,13 @@ end
 local function FinalReckoning(enemy)
   local spell = Spell.FinalReckoning
 
-  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 60000) and spell:CastEx(enemy)
+  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 55000) and spell:CastEx(enemy)
 end
 
 local function DivineToll(enemy)
   local spell = Spell.DivineToll
 
-  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 60000) and spell:CastEx(enemy)
+  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 55000) and spell:CastEx(enemy)
 end
 
 local function DivineStorm()
