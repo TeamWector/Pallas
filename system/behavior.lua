@@ -21,6 +21,9 @@ BehaviorType = {
   Extra = 5
 }
 
+
+local behavior_map = require('data.specializations')
+
 function Behavior:Initialize(isReload)
   if isReload and self.LoadedClass == Me.ClassName then
     return
@@ -65,24 +68,49 @@ function Behavior:Initialize(isReload)
   self:ReportLoadedBehaviors()
 end
 
-function Behavior:Update()
-  local behavior = self.Active
-  -- if no behavior is active, return
-  if not behavior then return end
-
-  -- Call all behaviors in whatever order they are in
-  -- Could sort to call them in a specific order
-  for _, k in pairs(BehaviorType) do
-    if behavior.Behaviors[k] then
-      behavior.Behaviors[k]()
-    end
-    for _, v in pairs(self.Extras) do
-      if v.Behaviors[k] then
-        v.Behaviors[k]()
+function Behavior:DecideBestSpecialization()
+  if wector.CurrentScript.Game == 'wow_retail' then
+    return Me.Talents.ActiveSpecializationId
+  elseif wector.CurrentScript.Game == 'wow_wrath' then
+    local bestspec = -1
+    local bestspecpoints = -1
+    for _, v in pairs(Me.Talents.ActiveTalentGroup.Tabs) do
+      if v.Points > bestspecpoints then
+        bestspec = v.Id
+        bestspecpoints = v.Points
       end
+    end
+    return bestspec
+  end
+  return -1
+end
+
+function Behavior:Update()
+  -- Use class_trim, as it seems to be the variable containing the player's class in lowercase
+  local class_trim = Me.ClassName:gsub("%s+", "")
+  class_trim = class_trim:lower()
+
+  local class = class_trim
+  local specid = self:DecideBestSpecialization()
+  local specname = behavior_map[class][specid]
+
+  -- Loop through BehaviorTypes
+  for _, k in pairs(BehaviorType) do
+    -- Check if a callback exists for the class, specname, and behavior type
+    if self.Active.Callbacks[class] and self.Active.Callbacks[class][specname] and self.Active.Callbacks[class][specname][k] then
+      -- Call the callback
+      self.Active.Callbacks[class][specname][k]()
+    end
+  end
+
+  -- Run Extras separately
+  for _, v in pairs(self.Extras) do
+    if v.Behaviors[BehaviorType.Extra] then
+      v.Behaviors[BehaviorType.Extra]()
     end
   end
 end
+
 
 function Behavior:setActive(behavior)
   print(string.format('Setting active behavior to %s', behavior.Name))
@@ -170,9 +198,22 @@ function Behavior:HasBehavior(type)
   -- if no behavior is active, return
   if not behavior then return false end
 
-  if not behavior.Behaviors[type] then return false end
+  -- Use class_trim, as it seems to be the variable containing the player's class in lowercase
+  local class_trim = Me.ClassName:gsub("%s+", "")
+  class_trim = class_trim:lower()
+  local class = class_trim
+  local specid = self:DecideBestSpecialization()
 
-  return true
+  -- Get the specname from the behavior_map
+  local specname = behavior_map[class][specid]
+
+  -- Check if a callback exists for the class, specname, and behavior type
+  if behavior.Callbacks[class] and behavior.Callbacks[class][specname] and behavior.Callbacks[class][specname][type] then
+    return true
+  end
+
+  return false
 end
+
 
 return Behavior
