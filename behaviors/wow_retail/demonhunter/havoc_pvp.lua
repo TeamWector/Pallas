@@ -193,6 +193,8 @@ local function DemonhunterHavocCombat()
 
   if common:DoInterrupt() then return end
 
+  if WoWItem:UseHealthstone() then return end
+
   if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
   if Blur() then return end
