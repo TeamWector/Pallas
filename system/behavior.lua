@@ -90,24 +90,23 @@ function Behavior:Update()
     end
   end
 end
+
 function Behavior:setActive(behavior)
   print(string.format('Setting active behavior to %s', behavior.Name))
   Settings.ActiveBehavior = behavior.Name
   self.Active = behavior
 
+  -- TODO: Add Options when feature exists for the given specialization on behavior change
   -- find the appropriate options for this specialization
-  local className = Me.ClassName:lower():gsub("%s+", "")
-  local specname = Me:SpecializationName()
+  -- local className = Me.ClassName:lower():gsub("%s+", "")
+  -- local specname = Me:SpecializationName()
 
-  if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname].Options then
-    Menu:AddOptionMenu(behavior.Callbacks[className][specname].Options)
-  end
-    -- XXX: add back when we can change ImText text value
+  -- if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname].Options then
+  --   Menu:AddOptionMenu(behavior.Callbacks[className][specname].Options)
+  -- end
+  -- XXX: add back when we can change ImText text value
   --Menu.CurrentBehavior.Text = behavior.Name
 end
-
-
-
 
 function Behavior:onSelectBehavior(idx)
   if idx <= table.length(self.Loaded) then
