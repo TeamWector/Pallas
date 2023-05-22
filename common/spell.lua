@@ -76,4 +76,8 @@ function Spell.EventListener:PLAYER_ENTERING_WORLD(_, _) Spell:UpdateCache() end
 
 RegisterEvent('OnLoad', Spell.UpdateCache)
 
+--- XXX: ugly ugly ugly /SOVIET (help me ejt)
+Spell.EventListener:RegisterEvent('PLAYER SPECIALIZATION CHANGED')
+function Spell.EventListener:PLAYER_ENTERING_WORLD(_, _) Spell:UpdateCache() end
+
 return Spell

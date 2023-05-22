@@ -22,8 +22,6 @@ BehaviorType = {
 }
 
 
-local behavior_map = require('data.specializations')
-
 function Behavior:Initialize(isReload)
   if isReload and self.LoadedClass == Me.ClassName then
     return
@@ -79,9 +77,9 @@ function Behavior:Update()
   -- Loop through BehaviorTypes
   for _, type in pairs(BehaviorType) do
     -- Check if a callback exists for the player's class, specialization and behavior type
-    if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname][type] then
+    if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname].Behaviors and behavior.Callbacks[className][specname].Behaviors[type] then
       -- Call the callback
-      behavior.Callbacks[className][specname][type]()
+      behavior.Callbacks[className][specname].Behaviors[type]()
     end
   end
 
@@ -92,15 +90,24 @@ function Behavior:Update()
     end
   end
 end
-
 function Behavior:setActive(behavior)
   print(string.format('Setting active behavior to %s', behavior.Name))
   Settings.ActiveBehavior = behavior.Name
   self.Active = behavior
 
-  -- XXX: add back when we can change ImText text value
+  -- find the appropriate options for this specialization
+  local className = Me.ClassName:lower():gsub("%s+", "")
+  local specname = Me:SpecializationName()
+
+  if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname].Options then
+    Menu:AddOptionMenu(behavior.Callbacks[className][specname].Options)
+  end
+    -- XXX: add back when we can change ImText text value
   --Menu.CurrentBehavior.Text = behavior.Name
 end
+
+
+
 
 function Behavior:onSelectBehavior(idx)
   if idx <= table.length(self.Loaded) then
@@ -183,7 +190,7 @@ function Behavior:HasBehavior(type)
   local specname = Me:SpecializationName()
 
   -- Check if a callback exists for the player's class, specialization, and behavior type
-  if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname][type] then
+  if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname].Behaviors and behavior.Callbacks[className][specname].Behaviors[type] then
     return true
   end
 
