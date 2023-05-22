@@ -179,6 +179,7 @@ local function ShamanElementalCombat()
   if wector.SpellBook.GCD:CooldownRemaining() > 0 then return end
 
   if common:AstralShift() then return end
+  if WoWItem:UseHealthstone() then return end
   if common:EarthShield() then return end
   if common:LightningShield() then return end
   if common:FlametongueWeapon() then return end

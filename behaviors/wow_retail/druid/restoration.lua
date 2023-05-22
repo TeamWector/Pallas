@@ -245,6 +245,8 @@ local function DruidRestoHeal()
     return
   end
 
+  if WoWItem:UseHealthstone() then return end
+
   if Me.ShapeshiftForm ~= ShapeshiftForm.Travel then
 
   end
