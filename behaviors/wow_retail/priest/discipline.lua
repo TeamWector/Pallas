@@ -303,6 +303,7 @@ local function PriestDiscipline()
   if common:PowerWordLife() then return end
   if MassDispel() then return end
   if common:DesperatePrayer() then return end
+  if WoWItem:UseHealthstone() then return end
   if DeathThePoly() then return end
 
   -- BURST HEALING

@@ -1,6 +1,6 @@
 local common = require("behaviors.wow_retail.shaman.common")
 
--- BgQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwB4AH4AOwBWwCcgDwBaQZBHQZBlDsgiFcABh0iEIaSSRgSiolEJJRD
+-- BgQAu3fz4tp2ZikXIAdNeR+oLAAAAAAAAAAAAAQIRSiWCpJJlElUCSkASLSoFaSSBQiolkEJRD
 
 local options = {
   Name = "Shaman (Restorationn) PVP",
@@ -31,17 +31,26 @@ local options = {
     },
     {
       type = "slider",
-      uid = "EarthenWallTotemPct",
-      text = "Earthen Wall Totem (%)",
-      default = 58,
+      uid = "HealingRainPct",
+      text = "Healing Rain (%)",
+      default = 75,
       min = 0,
       max = 100
     },
     {
       type = "slider",
+      uid = "EarthenWallTotemPct",
+      text = "Earthen Wall Totem (%)",
+      default = 65,
+      min = 0,
+      max = 100
+    },
+
+    {
+      type = "slider",
       uid = "HealingTideTotemPct",
       text = "Heaing Tide Totem (%)",
-      default = 37,
+      default = 42,
       min = 0,
       max = 100
     },
@@ -49,7 +58,7 @@ local options = {
       type = "slider",
       uid = "SpiritLinkTotemPct",
       text = "Spirit Link Totem (%)",
-      default = 26,
+      default = 33,
       min = 0,
       max = 100
     },
@@ -185,6 +194,12 @@ local function EarthenWallTotem(friend)
   return friend.HealthPct < Settings.EarthenWallTotemPct and spell:CastEx(friend)
 end
 
+local function HealingRain(friend)
+  local spell = Spell.HealingRain
+  if spell:CooldownRemaining() > 0 then return false end
+  return friend.HealthPct < Settings.HealingRainPct and spell:CastEx(friend)
+end
+
 local function EarthShield(friend)
   local spell = Spell.EarthShield
   if spell:CooldownRemaining() > 0 or friend:HasAura(auras.earthShield) or friend.HealthPct > 80 then return false end
@@ -289,6 +304,8 @@ local function ShamanResto()
 
   if common:EarthShield() then return end
 
+  if WoWItem:UseHealthstone() then return end
+
   local friends = {}
   for _, v in pairs(Heal.PriorityList) do
     local unit = v.Unit
@@ -312,6 +329,7 @@ local function ShamanResto()
     if HealingTideTotem(f) then return end
     if EarthenWallTotem(f) then return end
     if Riptide(f) then return end
+    if HealingRain(f) then return end
     if f.HealthPct < 60 and common:PrimordialWave(f) then return true end
     local earthShieldTarget = friends[1]
     if earthShieldTarget and earthShieldTarget == Me then earthShieldTarget = friends[2] end
