@@ -69,8 +69,6 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
     end
 
     ability:AddToQueue(target, interrupt)
-
-    WoWSpell:CastEx("Trigger")
   else
     print("Invalid Macro Expression")
   end
