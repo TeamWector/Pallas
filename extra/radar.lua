@@ -108,7 +108,7 @@ local function DrawAlerts()
   local add = 10
   for _, debug in pairs(alerts) do
     local textBasePos = World2Screen(Vec3(Me.Position.x, Me.Position.y, Me.Position.z + add))
-    add = add - 0.5
+    add = add - 0.3
     DrawText(textBasePos, colors.chartreuse, debug.text)
   end
 end

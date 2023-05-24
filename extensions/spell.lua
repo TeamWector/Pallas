@@ -13,6 +13,8 @@ local castTarget = nil
 local spellDelay = {}
 local globalDelay = 0
 
+WoWSpell.ignoreCastTime = false
+
 function WoWSpell:GetCastTarget()
   return castTarget
 end
@@ -24,23 +26,24 @@ SpellListener:RegisterEvent('CONSOLE_MESSAGE')
 
 local queue = {}
 
----@param spell WoWSpell @spell
----@param target string @target, focus, me
-function WoWSpell:AddToQueue(spell, target)
+---@param target WoWUnit @target, focus, me
+---@param interrupt boolean Interrupt current cast
+function WoWSpell:AddToQueue(target, interrupt)
   local slot = #queue + 1
 
   local object = {
     target = target,
-    ability = spell,
+    ability = self,
+    interrupt = interrupt or false,
     timer = #queue == 0 and wector.Game.Time + 3000 or queue[#queue].timer + 3000
   }
 
   for _, v in pairs(queue) do
-    if v.ability == spell then return end
+    if v.ability == self then return end
   end
 
   queue[slot] = object
-  Alert("Queued: " .. spell.Name .. " on " .. target, 3)
+  Alert("Queued: " .. self.Name .. " on " .. target.Name, 3)
 end
 
 function SpellListener:CONSOLE_MESSAGE(msg, color)
@@ -48,11 +51,12 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
 
   local target = string.match(msg, "queue%s*(%a*)%s*(%a+)")
   local ability = string.match(msg, "queue %a+ (%a+)")
+  local interrupt = string.find(msg, "interrupt")
 
   if target and ability then
     ability = Spell[ability]
 
-    if not ability or ability.Slot < 0 or ability:CooldownRemaining() > Me:GCDCooldown() then
+    if not ability or ability.Slot < 0 or ability:CooldownRemaining() > 2000 then
       print("Spell Wasn't Added To Queue")
       return
     end
@@ -60,9 +64,13 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
     if not target or (target == "target" and not Me.Target or target == "focus" and not Me.FocusTarget) then
       print("Invalid Target")
       return
+    else
+      target = (target == "target" and Me.Target or target == "focus" and Me.FocusTarget) or Me
     end
 
-    WoWSpell:AddToQueue(ability, target)
+    ability:AddToQueue(target, interrupt)
+
+    WoWSpell:CastEx("Trigger")
   else
     print("Invalid Macro Expression")
   end
@@ -107,11 +115,16 @@ function WoWSpell:CastEx(a1, ...)
   if queue[1] then
     local ability = queue[1].ability
     local target = queue[1].target
+    local interrupt = queue[1].interrupt
 
     if ability:IsUsable() then
       self = queue[1].ability
-      a1 = target == "target" and Me.Target or target == "focus" and Me.FocusTarget or Me
+      a1 = target
       is_queue_spell = true
+
+      if interrupt and Me.IsCastingOrChanneling then
+        Me:StopCasting()
+      end
     end
 
     for k, v in pairs(queue) do
@@ -139,7 +152,7 @@ function WoWSpell:CastEx(a1, ...)
   if self.IsActive then return false end
 
   -- if spell has cast time, are we moving?
-  if (self.CastTime > 0 or table.contains(exclusions, self.Id)) and Me:IsMoving() then return false end
+  if (self.CastTime > 0 or table.contains(exclusions, self.Id)) and Me:IsMoving() and not self.ignoreCastTime then return false end
 
   if type(arg1) == 'userdata' and type(arg1.ToUnit) ~= 'nil' then
     -- cast at unit
@@ -233,7 +246,7 @@ function WoWSpell:Apply(unit, condition)
   -- Absolute corruption exception (Aura Remaining 0)
   if aura and (aura.Remaining > 2000 or aura.Remaining == 0) then return false end
 
-  return self:CastEx(unit)
+  return self:CastEx(unit) or false
 end
 
 ---@return boolean casted if we used our interrupt.

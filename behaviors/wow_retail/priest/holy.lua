@@ -185,8 +185,6 @@ local function Smite(enemy)
   return spell:CastEx(enemy)
 end
 
-
-
 local function HolyFire(enemy)
   local spellData = WoWSpell(14914)
   local spell = Spell.HolyFire
@@ -210,20 +208,6 @@ local function EmpyrealBlaze()
   return spell:CastEx(Me)
 end
 
--- Beta Test For Leap Of Faith on Knockbacks
-local function LeapOfFaith()
-  local spell = Spell.LeapOfFaith
-  if spell:CooldownRemaining() > 0 then return false end
-
-  local friends = WoWGroup:GetGroupUnits()
-  for _, friend in pairs(friends) do
-    local speed = friend.CurrentSpeed
-    if not friend.IsMounted and speed > 200 and spell:CastEx(friend) then
-      return true
-    end
-  end
-end
-
 local function HolyWordChastise(enemy)
   local spell = Spell.HolyWordChastise
   if spell:CooldownRemaining() > 0 then return false end
@@ -235,7 +219,11 @@ local function ShadowWordPain(enemy, explosives)
   local spell = Spell.ShadowWordPain
 
   for _, e in pairs(Combat.Explosives) do
-    if spell:Apply(e) then Me:SetTarget(e) Alert("Killed Explosive", 2) return true end
+    if spell:Apply(e) then
+      Me:SetTarget(e)
+      Alert("Killed Explosive", 2)
+      return true
+    end
   end
 
   if explosives then return end
@@ -443,6 +431,7 @@ local function PriestHoly()
   if ShadowWordPain(nil, true) then return end
   if common:Fade() then return end
   if common:PowerWordFortitude() then return end
+  if WoWItem:UseHealthstone() then return end
   if common:DesperatePrayer() then return end
   if DivineHymn() then return end
   if common:PowerWordLife() then return end

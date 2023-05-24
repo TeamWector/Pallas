@@ -1,4 +1,4 @@
----@diagnostic disable: param-type-mismatch
+---@diagnostic disable: param-type-mismatch, duplicate-set-field
 
 ---@class Combat : Targeting
 Combat = Combat or Targeting:New()
@@ -18,7 +18,7 @@ Combat.EventListener:RegisterEvent("CONSOLE_MESSAGE")
 
 Combat.Burst = false
 function Combat.EventListener:CONSOLE_MESSAGE(msg)
-  if string.find(msg, "burst") then
+  if string.find(msg, "burst") and not string.find(msg, "queue") then
     Combat.Burst = not Combat.Burst
   end
 end
@@ -47,6 +47,7 @@ function Combat:Reset()
   self.EnemiesInMeleeRange = 0
   self.Enemies = 0
   self.Explosives = {}
+  self.Targets = {}
 end
 
 function Combat:WantToRun()
@@ -56,7 +57,7 @@ function Combat:WantToRun()
 
   if (Me.UnitFlags & UnitFlags.Looting) == UnitFlags.Looting then return false end
 
-  return Settings.PallasAttackOOC or (Me.UnitFlags & UnitFlags.InCombat) == UnitFlags.InCombat
+  return Settings.PallasAttackOOC or Me.InCombat
 end
 
 function Combat:CollectTargets()
@@ -65,7 +66,7 @@ function Combat:CollectTargets()
 
   if not Me.InCombat and Settings.PallasAttackOOC then
     local target = Me.Target
-    if target and not target.IsTapDenied then
+    if target and target:IsValidTarget() then
       table.insert(self.Targets, Me.Target)
     end
   else
@@ -96,6 +97,7 @@ end
 
 function Combat:InclusionFilter()
   local target = Me.Target
+
   if target then
     for _, u in pairs(self.Targets) do
       if u.Guid == target.Guid then

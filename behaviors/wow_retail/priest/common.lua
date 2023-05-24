@@ -132,7 +132,7 @@ function commonPriest:Mindgames(enemy)
   if spell:CooldownRemaining() > 0 then return false end
 
   for _, e in pairs(Combat.Targets) do
-    for _, friend in pairs(Heal.DPS) do
+    for _, friend in pairs(Heal.Friends.DPS) do
       if e.Target == friend then
         if spell:CastEx(e) then return true end
       end

@@ -4,20 +4,27 @@ Heal = Heal or Targeting:New()
 ---@type table<WoWUnit[], number>
 Heal.PriorityList = {}
 
----@type table<WoWUnit[], number>
-Heal.Tanks = {}
-
----@type table<WoWUnit[], number>
-Heal.DPS = {}
+---@type table<string, WoWUnit[]>
+Heal.Friends = {
+  Tanks = {},
+  DPS = {},
+  Healers = {},
+  All = {}
+}
 
 function Heal:Update()
   Targeting.Update(self)
 end
 
 function Heal:Reset()
-  Heal.PriorityList = {}
-  Heal.Tanks = {}
-  Heal.DPS = {}
+  self.PriorityList = {}
+  self.Friends = {
+    Tanks = {},
+    DPS = {},
+    Healers = {},
+    All = {}
+  }
+  self.HealTargets = {}
 end
 
 function Heal:WantToRun()
@@ -44,8 +51,6 @@ function Heal:ExclusionFilter()
   for k, u in pairs(self.HealTargets) do
     if Me:CanAttack(u) then
       self.HealTargets[k] = nil
-    elseif u.HealthPct == 100 then
-      self.HealTargets[k] = nil
     elseif u.DeadOrGhost or u.Health <= 1 then
       self.HealTargets[k] = nil
     elseif Me:GetDistance(u) > 40 then
@@ -65,6 +70,7 @@ function Heal:WeighFilter()
     local priority = 0
     local istank = false
     local isdps = false
+    local isheal = false
 
     -- only heal group members for now
     local member = group:GetMemberByGuid(u.Guid)
@@ -75,7 +81,12 @@ function Heal:WeighFilter()
         priority = priority + 20
         istank = true
       end
-      if member.Role & GroupRole.Healer == GroupRole.Healer then priority = priority + 10 end
+
+      if member.Role & GroupRole.Healer == GroupRole.Healer then
+        priority = priority + 10
+        isheal = true
+      end
+
       if member.Role & GroupRole.Damage == GroupRole.Damage then
         priority = priority + 5
         isdps = true
@@ -90,21 +101,19 @@ function Heal:WeighFilter()
     end
 
     if istank then
-      table.insert(self.Tanks, { Unit = u, Priority = priority })
+      table.insert(self.Friends.Tanks, u)
+    elseif isdps then
+      table.insert(self.Friends.DPS, u)
+    elseif isheal then
+      table.insert(self.Friends.Healers, u)
     end
 
-    if isdps then
-      table.insert(self.DPS, {Unit = u, Priority = priority})
-    end
+    table.insert(self.Friends.All, u)
 
     ::continue::
   end
 
   table.sort(self.PriorityList, function(a, b)
-    return a.Priority > b.Priority
-  end)
-
-  table.sort(self.Tanks, function(a, b)
     return a.Priority > b.Priority
   end)
 end
@@ -122,6 +131,8 @@ function Heal:GetLowestMember()
   return lowest
 end
 
+---@return WoWUnit[], integer Members below health percentage
+---@param pct integer Health percentage to check
 function Heal:GetMembersBelow(pct)
   local count = 0
   local members = {}
