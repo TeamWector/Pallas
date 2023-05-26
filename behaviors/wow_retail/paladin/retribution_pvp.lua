@@ -58,13 +58,13 @@ end
 local function FinalReckoning(enemy)
   local spell = Spell.FinalReckoning
 
-  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 60000) and spell:CastEx(enemy)
+  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 55000) and spell:CastEx(enemy)
 end
 
 local function DivineToll(enemy)
   local spell = Spell.DivineToll
 
-  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 60000) and spell:CastEx(enemy)
+  return (IsCrusade() or Spell.Crusade:CooldownRemaining() > 55000) and spell:CastEx(enemy)
 end
 
 local function DivineStorm()
@@ -173,6 +173,8 @@ local function PaladinRetriCombat()
 
   if common:DoInterrupt() then return end
 
+  if WoWItem:UseHealthstone() then return end
+
   if DivineShield() then return end
   if DivineProtection() then return end
 
@@ -192,6 +194,7 @@ local function PaladinRetriCombat()
   end)
   for _, f in pairs(friends) do
     if f.HealthPct < 40 and Spell.WordOfGlory:CastEx(f) then return end
+    if f.HealthPct < 40 and Spell.FlashOfLight:CastEx(f) then return end
     if isNotForbearance(f) and f.HealthPct < 15 and Spell.LayOnHands:CastEx(f) then return end
     if isNotForbearance(f) and f.HealthPct < 25 and Spell.BlessingOfProtection:CastEx(f) then return end
     if f.HealthPct < 30 and Me.HealthPct > 75 and Spell.BlessingOfSacrifice:CastEx(f) then return end
