@@ -1,5 +1,5 @@
 ---@diagnostic disable: param-type-mismatch
-local common = require('behaviors.wow_wrath.paladin.common')
+local common = require('behaviors.wow_wrath.Pallas.paladin.common')
 local dispels = require('data.dispels')
 
 local options = {

@@ -1,4 +1,4 @@
-local common = require('behaviors.wow_retail.demonhunter.common')
+local common = require('behaviors.wow_retail.PoorPVP.demonhunter.common')
 local colors = require("data.colors")
 
 local options = {

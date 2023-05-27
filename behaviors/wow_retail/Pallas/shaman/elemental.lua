@@ -1,4 +1,4 @@
-local common = require('behaviors.wow_retail.shaman.common')
+local common = require('behaviors.wow_retail.Pallas.shaman.common')
 
 
 -- TALENTS

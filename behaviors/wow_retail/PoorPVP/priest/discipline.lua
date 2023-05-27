@@ -1,4 +1,4 @@
-local common = require("behaviors.wow_retail.priest.common")
+local common = require("behaviors.wow_retail.PoorPVP.priest.common")
 
 local options = {
   Name = "Priest (Discipline) PVP",

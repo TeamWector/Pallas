@@ -1,4 +1,4 @@
-local common = require("behaviors.wow_retail.shaman.common")
+local common = require("behaviors.wow_retail.PoorPVP.shaman.common")
 
 -- BgQAu3fz4tp2ZikXIAdNeR+oLAAAAAAAAAAAAAQIRSiWCpJJlElUCSkASLSoFaSSBQiolkEJRD
 

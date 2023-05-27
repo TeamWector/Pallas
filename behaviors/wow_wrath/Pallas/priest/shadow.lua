@@ -1,4 +1,4 @@
-local common = require('behaviors.priest.common')
+local common = require('behaviors.wow_wrath.Pallas.priest.common')
 
 local options = {
     Name = "Priest (Shadow)",

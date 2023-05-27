@@ -1,4 +1,4 @@
-local common = require("behaviors.wow_retail.evoker.common")
+local common = require("behaviors.wow_retail.Pallas.evoker.common")
 
 local options = {
   Name = "Evoker (Preserve)",

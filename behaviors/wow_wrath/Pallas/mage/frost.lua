@@ -1,4 +1,4 @@
-local common = require("behaviors.mage.common")
+local common = require("behaviors.wow_wrath.Pallas.mage.common")
 local options = {
     Name = "Mage (Frost)",
     Widgets = {
