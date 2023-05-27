@@ -1,8 +1,11 @@
-local DemonhunterHavoc = require('behaviors.wow_retail.ExampleBehavior.demonhunter.havoc')
-local DemonhunterVengeance = require('behaviors.wow_retail.ExampleBehavior.demonhunter.vengeance')
+local behaviors = {
+  [BehaviorType.Combat] = function() end
+}
+
+local exampleCallback = {Options = {}, Behaviors = behaviors}
 
 local exampleBehavior = {
-  Name = "Example Behavior",
+  Name = "Retail Example Behavior",
   Classes = {
     ClassType.DeathKnight,
     ClassType.DemonHunter,
@@ -20,14 +23,81 @@ local exampleBehavior = {
   },
   Callbacks = {
     ["deathknight"] = {
-      ["Blood"] = {
-        [BehaviorType.Combat] = function() end,
-        [BehaviorType.Heal] = function() end,
-      },
+      ["Blood"] = exampleCallback,
+      ["Frost"] = exampleCallback,
+      ["Unholy"] = exampleCallback,
+      ["Initial"] = exampleCallback,
     },
     ["demonhunter"] = {
-      ["Havoc"] = DemonhunterHavoc,
-      ["Vengeance"] = DemonhunterVengeance,
+      ["Havoc"] = exampleCallback,
+      ["Vengeance"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["druid"] = {
+      ["Balance"] = exampleCallback,
+      ["Feral"] = exampleCallback,
+      ["Guardian"] = exampleCallback,
+      ["Restoration"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["evoker"] = {
+      ["devastation"] = exampleCallback,
+      ["preservation"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["hunter"] = {
+      ["Beast Mastery"] = exampleCallback,
+      ["Marksmanship"] = exampleCallback,
+      ["Survival"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["mage"] = {
+      ["Arcane"] = exampleCallback,
+      ["Fire"] = exampleCallback,
+      ["Frost"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["monk"] = {
+      ["Brewmaster"] = exampleCallback,
+      ["Mistweaver"] = exampleCallback,
+      ["Windwalker"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["paladin"] = {
+      ["Holy"] = exampleCallback,
+      ["Protection"] = exampleCallback,
+      ["Retribution"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["priest"] = {
+      ["Discipline"] = exampleCallback,
+      ["Holy"] = exampleCallback,
+      ["Shadow"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["rogue"] = {
+      ["Assassination"] = exampleCallback,
+      ["Outlaw"] = exampleCallback,
+      ["Subtlety"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["shaman"] = {
+      ["Elemental"] = exampleCallback,
+      ["Enhancement"] = exampleCallback,
+      ["Restoration"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["warlock"] = {
+      ["Affliction"] = exampleCallback,
+      ["Demonology"] = exampleCallback,
+      ["Destruction"] = exampleCallback,
+      ["Initial"] = exampleCallback,
+    },
+    ["warrior"] = {
+      ["Arms"] = exampleCallback,
+      ["Fury"] = exampleCallback,
+      ["Protection"] = exampleCallback,
+      ["Initial"] = exampleCallback,
     },
   }
 }
