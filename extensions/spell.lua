@@ -8,19 +8,26 @@ SpellCastExFlags = {
   NoUsable = 0x1
 }
 
-local randomModifier = 0
-local spellDelay = {}
-local globalDelay = 0
----@type WoWUnit
+---@type WoWUnit Current target that our spell is targetting
 WoWSpell.Target = nil
----@type boolean
+---@type boolean set this to true or false in your behavior, eg when using Spiritwalker's Grace
 WoWSpell.ignoreCastTime = false
+
+---@type integer Random modifier for interrupt "humanization"
+local randomModifier = 0
+---@type integer[] contains ids of all spells that are on delay
+local spellDelay = {}
+---@type integer Global delay (Optional Setting) Works well for no overlaps on dot applying
+local globalDelay = 0
+
+
 
 SpellListener = wector.FrameScript:CreateListener()
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SENT')
 SpellListener:RegisterEvent('CONSOLE_MESSAGE')
 
+---@type table contains all queued spells called from console command.
 local queue = {}
 
 ---@param target WoWUnit @target, focus, me
@@ -71,10 +78,12 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
   end
 end
 
+local castedguid = ""
 local is_queue_spell = false
-local spellIdCast = 0
+---@param castguid WoWGuid
 function SpellListener:UNIT_SPELLCAST_SENT(unit, target, castguid, spellID)
-  spellIdCast = spellID
+  castedguid = castguid.ToString
+
   if is_queue_spell then
     for k, q in pairs(queue) do
       if q.ability.Id == spellID then
@@ -87,15 +96,15 @@ function SpellListener:UNIT_SPELLCAST_SENT(unit, target, castguid, spellID)
   spellDelay[spellID] = wector.Game.Time + math.random(150, 300)
 end
 
-function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castGuid, SpellID)
-  if SpellID ~= spellIdCast then return end
-
-  spellIdCast = 0
+---@param castguid WoWGuid
+function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castguid, SpellID)
+  if castguid.ToString ~= castedguid then return end
 
   local latency = Settings.PallasGlobalDelay and 100 or 0
   globalDelay = wector.Game.Time + latency
 end
 
+---@type table All these spells have 0 cast time but can not be used while moving, most likely a channeled spell.
 local exclusions = {
   [117952] = true, -- Crackling Jade Lightning
   [115175] = true, --Soothing Mist
