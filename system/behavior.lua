@@ -21,6 +21,7 @@ BehaviorType = {
   Extra = 5
 }
 
+
 function Behavior:Initialize(isReload)
   if isReload and self.LoadedClass == Me.ClassName then
     return
@@ -70,16 +71,22 @@ function Behavior:Update()
   -- if no behavior is active, return
   if not behavior then return end
 
-  -- Call all behaviors in whatever order they are in
-  -- Could sort to call them in a specific order
-  for _, k in pairs(BehaviorType) do
-    if behavior.Behaviors[k] then
-      behavior.Behaviors[k]()
+  local className = Me.ClassName:lower():gsub("%s+", "")
+  local specname = Me:SpecializationName()
+
+  -- Loop through BehaviorTypes
+  for _, type in pairs(BehaviorType) do
+    -- Check if a callback exists for the player's class, specialization and behavior type
+    if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname].Behaviors and behavior.Callbacks[className][specname].Behaviors[type] then
+      -- Call the callback
+      behavior.Callbacks[className][specname].Behaviors[type]()
     end
-    for _, v in pairs(self.Extras) do
-      if v.Behaviors[k] then
-        v.Behaviors[k]()
-      end
+  end
+
+  -- Run Extras separately
+  for _, extraBehavior in pairs(self.Extras) do
+    if extraBehavior.Behaviors[BehaviorType.Extra] then
+      extraBehavior.Behaviors[BehaviorType.Extra]()
     end
   end
 end
@@ -89,6 +96,14 @@ function Behavior:setActive(behavior)
   Settings.ActiveBehavior = behavior.Name
   self.Active = behavior
 
+  -- TODO: Add Options when feature exists for the given specialization on behavior change
+  -- find the appropriate options for this specialization
+  -- local className = Me.ClassName:lower():gsub("%s+", "")
+  -- local specname = Me:SpecializationName()
+
+  -- if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname].Options then
+  --   Menu:AddOptionMenu(behavior.Callbacks[className][specname].Options)
+  -- end
   -- XXX: add back when we can change ImText text value
   --Menu.CurrentBehavior.Text = behavior.Name
 end
@@ -170,9 +185,15 @@ function Behavior:HasBehavior(type)
   -- if no behavior is active, return
   if not behavior then return false end
 
-  if not behavior.Behaviors[type] then return false end
+  local className = Me.ClassName:lower():gsub("%s+", "")
+  local specname = Me:SpecializationName()
 
-  return true
+  -- Check if a callback exists for the player's class, specialization, and behavior type
+  if behavior.Callbacks[className] and behavior.Callbacks[className][specname] and behavior.Callbacks[className][specname].Behaviors and behavior.Callbacks[className][specname].Behaviors[type] then
+    return true
+  end
+
+  return false
 end
 
 return Behavior

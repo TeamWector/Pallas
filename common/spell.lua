@@ -1,26 +1,26 @@
 ---@diagnostic disable: duplicate-set-field
 
 Spell = setmetatable({
-        ---@type WoWSpell[]
-        Cache = {},
-        NullSpell = WoWSpell(0)
-    },
-        {
-            __index = function(tbl, key)
-              if tbl.Cache[key] then
-                -- fix for cache containing rank 1 spells after relogging
-                local spell = tbl.Cache[key]
-                local tmp = WoWSpell(spell.Name)
-                if tmp.Rank > spell.Rank then
-                  -- corrupt cache, update
-                  Spell:UpdateCache()
-                  wector.Console:Log('Updated corrupt cached')
-                end
-                return tbl.Cache[key]
-              end
-              return tbl.NullSpell
-            end
-        })
+    ---@type WoWSpell[]
+    Cache = {},
+    NullSpell = WoWSpell(0)
+  },
+  {
+    __index = function(tbl, key)
+      if tbl.Cache[key] then
+        -- fix for cache containing rank 1 spells after relogging
+        local spell = tbl.Cache[key]
+        local tmp = WoWSpell(spell.Name)
+        if tmp.Rank > spell.Rank then
+          -- corrupt cache, update
+          Spell:UpdateCache()
+          wector.Console:Log('Updated corrupt cached')
+        end
+        return tbl.Cache[key]
+      end
+      return tbl.NullSpell
+    end
+  })
 
 local function tchelper(first, rest)
   return first:upper() .. rest:lower()
@@ -75,5 +75,11 @@ Spell.EventListener:RegisterEvent('LEARNED_SPELL_IN_TAB')
 function Spell.EventListener:PLAYER_ENTERING_WORLD(_, _) Spell:UpdateCache() end
 
 RegisterEvent('OnLoad', Spell.UpdateCache)
+
+Spell.EventListener:RegisterEvent('ACTIVE_PLAYER_SPECIALIZATION_CHANGED')
+function Spell.EventListener:ACTIVE_PLAYER_SPECIALIZATION_CHANGED()
+  print(string.format('Specialization changed to: %s', Me:SpecializationName()))
+  Spell:UpdateCache()
+end
 
 return Spell
