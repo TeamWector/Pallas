@@ -71,7 +71,7 @@ function commonPriest:PowerWordFortitude()
   if Me.InCombat or not Settings.PriestPowerWordFortitude then return false end
   if wector.Game.Time - lastUsed < 5000 then return false end
 
-  local friends = WoWGroup:GetGroupUnits()
+  local friends = Heal.Friends.All
 
   for _, f in pairs(friends) do
     if spell:Apply(f) then lastUsed = wector.Game.Time return true end

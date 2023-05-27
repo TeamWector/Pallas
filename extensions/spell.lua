@@ -9,15 +9,12 @@ SpellCastExFlags = {
 }
 
 local randomModifier = 0
-local castTarget = nil
 local spellDelay = {}
 local globalDelay = 0
-
+---@type WoWUnit
+WoWSpell.Target = nil
+---@type boolean
 WoWSpell.ignoreCastTime = false
-
-function WoWSpell:GetCastTarget()
-  return castTarget
-end
 
 SpellListener = wector.FrameScript:CreateListener()
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
@@ -56,7 +53,7 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
   if target and ability then
     ability = Spell[ability]
 
-    if not ability or ability.Slot < 0 or ability:CooldownRemaining() > 2000 then
+    if not ability or ability.Slot < 0 or ability:CooldownRemaining() > Me:GCDCooldown() then
       print("Spell Wasn't Added To Queue")
       return
     end
@@ -76,37 +73,37 @@ end
 
 local is_queue_spell = false
 local spellIdCast = 0
-local targetCast
 function SpellListener:UNIT_SPELLCAST_SENT(unit, target, castguid, spellID)
   spellIdCast = spellID
-  targetCast = target
+  if is_queue_spell then
+    for k, q in pairs(queue) do
+      if q.ability.Id == spellID then
+        table.remove(queue, k)
+        is_queue_spell = false
+      end
+    end
+  end
+
+  spellDelay[spellID] = wector.Game.Time + math.random(150, 300)
 end
 
 function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castGuid, SpellID)
-  if SpellID ~= spellIdCast or not targetCast == unitTarget then return end
+  if SpellID ~= spellIdCast then return end
 
-  if unitTarget == Me then
-    castTarget = nil
-  end
+  spellIdCast = 0
 
-  if is_queue_spell then
-    table.remove(queue, 1)
-    is_queue_spell = false
-  end
-
-  spellDelay[SpellID] = wector.Game.Time + math.random(150, 500)
-  local latency = math.random() * Settings.PallasWorldLatency + Settings.PallasWorldLatency * 1.25
+  local latency = Settings.PallasGlobalDelay and 100 or 0
   globalDelay = wector.Game.Time + latency
 end
 
 local exclusions = {
-  117952, -- Crackling Jade Lightning
-  115175, -- Soothing Mist
-  357208, -- Fire Breath
-  356995, -- Disintegrate,
-  359073, -- Eternity Surge
-  15407,  -- Mind Flay
-  391403, -- Mind flay V2
+  [117952] = true,-- Crackling Jade Lightning
+  [115175] = true, --Soothing Mist
+  [357208] = true, -- Fire Breath
+  [356995] = true,-- Disintegrate,
+  [359073] = true,-- Eternity Surge
+  [15407] = true,  -- Mind Flay
+  [391403] = true, -- Mind flay V2
 }
 
 function WoWSpell:CastEx(a1, ...)
@@ -115,7 +112,7 @@ function WoWSpell:CastEx(a1, ...)
     local target = queue[1].target
     local interrupt = queue[1].interrupt
 
-    if ability:IsUsable() then
+    if ability:IsUsable() and ability:InRange(target) then
       self = queue[1].ability
       a1 = target
       is_queue_spell = true
@@ -150,7 +147,7 @@ function WoWSpell:CastEx(a1, ...)
   if self.IsActive then return false end
 
   -- if spell has cast time, are we moving?
-  if (self.CastTime > 0 or table.contains(exclusions, self.Id)) and Me:IsMoving() and not self.ignoreCastTime then return false end
+  if (self.CastTime > 0 or exclusions[self.Id]) and Me:IsMoving() and not self.ignoreCastTime then return false end
 
   if type(arg1) == 'userdata' and type(arg1.ToUnit) ~= 'nil' then
     -- cast at unit
@@ -169,7 +166,7 @@ function WoWSpell:CastEx(a1, ...)
 
     wector.Console:Log('Cast ' .. self.Name)
 
-    castTarget = arg1.ToUnit
+    WoWSpell.Target = arg1.ToUnit
     return self:Cast(arg1.ToUnit)
   else
     -- cast at position
@@ -189,7 +186,6 @@ function WoWSpell:CastEx(a1, ...)
     end
 
     wector.Console:Log('Cast ' .. self.Name)
-
     return self:Cast(x, y, z)
   end
 end

@@ -155,9 +155,11 @@ function Heal:GetMembersAround(friend, dist, threshold)
   local count = 0
   local members = {}
 
+  threshold = threshold or 100
+
   for _, v in pairs(self.PriorityList) do
     local f = v.Unit
-    if friend:GetDistance(f) <= dist and not threshold or f.HealthPct < threshold then
+    if friend:GetDistance(f) <= dist and f.HealthPct < threshold then
       count = count + 1
       table.insert(members, f)
     end

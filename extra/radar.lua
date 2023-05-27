@@ -68,6 +68,12 @@ local options = {
     },
     {
       type = "checkbox",
+      uid = "ExtraRadarDrawLinesClosest",
+      text = "Draw Lines Closest Only",
+      default = false
+    },
+    {
+      type = "checkbox",
       uid = "ExtraRadarDrawDistance",
       text = "Draw Distance",
       default = false
@@ -243,10 +249,32 @@ local function CollectVisuals()
       end
     end
   end
+
+  if Settings.ExtraRadarDrawLinesClosest then
+    table.sort(onscreen, function(a, b)
+      return Me:GetDistance(a.object) < Me:GetDistance(b.object)
+    end)
+  end
 end
 
 local function DrawColoredLines()
   if not Settings.ExtraRadarDrawLines then return end
+
+
+  if Settings.ExtraRadarDrawLinesClosest then
+    local closest = onscreen[1]
+    if not closest then return end
+
+    local object = closest.object
+    local type = closest.type
+    local pos = object.Position
+    local start = World2Screen(Me.Position)
+    local finish = World2Screen(Vec3(pos.x, pos.y, pos.z))
+    local color = objectColors[type] or colors.white
+
+    DrawLine(start, finish, color, 2)
+    return
+  end
 
   for _, o in pairs(onscreen) do
     local object = o.object

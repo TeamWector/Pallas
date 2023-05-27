@@ -105,7 +105,7 @@ local function BeaconLogic()
 end
 
 local function PaladinHolyHeal()
-    local spelltarget = WoWSpell:GetCastTarget()
+    local spelltarget = WoWSpell.Target
     if IsCastingHeal() and spelltarget then
         local hlost = spelltarget:GetHealthLost()
         if hlost < Settings.FlashOfLightAmt * 0.7 and
