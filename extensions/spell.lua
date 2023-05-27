@@ -97,11 +97,11 @@ function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castGuid, SpellID)
 end
 
 local exclusions = {
-  [117952] = true,-- Crackling Jade Lightning
+  [117952] = true, -- Crackling Jade Lightning
   [115175] = true, --Soothing Mist
   [357208] = true, -- Fire Breath
-  [356995] = true,-- Disintegrate,
-  [359073] = true,-- Eternity Surge
+  [356995] = true, -- Disintegrate,
+  [359073] = true, -- Eternity Surge
   [15407] = true,  -- Mind Flay
   [391403] = true, -- Mind flay V2
 }
