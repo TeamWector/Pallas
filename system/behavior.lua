@@ -31,29 +31,30 @@ function Behavior:Initialize(isReload)
 
   local behaviors = self:CollectScriptPaths()
   for _, scriptPath in ipairs(behaviors) do
-    -- pcall require so we can catch errors
     local status, behavior = pcall(require, scriptPath)
     if status and self:ValidateBehavior(behavior) then
+      local className = Me.ClassName:lower():gsub("%s+", "")
       -- TODO @IAN @SOVIET remove this when we have options refresh
 
       -- create a menu for this behavior
       Menu2:CreateBehaviorMenu(behavior.Name)
 
       -- iterate over all callbacks in behavior
-      for className, classCallbacks in pairs(behavior.Callbacks) do
-        for specname, specCallbacks in pairs(classCallbacks) do
-          -- check if the Options field exists and add it to the menu
-          if specCallbacks.Options and next(specCallbacks.Options) ~= nil then
-            -- create a submenu under the behavior menu for these options
-            Menu2:CreateSubmenu(behavior.Name, specCallbacks.Options.Name)
-            -- add options for this submenu
-            Menu2:AddOptionMenu(behavior.Name, specCallbacks.Options)
+      for classNameCallback, classCallbacks in pairs(behavior.Callbacks) do
+        if classNameCallback == className then -- check if the className matches
+          for specname, specCallbacks in pairs(classCallbacks) do
+            -- check if the Options field exists and add it to the menu
+            if specCallbacks.Options and next(specCallbacks.Options) ~= nil then
+              -- create a submenu under the behavior menu for these options
+              Menu2:CreateSubmenu(behavior.Name, specCallbacks.Options.Name)
+              -- add options for this submenu
+              Menu2:AddOptionMenu(behavior.Name, specCallbacks.Options)
+            end
           end
         end
       end
 
       -- END TODO @IAN @SOVIET remove this when we have options refresh
-
 
       Menu.CombatBehavior:AddOption(behavior.Name)
       table.insert(self.Loaded, behavior)
@@ -100,16 +101,10 @@ function Behavior:Update()
     end
   end
 
-  -- Handle Extras first
+  -- Run Extras separately
   for _, extraBehavior in pairs(self.Extras) do
-    -- Iterate through all callbacks in this extra behavior
-    for callbackName, callback in pairs(extraBehavior.Callbacks) do
-      -- Check if Behaviors exists and is a function
-      if callback.Behaviors then
-        callback.Behaviors[BehaviorType.Extra]()
-      else
-        print('Failed to run ' .. callbackName .. ': Not a valid callback function')
-      end
+    if extraBehavior.Behaviors[BehaviorType.Extra] then
+      extraBehavior.Behaviors[BehaviorType.Extra]()
     end
   end
 end
@@ -160,47 +155,38 @@ function Behavior:LoadExtraBehaviors()
   -- <root>\behaviors\generic\
   local path = filesystem.Path(string.format('%s\\behaviors\\generic\\', wector.script_path))
 
-  -- iterate all files in class behaviors directory
+  -- iterate all files in behaviors\generic\
   local it = filesystem.Directory(path)
   for _, v in pairs(it) do
     local s = tostring(v)
 
-    if s:sub(-4) == ".lua" then
-      -- find the last backslash in path to extract the behavior name
-      local idx = s:find("\\[^\\]*$")
-      if idx then
-        local behaviorPath = string.format(s)
-        local rel = filesystem.relative_base(behaviorPath, wector.script_path):gsub('\\', '.'):sub(1, -5)
+    -- find the last backslash in path to extract the behavior name
+    local idx = s:find("\\[^\\]*$")
+    if idx then
+      local behavior_name = s:sub(idx + 1, s:len())
 
-        local status, behavior = pcall(require, rel)
-        if status then
-          if behavior.Callbacks and next(behavior.Callbacks) then
-            -- create a menu for this behavior
-            Menu2:CreateBehaviorMenu(behavior.Name)
+      -- create a full path including the behavior name
+      local behavior_path = string.format('%s\\%s.lua', s, behavior_name)
+      local rel = filesystem.relative_base(behavior_path, wector.script_path):gsub('\\', '.'):sub(1, -5)
 
-            -- iterate over all callbacks in behavior
-            for callbackName, callback in pairs(behavior.Callbacks) do
-              -- check if the Options field exists and add it to the menu
-              if callback.Options and next(callback.Options) ~= nil then
-                -- create a submenu under the behavior menu for these options
-                Menu2:CreateSubmenu(behavior.Name, callback.Options.Name)
-                -- add options for this submenu
-                Menu2:AddOptionMenu(behavior.Name, callback.Options)
-              end
-            end
-
-            table.insert(self.Loaded, behavior)
-            table.insert(self.Extras, behavior) -- insert the behavior into Extras
-          else
-            print('Failed to load ' .. behaviorPath .. ': Invalid behavior, it does not have any callbacks')
-          end
-        else
-          print('Failed to load ' .. behaviorPath .. ': ' .. behavior)
+      local status, behavior = pcall(require, rel)
+      if status then
+        if behavior.Options then
+          -- add the behavior's options directly to the menu as a submenu
+          Menu:AddOptionMenu(behavior.Options)
         end
+        table.insert(self.Extras, behavior)
+      else
+        print('Failed to load ' .. behavior_path .. ': ' .. behavior)
       end
     end
   end
 end
+
+
+
+
+
 
 function Behavior:ReportLoadedBehaviors()
   print('Loaded ' .. table.length(self.Loaded) .. ' behavior(s) for ' .. Me.ClassName)

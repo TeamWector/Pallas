@@ -66,9 +66,6 @@ local function LavaBurstWithLavaSurge(target)
   if IsLavaSurge() and target:HasAura("Flame Shock") and Spell.LavaBurst:CastEx(target) then return true end
 end
 
-
-
-
 local function FlameShock(target)
   local spell = Spell.FlameShock
   if spell:CooldownRemaining() > 0 then return false end
