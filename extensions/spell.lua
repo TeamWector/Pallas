@@ -8,39 +8,46 @@ SpellCastExFlags = {
   NoUsable = 0x1
 }
 
+---@type WoWUnit Current target that our spell is targetting
+WoWSpell.Target = nil
+---@type boolean set this to true or false in your behavior, eg when using Spiritwalker's Grace
+WoWSpell.ignoreCastTime = false
+
+---@type integer Random modifier for interrupt "humanization"
 local randomModifier = 0
-local castTarget = nil
+---@type integer[] contains ids of all spells that are on delay
 local spellDelay = {}
+---@type integer Global delay (Optional Setting) Works well for no overlaps on dot applying
 local globalDelay = 0
 
-function WoWSpell:GetCastTarget()
-  return castTarget
-end
+
 
 SpellListener = wector.FrameScript:CreateListener()
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED')
 SpellListener:RegisterEvent('UNIT_SPELLCAST_SENT')
 SpellListener:RegisterEvent('CONSOLE_MESSAGE')
 
+---@type table contains all queued spells called from console command.
 local queue = {}
 
----@param spell WoWSpell @spell
----@param target string @target, focus, me
-function WoWSpell:AddToQueue(spell, target)
+---@param target WoWUnit @target, focus, me
+---@param interrupt boolean Interrupt current cast
+function WoWSpell:AddToQueue(target, interrupt)
   local slot = #queue + 1
 
   local object = {
     target = target,
-    ability = spell,
+    ability = self,
+    interrupt = interrupt or false,
     timer = #queue == 0 and wector.Game.Time + 3000 or queue[#queue].timer + 3000
   }
 
   for _, v in pairs(queue) do
-    if v.ability == spell then return end
+    if v.ability == self then return end
   end
 
   queue[slot] = object
-  Alert("Queued: " .. spell.Name .. " on " .. target, 3)
+  Alert("Queued: " .. self.Name .. " on " .. target.Name, 3)
 end
 
 function SpellListener:CONSOLE_MESSAGE(msg, color)
@@ -48,6 +55,7 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
 
   local target = string.match(msg, "queue%s*(%a*)%s*(%a+)")
   local ability = string.match(msg, "queue %a+ (%a+)")
+  local interrupt = string.find(msg, "interrupt")
 
   if target and ability then
     ability = Spell[ability]
@@ -60,58 +68,67 @@ function SpellListener:CONSOLE_MESSAGE(msg, color)
     if not target or (target == "target" and not Me.Target or target == "focus" and not Me.FocusTarget) then
       print("Invalid Target")
       return
+    else
+      target = (target == "target" and Me.Target or target == "focus" and Me.FocusTarget) or Me
     end
 
-    WoWSpell:AddToQueue(ability, target)
+    ability:AddToQueue(target, interrupt)
   else
     print("Invalid Macro Expression")
   end
 end
 
+local castedguid = ""
 local is_queue_spell = false
-local spellIdCast = 0
-local targetCast
+---@param castguid WoWGuid
 function SpellListener:UNIT_SPELLCAST_SENT(unit, target, castguid, spellID)
-  spellIdCast = spellID
-  targetCast = target
-end
-
-function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castGuid, SpellID)
-  if SpellID ~= spellIdCast or not targetCast == unitTarget then return end
-
-  if unitTarget == Me then
-    castTarget = nil
-  end
+  castedguid = castguid.ToString
 
   if is_queue_spell then
-    table.remove(queue, 1)
-    is_queue_spell = false
+    for k, q in pairs(queue) do
+      if q.ability.Id == spellID then
+        table.remove(queue, k)
+        is_queue_spell = false
+      end
+    end
   end
 
-  spellDelay[SpellID] = wector.Game.Time + math.random(150, 500)
-  local latency = math.random() * Settings.PallasWorldLatency + Settings.PallasWorldLatency * 1.25
+  spellDelay[spellID] = wector.Game.Time + math.random(150, 300)
+end
+
+---@param castguid WoWGuid
+function SpellListener:UNIT_SPELLCAST_SUCCEEDED(unitTarget, castguid, SpellID)
+  if castguid.ToString ~= castedguid then return end
+
+  local latency = Settings.PallasGlobalDelay and 100 or 0
   globalDelay = wector.Game.Time + latency
 end
 
+---@type table All these spells have 0 cast time but can not be used while moving, most likely a channeled spell.
 local exclusions = {
-  117952, -- Crackling Jade Lightning
-  115175, -- Soothing Mist
-  357208, -- Fire Breath
-  356995, -- Disintegrate,
-  359073, -- Eternity Surge
-  15407,  -- Mind Flay
-  391403, -- Mind flay V2
+  [117952] = true, -- Crackling Jade Lightning
+  [115175] = true, --Soothing Mist
+  [357208] = true, -- Fire Breath
+  [356995] = true, -- Disintegrate,
+  [359073] = true, -- Eternity Surge
+  [15407] = true,  -- Mind Flay
+  [391403] = true, -- Mind flay V2
 }
 
 function WoWSpell:CastEx(a1, ...)
   if queue[1] then
     local ability = queue[1].ability
     local target = queue[1].target
+    local interrupt = queue[1].interrupt
 
-    if ability:IsUsable() then
+    if ability:IsUsable() and ability:InRange(target) then
       self = queue[1].ability
-      a1 = target == "target" and Me.Target or target == "focus" and Me.FocusTarget or Me
+      a1 = target
       is_queue_spell = true
+
+      if interrupt and Me.IsCastingOrChanneling then
+        Me:StopCasting()
+      end
     end
 
     for k, v in pairs(queue) do
@@ -139,7 +156,7 @@ function WoWSpell:CastEx(a1, ...)
   if self.IsActive then return false end
 
   -- if spell has cast time, are we moving?
-  if (self.CastTime > 0 or table.contains(exclusions, self.Id)) and Me:IsMoving() then return false end
+  if (self.CastTime > 0 or exclusions[self.Id]) and Me:IsMoving() and not self.ignoreCastTime then return false end
 
   if type(arg1) == 'userdata' and type(arg1.ToUnit) ~= 'nil' then
     -- cast at unit
@@ -158,7 +175,7 @@ function WoWSpell:CastEx(a1, ...)
 
     wector.Console:Log('Cast ' .. self.Name)
 
-    castTarget = arg1.ToUnit
+    WoWSpell.Target = arg1.ToUnit
     return self:Cast(arg1.ToUnit)
   else
     -- cast at position
@@ -178,7 +195,6 @@ function WoWSpell:CastEx(a1, ...)
     end
 
     wector.Console:Log('Cast ' .. self.Name)
-
     return self:Cast(x, y, z)
   end
 end
@@ -233,7 +249,7 @@ function WoWSpell:Apply(unit, condition)
   -- Absolute corruption exception (Aura Remaining 0)
   if aura and (aura.Remaining > 2000 or aura.Remaining == 0) then return false end
 
-  return self:CastEx(unit)
+  return self:CastEx(unit) or false
 end
 
 ---@return boolean casted if we used our interrupt.

@@ -142,7 +142,17 @@ function WoWUnit:IsImmune()
     end
   end
 
-  return (self.UnitFlags & UnitFlags.Unk31 > 0)
+  return (self.UnitFlags & UnitFlags.Unk31 > 0) or (self.UnitFlags & UnitFlags.ImmuneToPC > 0)
+end
+
+function WoWUnit:IsValidTarget()
+  local canAttack = self.IsAttackable
+  local deadOrGhost = self.DeadOrGhost
+  local inDistance = self:GetDistance(Me.ToUnit) <= 40
+  local isTapDenied = self.IsTapDenied and (not self.Target or self.Target ~= Me)
+  local isImmune = self:IsImmune()
+
+  return canAttack and not deadOrGhost and inDistance and not isTapDenied and not isImmune
 end
 
 function WoWUnit:WithinLineOfSight(target)
