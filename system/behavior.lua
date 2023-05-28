@@ -34,9 +34,26 @@ function Behavior:Initialize(isReload)
     -- pcall require so we can catch errors
     local status, behavior = pcall(require, scriptPath)
     if status and self:ValidateBehavior(behavior) then
-      if behavior.Options then
-        Menu:AddOptionMenu(behavior.Options)
+      -- TODO @IAN @SOVIET remove this when we have options refresh
+
+      -- create a menu for this behavior
+      Menu2:CreateBehaviorMenu(behavior.Name)
+
+      -- iterate over all callbacks in behavior
+      for className, classCallbacks in pairs(behavior.Callbacks) do
+        for specname, specCallbacks in pairs(classCallbacks) do
+          -- check if the Options field exists and add it to the menu
+          if specCallbacks.Options and next(specCallbacks.Options) ~= nil then
+            -- create a submenu under the behavior menu for these options
+            Menu2:CreateSubmenu(behavior.Name, specCallbacks.Options.Name)
+            -- add options for this submenu
+            Menu2:AddOptionMenu(behavior.Name, specCallbacks.Options)
+          end
+        end
       end
+
+      -- END TODO @IAN @SOVIET remove this when we have options refresh
+
 
       Menu.CombatBehavior:AddOption(behavior.Name)
       table.insert(self.Loaded, behavior)
@@ -96,7 +113,7 @@ function Behavior:setActive(behavior)
   Settings.ActiveBehavior = behavior.Name
   self.Active = behavior
 
-  -- TODO: Add Options when feature exists for the given specialization on behavior change
+  -- TODO @IAN: Add Options when feature exists for the given specialization on behavior change
   -- find the appropriate options for this specialization
   -- local className = Me.ClassName:lower():gsub("%s+", "")
   -- local specname = Me:SpecializationName()
@@ -134,17 +151,46 @@ function Behavior:ValidateBehavior(behavior)
 end
 
 function Behavior:LoadExtraBehaviors()
-  local extras = { 'autoloot', 'antiafk', 'radar' }
+  -- <root>\behaviors\generic\
+  local path = filesystem.Path(string.format('%s\\behaviors\\generic\\', wector.script_path))
 
-  for _, extra in ipairs(extras) do
-    local status, module = pcall(require, ('extra.' .. extra))
-    if status then
-      if module.Options then
-        Menu:AddOptionMenu(module.Options)
+  -- iterate all files in class behaviors directory
+  local it = filesystem.Directory(path)
+  for _, v in pairs(it) do
+    local s = tostring(v)
+
+    if s:sub(-4) == ".lua" then
+      -- find the last backslash in path to extract the behavior name
+      local idx = s:find("\\[^\\]*$")
+      if idx then
+        local behaviorPath = string.format(s)
+        local rel = filesystem.relative_base(behaviorPath, wector.script_path):gsub('\\', '.'):sub(1, -5)
+
+        local status, behavior = pcall(require, rel)
+        if status then
+          if behavior.Callbacks and next(behavior.Callbacks) then
+            -- create a menu for this behavior
+            Menu2:CreateBehaviorMenu(behavior.Name)
+
+            -- iterate over all callbacks in behavior
+            for callbackName, callback in pairs(behavior.Callbacks) do
+              -- check if the Options field exists and add it to the menu
+              if callback.Options and next(callback.Options) ~= nil then
+                -- create a submenu under the behavior menu for these options
+                Menu2:CreateSubmenu(behavior.Name, callback.Options.Name)
+                -- add options for this submenu
+                Menu2:AddOptionMenu(behavior.Name, callback.Options)
+              end
+            end
+
+            table.insert(self.Loaded, behavior)
+          else
+            print('Failed to load ' .. behaviorPath .. ': Invalid behavior, it does not have any callbacks')
+          end
+        else
+          print('Failed to load ' .. behaviorPath .. ': ' .. behavior)
+        end
       end
-      table.insert(self.Extras, module)
-    else
-      print('Failed to load ' .. extra)
     end
   end
 end

@@ -17,6 +17,7 @@ function Pallas:Initialize()
 
   print('Initialize Pallas')
   Menu:Initialize()
+  Menu2:Initialize()
   Behavior:Initialize()
 end
 
