@@ -100,10 +100,16 @@ function Behavior:Update()
     end
   end
 
-  -- Run Extras separately
+  -- Handle Extras first
   for _, extraBehavior in pairs(self.Extras) do
-    if extraBehavior.Behaviors[BehaviorType.Extra] then
-      extraBehavior.Behaviors[BehaviorType.Extra]()
+    -- Iterate through all callbacks in this extra behavior
+    for callbackName, callback in pairs(extraBehavior.Callbacks) do
+      -- Check if Behaviors exists and is a function
+      if callback.Behaviors then
+        callback.Behaviors[BehaviorType.Extra]()
+      else
+        print('Failed to run ' .. callbackName .. ': Not a valid callback function')
+      end
     end
   end
 end
@@ -184,6 +190,7 @@ function Behavior:LoadExtraBehaviors()
             end
 
             table.insert(self.Loaded, behavior)
+            table.insert(self.Extras, behavior) -- insert the behavior into Extras
           else
             print('Failed to load ' .. behaviorPath .. ': Invalid behavior, it does not have any callbacks')
           end
