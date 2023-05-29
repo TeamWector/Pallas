@@ -36,6 +36,9 @@ local dispels = {
   -- Dragonflight --
   -- The Azure Vault
   [384978] = DispelPriority.Low, -- Dragon Strike
+  [389443] = DispelPriority.Low, -- Purifying Blast
+  [385963] = DispelPriority.Low, -- Frost Shock
+  [269301] = DispelPriority.Low, -- Putrid Blood
   -- ***** PVP *****
   -- PURGE
   [1022] = DispelPriority.High,   -- Paladin - Blessing of Protection

@@ -9,9 +9,13 @@ function WoWGroup:GetGroupUnits()
   else
     local companions = group.Members
     for _, m in pairs(companions) do
-      local unit = wector.Game:GetObjectByGuid(m.Guid)
+      local object = wector.Game:GetObjectByGuid(m.Guid)
+      local unit = object and object.ToUnit
       if unit and unit.Position:DistanceSq(Me.Position) <= 40 then
-        table.insert(members, unit.ToUnit)
+        local valid = not unit.DeadOrGhost
+        if valid then
+          table.insert(members, unit)
+        end
       end
     end
   end

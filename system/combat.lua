@@ -1,4 +1,4 @@
----@diagnostic disable: param-type-mismatch
+---@diagnostic disable: param-type-mismatch, duplicate-set-field
 
 ---@class Combat : Targeting
 Combat = Combat or Targeting:New()
@@ -9,16 +9,26 @@ Combat.EnemiesInMeleeRange = 0
 Combat.Enemies = 0
 
 ---@type WoWUnit[]
-Combat.Explosives = {}
+Combat.Incorporeals = {}
 
 Combat.EventListener = wector.FrameScript:CreateListener()
 Combat.EventListener:RegisterEvent("PLAYER_ENTER_COMBAT")
 Combat.EventListener:RegisterEvent("PLAYER_LEAVE_COMBAT")
 Combat.EventListener:RegisterEvent("CONSOLE_MESSAGE")
 
+local specialUnits = {
+  incorporeal = 204560,
+}
+
+local ignoreList = {
+  [45704] = true, -- Vortex Pinnacle, hiding mobs
+}
+
+---@type boolean Console command burst to set on/off
 Combat.Burst = false
+
 function Combat.EventListener:CONSOLE_MESSAGE(msg)
-  if string.find(msg, "burst") then
+  if string.find(msg, "burst") and not string.find(msg, "queue") then
     Combat.Burst = not Combat.Burst
   end
 end
@@ -46,7 +56,8 @@ function Combat:Reset()
   self.BestTarget = nil -- reset
   self.EnemiesInMeleeRange = 0
   self.Enemies = 0
-  self.Explosives = {}
+  self.Incorporeals = {}
+  self.Targets = {}
 end
 
 function Combat:WantToRun()
@@ -56,7 +67,7 @@ function Combat:WantToRun()
 
   if (Me.UnitFlags & UnitFlags.Looting) == UnitFlags.Looting then return false end
 
-  return Settings.PallasAttackOOC or (Me.UnitFlags & UnitFlags.InCombat) == UnitFlags.InCombat
+  return Settings.PallasAttackOOC or Me.InCombat
 end
 
 function Combat:CollectTargets()
@@ -65,7 +76,7 @@ function Combat:CollectTargets()
 
   if not Me.InCombat and Settings.PallasAttackOOC then
     local target = Me.Target
-    if target and not target.IsTapDenied then
+    if target and target:IsValidTarget() then
       table.insert(self.Targets, Me.Target)
     end
   else
@@ -90,12 +101,20 @@ function Combat:ExclusionFilter()
       self.Targets[k] = nil
     elseif u:IsImmune() then
       self.Targets[k] = nil
+    elseif ignoreList[u.EntryId] then
+      self.Targets[k] = nil
+    elseif u.EntryId == specialUnits.incorporeal then -- Add to special units, remove from targets
+      if u.IsCastingOrChanneling then
+        table.insert(self.Incorporeals, u)
+      end
+      self.Targets[k] = nil
     end
   end
 end
 
 function Combat:InclusionFilter()
   local target = Me.Target
+
   if target then
     for _, u in pairs(self.Targets) do
       if u.Guid == target.Guid then
@@ -125,25 +144,12 @@ function Combat:WeighFilter()
       self.EnemiesInMeleeRange = self.EnemiesInMeleeRange + 1
     end
 
-    if u.EntryId == 120651 and u.IsCastingOrChanneling then
-      table.insert(self.Explosives, u)
-    end
-
     -- our only priority right now, current target
     if Me.Target and Me.Target == u then
       priority = priority + 50
     end
 
     table.insert(priorityList, { Unit = u, Priority = priority })
-  end
-
-  if #self.Explosives > 1 then
-    table.sort(self.Explosives, function(a, b)
-      local aCastLeft = a.CurrentSpell.CastEnd - wector.Game.Time
-      local bCastLeft = b.CurrentSpell.CastEnd - wector.Game.Time
-
-      return aCastLeft < bCastLeft
-    end)
   end
 
   table.sort(priorityList, function(a, b)

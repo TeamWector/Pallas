@@ -51,10 +51,11 @@ function Menu:Initialize()
 
   Menu.SpellGroup = ImGroupbox("Spell")
 
-  if Settings.PallasWorldLatency == nil then Settings.PallasWorldLatency = 0 end
-  local spellDelay = ImSlider("Spell Global Delay", Settings.PallasWorldLatency, 0, 500)
-  spellDelay.OnValueChanged = function(_, _, newValue) Settings.PallasWorldLatency = newValue end
-  Menu.SpellGroup:Add(spellDelay)
+  if Settings.PallasGlobalDelay == nil then Settings.PallasGlobalDelay = false end
+  local globaldelay = ImCheckbox("Spell Delay", Settings.PallasGlobalDelay)
+  globaldelay.OnClick = function(_, _, newValue) Settings.PallasGlobalDelay = newValue end
+
+  Menu.SpellGroup:Add(globaldelay)
 
   Menu.GeneralGroup = ImGroupbox("General")
 

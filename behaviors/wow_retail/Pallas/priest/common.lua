@@ -71,7 +71,7 @@ function commonPriest:PowerWordFortitude()
   if Me.InCombat or not Settings.PriestPowerWordFortitude then return false end
   if wector.Game.Time - lastUsed < 5000 then return false end
 
-  local friends = WoWGroup:GetGroupUnits()
+  local friends = Heal.Friends.All
 
   for _, f in pairs(friends) do
     if spell:Apply(f) then lastUsed = wector.Game.Time return true end
@@ -132,7 +132,7 @@ function commonPriest:Mindgames(enemy)
   if spell:CooldownRemaining() > 0 then return false end
 
   for _, e in pairs(Combat.Targets) do
-    for _, friend in pairs(Heal.DPS) do
+    for _, friend in pairs(Heal.Friends.DPS) do
       if e.Target == friend then
         if spell:CastEx(e) then return true end
       end

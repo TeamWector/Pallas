@@ -22,7 +22,7 @@ local function PriestDiscHeal()
 
   if (not Me:HasVisibleAura("Inner Fire")) and Spell.InnerFire:CastEx(Me) then return end
 
-  local spelltarget = WoWSpell:GetCastTarget()
+  local spelltarget = WoWSpell.Target
 
   if Me.IsCasting and IsCastingHeal() and spelltarget then
     if spelltarget.HealthPct > 98 then Me:StopCasting() end
