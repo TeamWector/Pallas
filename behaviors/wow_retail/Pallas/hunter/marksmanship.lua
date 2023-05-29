@@ -1,4 +1,4 @@
-local common = require('behaviors.wow_retail.hunter.common')
+local common = require('behaviors.wow_retail.Pallas.hunter.common')
 
 local options = {
   -- The sub menu name
@@ -78,5 +78,5 @@ end
 local behaviors = {
     [BehaviorType.Combat] = HunterMarksmanshipCombat
   }
-  
+
   return { Options = options, Behaviors = behaviors }

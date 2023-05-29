@@ -1,4 +1,4 @@
-local common = require('behaviors.paladin.common')
+local common = require('behaviors.wow_wrath.Pallas.paladin.common')
 local options = {
     -- The sub menu name
     Name = "Paladin (Ret)",

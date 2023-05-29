@@ -1,4 +1,4 @@
-local common = require("behaviors.wow_retail.paladin.common")
+local common = require("behaviors.wow_retail.Pallas.paladin.common")
 
 local options = {
   Name = "Paladin (Prot)",

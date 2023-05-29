@@ -1,4 +1,4 @@
-local common = require('behaviors.deathknight.common')
+local common = require('behaviors.wow_wrath.Pallas.deathknight.common')
 local options = {
   Name = "Deathknight (UH)",
   Widgets = {
@@ -90,7 +90,7 @@ local function UnholyDamage(target)
   if (Me.Power > 80 or Spell.SummonGargoyle:CooldownRemaining() > 4000) and Spell.RaiseDead:CooldownRemaining() == 0
       and Spell.CorpseExplosion:CastEx(Me.Pet) then return end
 
-  
+
   -- Death coil spam if we dont have gargoyle ready or mind freeze is on cooldown for more than 5 sec.
   if (Me.Power > 80 or Spell.SummonGargoyle:CooldownRemaining() > 4000)
       and Spell.DeathCoil:CastEx(target) then return end
@@ -118,7 +118,7 @@ local function UnholyDamage(target)
 
   if common:TargetHasDiseases(target) and Spell.ScourgeStrike:CastEx(target) then return end
 
-  
+
 
   if Settings.Desolation and (not desolation or desolation.Remaining < 3000) and Spell.BloodStrike:CastEx(target) then return end
 

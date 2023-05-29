@@ -1,4 +1,4 @@
-local common = require('behaviors.wow_wrath.warrior.common')
+local common = require('behaviors.wow_wrath.Pallas.warrior.common')
 
 --[[ !TODO
   - Better thunder clap + demo should logic

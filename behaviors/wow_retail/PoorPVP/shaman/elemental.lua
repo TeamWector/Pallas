@@ -1,4 +1,4 @@
-local common = require('behaviors.wow_retail.shaman.common')
+local common = require('behaviors.wow_retail.PoorPVP.shaman.common')
 
 
 -- TALENTS
@@ -65,9 +65,6 @@ end
 local function LavaBurstWithLavaSurge(target)
   if IsLavaSurge() and target:HasAura("Flame Shock") and Spell.LavaBurst:CastEx(target) then return true end
 end
-
-
-
 
 local function FlameShock(target)
   local spell = Spell.FlameShock

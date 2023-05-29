@@ -1,4 +1,4 @@
-local common = require('behaviors.wow_retail.mage.common')
+local common = require('behaviors.wow_retail.Pallas.mage.common')
 
 local options = {
     -- The sub menu name

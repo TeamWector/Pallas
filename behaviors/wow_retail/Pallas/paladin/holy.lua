@@ -1,7 +1,7 @@
 -- Holy paladin M+ Rotation
 -- BEEAwtJ2KpR8WbGzhz/jy2AP8AAAAAAQSAAAAAAA0SCQJSSaNRKSIlAaJHIRTEJpkESSUSRSIFEB
 
-local common = require("behaviors.wow_retail.paladin.common")
+local common = require("behaviors.wow_retail.Pallas.paladin.common")
 
 local options = {
   Name = "Paladin (Holy)",

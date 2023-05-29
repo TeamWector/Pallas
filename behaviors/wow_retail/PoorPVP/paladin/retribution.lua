@@ -1,5 +1,5 @@
 -- BYEAS+uMNo6HaxL/ztTZBhrdcCAAAQAACKtWSpUOgkSOQSaSAAAAAAAkWIJSJBSiEpEgQkm0KhIJIogWA
-local common = require("behaviors.wow_retail.paladin.common")
+local common = require("behaviors.wow_retail.PoorPVP.paladin.common")
 
 local options = {
   Name = "Paladin (Retri)",

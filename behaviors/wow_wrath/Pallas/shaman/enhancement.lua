@@ -1,4 +1,4 @@
-local common = require('behaviors.shaman.common')
+local common = require('behaviors.wow_wrath.Pallas.shaman.common')
 
 local options = {
     -- The sub menu name

@@ -1,4 +1,4 @@
-local common = require('behaviors.wow_retail.shaman.common')
+local common = require('behaviors.wow_retail.Pallas.shaman.common')
 
 local options = {
   -- The sub menu name
@@ -53,19 +53,19 @@ local function ShamanEnhancementCombat()
     if not Me:IsFacing(target) then return end
     if Me.IsCastingOrChanneling then return end
     if not Settings.PallasAttackOOC then return end
-   
-    if Me.HealthPct <= Settings.ShamanAstralShift and Spell.AstralShift:CooldownRemaining() == 0 then	
+
+    if Me.HealthPct <= Settings.ShamanAstralShift and Spell.AstralShift:CooldownRemaining() == 0 then
 		if Spell.AstralShift:CastEx(Me) then return end
 	end
 
     if (Spell.FeralSpirit:GetCooldown() == 0 or (feralSpirit and feralSpirit.Remaining > 8000 )) then
         common:UseTrinkets()
     end
-    
-    
+
+
     if Spell.FeralSpirit:CastEx(target) then return end
-    
-   
+
+
     if(hotHand or (ashenCatalyst and ashenCatalyst.Stacks >= 7)) then
         if Spell.LavaLash:CastEx(target) then return end
     end
@@ -78,11 +78,11 @@ local function ShamanEnhancementCombat()
         if Spell.CrashLightning:CastEx(Me) then return end
         if Spell.FireNova:CastEx(target) then return end
     end
-    
+
     if Spell.PrimordialWave:CastEx(target) then return end
 
     if not target:HasAura(188389) then
-        
+
         if Spell.FlameShock:CastEx(target) then return end
     end
 
@@ -94,7 +94,7 @@ local function ShamanEnhancementCombat()
         end
     end
 
-    
+
     if ((maelstrom and maelstrom.Stacks >= 8 and Spell.ElementalBlast.Charges > 1) or (feralSpirit and Spell.ElementalBlast.Charges > 0)) then
         if Spell.ElementalBlast:CastEx(target) then return end
     end
@@ -102,11 +102,11 @@ local function ShamanEnhancementCombat()
     if (maelstrom and maelstrom.Stacks >= 5 and Spell.ElementalBlast.Charges > 0) then
         if Spell.ElementalBlast:CastEx(target) then return end
     end
-    
+
     if Spell.IceStrike:CastEx(target) then return end
-    
+
     if(not maelstromOfElements and maelstrom and maelstrom.Stacks >=5 and Spell.Stormstrike.Charges > 0 ) then
-        
+
         if Spell.Stormstrike:CastEx(target) then return end
     end
 
@@ -127,10 +127,10 @@ local function ShamanEnhancementCombat()
     if (target:HasDebuffByMe("Flame Shock") and target:GetAuraByMe("Flame Shock").Remaining < 5000 ) then
         if Spell.LavaLash:CastEx(target) then return end
     end
-    
+
     if Spell.LavaLash:CastEx(target) then return end
-    
-   
+
+
 
     if (maelstrom and maelstrom.Stacks >= 5) then
         if #target:GetUnitsAround(5) <= Settings.ShamanAOEtargets then
@@ -140,14 +140,14 @@ local function ShamanEnhancementCombat()
         end
     end
 
-    
+
     if Spell.FrostShock:CastEx(target) then return end
     if Spell.CrashLightning:CastEx(Me) then return end
-    
+
     if Spell.Stormstrike:CastEx(target) then return end
     print("------ Nothing more in Prio - Casting Flame Shock!! --------")
     if Spell.FlameShock:CastEx(target) then return end
-    
+
     if not Me:InMeleeRange(target) and Me:IsFacing(target) then
         if Spell.LightningBolt:CastEx(target) then return end
         if Spell.FlameShock:CastEx(target) then return end
@@ -158,5 +158,5 @@ end
 local behaviors = {
     [BehaviorType.Combat] = ShamanEnhancementCombat
   }
-  
+
   return { Options = options, Behaviors = behaviors }

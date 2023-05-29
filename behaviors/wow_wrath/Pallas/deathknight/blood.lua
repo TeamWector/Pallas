@@ -1,4 +1,4 @@
-local common = require('behaviors.deathknight.common')
+local common = require('behaviors.wow_wrath.Pallas.deathknight.common')
 
 local options = {
   -- The sub menu name

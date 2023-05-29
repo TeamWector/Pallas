@@ -1,4 +1,4 @@
-local common = require('behaviors.wow_retail.demonhunter.common')
+local common = require('behaviors.wow_retail.Pallas.demonhunter.common')
 
 local options = {
   -- The sub menu name
