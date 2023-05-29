@@ -4,7 +4,6 @@ local commonWarrior = {}
   - Better shout logic. We are smart enough to do commanding shout if we have blessing of might even if battle shout is selected!
     Could also do commanding/battle depending on if another warrior is buffing.
 ]]
-
 commonWarrior.widgets = {
   {
     type = "checkbox",
@@ -18,6 +17,21 @@ commonWarrior.widgets = {
     text = "Select shout",
     default = 0,
     options = { "Battle Shout", "Commanding Shout" }
+  },
+  {
+    type = "combobox",
+    uid = "CommonInterrupts",
+    text = "Interrupt",
+    default = 0,
+    options = { "Disabled", "Any", "Whitelist" }
+  },
+  {
+    type = "slider",
+    uid = "CommonInterruptPct",
+    text = "Kick Cast Left (%)",
+    default = 20,
+    min = 0,
+    max = 100
   },
   {
     type = "checkbox",

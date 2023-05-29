@@ -36,7 +36,7 @@ local function PaladinRetriHeal()
 
     local lowest = Heal:GetLowestMember()
     local artofwar = Me:GetVisibleAura("The Art of War")
-    local castTarget = WoWSpell:GetCastTarget()
+    local castTarget = WoWSpell.Target
     local currentSpell = Me.CurrentSpell
     if castTarget and currentSpell and currentSpell.Name == "Flash of Light" and castTarget.HealthPct > 95 then
         Me:StopCasting()
