@@ -18,12 +18,27 @@ function Menu:Initialize()
 
   Menu.MainMenu = ImMenu("Pallas")
 
+  -- Behavior
+  Menu.BehaviorGroup = ImGroupbox("Behavior")
+
+  -- XXX: add back when ImText text value can be changed!
+  --Menu.CurrentBehavior = ImText('')
+  --Menu.BehaviorGroup:Add(Menu.CurrentBehavior)
+
+  Menu.CombatBehavior = ImCombobox("Routine")
+  Menu.CombatBehavior:AddOption("Change Routine") -- Add dummy option at 0th index
+  -- Load the selected script when an option is selected
+  Menu.CombatBehavior.OnSelect = function(_, _, _, _, newIdx)
+    if newIdx > 0 then
+      Behavior:onSelectBehavior(newIdx)
+    end
+  end
+
+  Menu.BehaviorGroup:Add(Menu.CombatBehavior)
+  -- End Behavior
+
   -- Combat
-  --Menu.CombatBehavior = ImCombobox("Behavior")
-  --Menu.MainMenu:Add(Menu.CombatBehavior)
-
   Menu.CombatGroup = ImGroupbox("Combat")
-
   if Settings.PallasAutoTarget == nil then Settings.PallasAutoTarget = false end
   local autotarget = ImCheckbox("Auto-target", Settings.PallasAutoTarget)
   autotarget.OnClick = function(_, _, newValue) Settings.PallasAutoTarget = newValue end
@@ -49,6 +64,7 @@ function Menu:Initialize()
   healthstone.OnValueChanged = function(_, _, newValue) Settings.PallasHealthstonePct = newValue end
   Menu.GeneralGroup:Add(healthstone)
 
+  Menu.MainMenu:Add(Menu.BehaviorGroup)
   Menu.MainMenu:Add(Menu.SpellGroup)
   Menu.MainMenu:Add(Menu.GeneralGroup)
   Menu.MainMenu:Add(Menu.CombatGroup)
