@@ -18,14 +18,8 @@ commonPriest.widgets = {
     type = "combobox",
     uid = "CommonDispels",
     text = "Dispel",
-    default = 0,
+    default = 2,
     options = { "Disabled", "Any", "Whitelist" }
-  },
-  {
-    type = "checkbox",
-    uid = "PriestPowerWordFortitude",
-    text = "PW: Fortitude Friends",
-    default = false
   },
   {
     type = "checkbox",
@@ -63,19 +57,6 @@ function commonPriest:DesperatePrayer()
   if spell:CooldownRemaining() > 0 then return false end
 
   return Me.HealthPct < Settings.PriestDesperatePrayerPct and spell:CastEx(Me)
-end
-
-local lastUsed = wector.Game.Time
-function commonPriest:PowerWordFortitude()
-  local spell = Spell.PowerWordFortitude
-  if Me.InCombat or not Settings.PriestPowerWordFortitude then return false end
-  if wector.Game.Time - lastUsed < 5000 then return false end
-
-  local friends = WoWGroup:GetGroupUnits()
-
-  for _, f in pairs(friends) do
-    if spell:Apply(f) then lastUsed = wector.Game.Time return true end
-  end
 end
 
 function commonPriest:Fade()
@@ -128,18 +109,18 @@ function commonPriest:Shadowfiend(enemy)
 end
 
 function commonPriest:Mindgames(enemy)
+  return Spell.MindGames:CastEx(enemy)
+end
+
+function commonPriest:MindGamesLow()
   local spell = Spell.Mindgames
   if spell:CooldownRemaining() > 0 then return false end
 
   for _, e in pairs(Combat.Targets) do
-    for _, friend in pairs(Heal.DPS) do
-      if e.Target == friend then
-        if spell:CastEx(e) then return true end
-      end
-    end
+    if e.HealthPct < 20 and spell:CastEx(e) then return true end
   end
 
-  return spell:CastEx(enemy)
+  return false
 end
 
 function commonPriest:ShadowWordDeath()

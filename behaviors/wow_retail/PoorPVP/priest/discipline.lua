@@ -159,12 +159,6 @@ local function Schism(target)
   return spell:CastEx(target)
 end
 
-local function PowerWordSolace(target)
-  local spell = Spell.PowerWordSolace
-  if spell:CooldownRemaining() > 0 then return false end
-  return spell:CastEx(target)
-end
-
 local function MindBlast(target)
   local spell = Spell.MindBlast
   if spell:CooldownRemaining() > 0 then return false end
@@ -207,17 +201,6 @@ local function FlashHealSurgeOfLight(friend)
 end
 
 
--- TODO REVISIT ME
-local function MaintainAtonement()
-  if not Me:InArena() or Me:HasArenaPreparation() then return false end
-
-  local friends = WoWGroup:GetGroupUnits()
-  for _, f in pairs(friends) do
-
-  end
-end
-
-
 local blacklist = {
   [61305] = "Polymorph (Cat)",
   [161354] = "Polymorph (Monkey)",
@@ -234,14 +217,17 @@ local blacklist = {
   [51514] = "Hex (Frog)",
   [211010] = "Hex (Snake)",
   [211004] = "Hex (Spider)",
+  [360806] = "Sleep walk",
+  [5782] = "Fear",
+  [342914] = "Fear2",
 }
 
-local function DeathThePoly()
+local function DeathTheCC()
   for _, t in pairs(Combat.Targets) do
     if t.IsCastingOrChanneling then
       local spellInfo = t.SpellInfo
       local target = wector.Game:GetObjectByGuid(spellInfo.TargetGuid1)
-      if (t.CurrentSpell) then
+      if (t.CurrentSpell and t.CurrentSpell:CastRemaining() < 1000) then
         local onBlacklist = blacklist[t.CurrentSpell.Id]
         if target and target == Me and onBlacklist and Spell.ShadowWordDeath:CastEx(target) then return end
       end
@@ -279,8 +265,8 @@ local function PriestDiscDamage()
   if common:DispelMagic(DispelPriority.Medium) then return end
 
   if PurgeTheWicked(target) then return true end
-  --if PowerInfusionMyself() then return true end
   if common:ShadowWordDeath() then return true end
+  if common:MindGamesLow() then return true end
   if common:Shadowfiend(target) then return true end
   if Schism(target) then return true end
   if (target.HealthPct < 50) then
@@ -304,7 +290,7 @@ local function PriestDiscipline()
   if MassDispel() then return end
   if common:DesperatePrayer() then return end
   if WoWItem:UseHealthstone() then return end
-  if DeathThePoly() then return end
+  if DeathTheCC() then return end
 
   -- BURST HEALING
   for _, v in pairs(Heal.PriorityList) do
@@ -331,8 +317,6 @@ local function PriestDiscipline()
 
 
   if Dispel(DispelPriority.Low) then return end
-
-  if MaintainAtonement() then return end
 
   if PriestDiscDamage() then return end
 end

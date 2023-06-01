@@ -366,25 +366,25 @@ local function DruidRestoHeal()
     end
   end
   ]]
-  for _, v in pairs(Heal.Tanks) do
-    ---@type WoWUnit
-    local u = v.Unit
+  -- for _, v in pairs(Heal.Tanks) do
+  --   ---@type WoWUnit
+  --   local u = v.Unit
 
-    -- this is a mess but works
-    if Me.ShapeshiftForm == ShapeshiftForm.Cat and u.HealthPct > 80 then goto continue end
+  --   -- this is a mess but works
+  --   if Me.ShapeshiftForm == ShapeshiftForm.Cat and u.HealthPct > 80 then goto continue end
 
-    local lifebloom = u:GetAuraByMe("Lifebloom")
-    if not lifebloom and Spell.Lifebloom:CastEx(u) then return end
+  --   local lifebloom = u:GetAuraByMe("Lifebloom")
+  --   if not lifebloom and Spell.Lifebloom:CastEx(u) then return end
 
-    if not FindAdaptiveSwarm() and Spell.AdaptiveSwarm:CastEx(u) then return end
-    --if lifebloom and u.InCombat then
-    --  if u.HealthPct < 90 and lifebloom.Stacks < 1 and Spell.Lifebloom:CastEx(u) then return end
-    --  if u.HealthPct < 80 and lifebloom.Stacks < 2 and Spell.Lifebloom:CastEx(u) then return end
-    --  if u.HealthPct < 70 and lifebloom.Stacks < 3 and Spell.Lifebloom:CastEx(u) then return end
-    --  --if lifebloom.Remaining < 2500 and u.HealthPct > 70 and Spell.Lifebloom:CastEx(u) then return end
-    --end
-    ::continue::
-  end
+  --   if not FindAdaptiveSwarm() and Spell.AdaptiveSwarm:CastEx(u) then return end
+  --   --if lifebloom and u.InCombat then
+  --   --  if u.HealthPct < 90 and lifebloom.Stacks < 1 and Spell.Lifebloom:CastEx(u) then return end
+  --   --  if u.HealthPct < 80 and lifebloom.Stacks < 2 and Spell.Lifebloom:CastEx(u) then return end
+  --   --  if u.HealthPct < 70 and lifebloom.Stacks < 3 and Spell.Lifebloom:CastEx(u) then return end
+  --   --  --if lifebloom.Remaining < 2500 and u.HealthPct > 70 and Spell.Lifebloom:CastEx(u) then return end
+  --   --end
+  --   ::continue::
+  -- end
 
   if Dispel(DispelPriority.Low) then return end
 

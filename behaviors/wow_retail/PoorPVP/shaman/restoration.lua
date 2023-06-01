@@ -282,7 +282,6 @@ local function ShamanRestoDamage()
   if common:LightningBoltWithStormkeeper(target) then return true end
   if FlameShock(target) then return true end
   if Purge(DispelPriority.Low) then return true end
-  if common:Stormkeeper() then return true end
   if common:LavaBurst(target) then return true end
   if (#target:GetUnitsAround(13) > 1) then
     if common:ChainLightning(target) then return true end
