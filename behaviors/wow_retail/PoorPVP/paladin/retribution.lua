@@ -87,7 +87,7 @@ end
 local function Crusade()
   local spell = Spell.Crusade
 
-  return Spell.FinalReckoning:CooldownRemaining() == 0  and Spell.DivineToll:CooldownRemaining() == 0 and spell:CastEx(Me)
+  return Spell.FinalReckoning:CooldownRemaining() == 0 and Spell.DivineToll:CooldownRemaining() == 0 and spell:CastEx(Me)
 end
 
 
@@ -135,6 +135,54 @@ local function isNotForbearance(friend)
 end
 
 
+local sancTargets = {}
+
+local function BlessingOfSanctuary(check)
+  local spell = Spell.BlessingOfSanctuary
+  if spell:CooldownRemaining() > 0 then return false end
+
+  if check then
+    -- Add new stunned friends and remove stale entries
+    for i = #sancTargets, 1, -1 do
+      local v = sancTargets[i]
+      if not v.friend:IsStunned() then
+        table.remove(sancTargets, i)
+      end
+    end
+
+    for _, friend in pairs(Heal.Friends.All) do
+      if friend ~= Me and friend:IsStunned() then
+        local found = false
+        for _, v in ipairs(sancTargets) do
+          if v.friend == friend then
+            found = true
+            break
+          end
+        end
+        if not found then
+          table.insert(sancTargets, { friend = friend, time = wector.Game.Time + 300 })
+        end
+      end
+    end
+  else
+    -- Cast Blessing of Sanctuary on stunned friends and remove entries
+    for i = #sancTargets, 1, -1 do
+      local v = sancTargets[i]
+      if v.friend and v.friend:IsStunned() then
+        if wector.Game.Time > v.time then
+          if spell:CastEx(v.friend) then
+            table.remove(sancTargets, i)
+            return true
+          end
+        end
+      else
+        table.remove(sancTargets, i)
+      end
+    end
+  end
+end
+
+
 local function getMyTarget()
   local target = Me.Target
   if not target then return end
@@ -157,6 +205,7 @@ local function getMyTarget()
 end
 
 local function PaladinRetriCombat()
+  if BlessingOfSanctuary(true) then return end
   if Me:IsStunned() or Me.IsCastingOrChanneling then return end
 
   if CrusaderAura() then return end
@@ -193,14 +242,17 @@ local function PaladinRetriCombat()
     return a:TimeToDeath() < b:TimeToDeath()
   end)
   for _, f in pairs(friends) do
+    if BlessingOfSanctuary(false) then return end
     if f.HealthPct < 40 and Spell.WordOfGlory:CastEx(f) then return end
-    if f.HealthPct < 40 and Spell.FlashOfLight:CastEx(f) then return end
+    if f.HealthPct < 60 and Spell.FlashOfLight:CastEx(f) then return end
     if isNotForbearance(f) and f.HealthPct < 15 and Spell.LayOnHands:CastEx(f) then return end
     if isNotForbearance(f) and f.HealthPct < 25 and Spell.BlessingOfProtection:CastEx(f) then return end
     if f.HealthPct < 30 and Me.HealthPct > 75 and Spell.BlessingOfSacrifice:CastEx(f) then return end
-    if f ~= Me and f:IsStunned() and Spell.BlessingOfSanctuary:CastEx(f) then return end
     if f ~= Me and f:IsRooted() and Spell.BlessingOfFreedom:CastEx(f) then return end
   end
+
+
+
 
   if Judgment(target) then return end
   --if Crusade() then return end
