@@ -58,7 +58,7 @@ local function PaladinRetriHeal()
     --MeleeAttack(target)
     if Me:IsStunned() and Spell.HandOfFreedom:CastEx(Me) then return end
     if common:HammerOfWrath() then return end
-    if Spell.JudgementOfLight:CastEx(target) then return end
+    if common:Judgement(target) then return end
 
     if artofwar and (not lowest or lowest.HealthPct > 95) and Spell.Exorcism:CastEx(target) then return end
     if Spell.CrusaderStrike:CastEx(target) then return end

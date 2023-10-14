@@ -7,13 +7,33 @@ local options = {
       type = "checkbox",
       uid = "UsePainSuppression",
       text = "Use Pain Suppresion",
-      default = false
+      default = true
+    },
+    {
+      type = "combobox",
+      uid = "CommonDispels",
+      text = "Dispel",
+      default = 0,
+      options = { "Disabled", "Any", "Whitelist" }
     }
   }
 }
 
 local function IsCastingHeal()
   return Me.CurrentCast == Spell.FlashHeal or Me.CurrentCast == Spell.GreaterHeal or Me.CurrentCast == Spell.BindingHeal
+end
+
+local function Dispel(priority)
+  local spell = Spell.DispelMagic
+  if spell:CooldownRemaining() > 0 then return false end
+  spell:Dispel(true, priority or 1, WoWDispelType.Magic)
+end
+
+
+local function AbolishDisease(priority)
+  local spell = Spell.AbolishDisease
+  if spell:CooldownRemaining() > 0 then return false end
+  spell:Dispel(true, priority or 1, WoWDispelType.Disease)
 end
 
 local function PriestDiscHeal()
@@ -31,7 +51,7 @@ local function PriestDiscHeal()
 
   -- DO ME FIRST
 
-  if Settings.UsePainSuppression and Me.HealthPct < 35 and Spell.PainSuppresion:CastEx(Me) then return end
+  if Settings.UsePainSuppression and Me.HealthPct < 30 and Me.InCombat and Spell.PainSuppresion:CastEx(Me) then return end
 
   if Me.HealthPct < 75 and not Me:HasAura("Weakened Soul") and Spell.PowerWordShield:CastEx(Me) then return end
 
@@ -39,18 +59,16 @@ local function PriestDiscHeal()
 
   if Me.HealthPct < 90 and Me.InCombat and Spell.PrayerOfMending:CastEx(Me) then return end
 
-  if Me.HealthPct < 90 and not Me:HasAura("Renew") and Spell.Renew:CastEx(Me) then return end
-
-
+  --if Me.HealthPct < 90 and not Me:HasAura("Renew") and Spell.Renew:CastEx(Me) then return end
 
 
 
   for _, v in pairs(Heal.PriorityList) do
     local u = v.Unit
 
-    if Settings.UsePainSuppression and u.HealthPct < 25 and Spell.PainSuppresion:CastEx(u) then return end
+    if Settings.UsePainSuppression and u.HealthPct < 25 and u.InCombat and Spell.PainSuppresion:CastEx(u) then return end
 
-    if u.HealthPct < 40 and Me:GetHealthPercent() < 50 and Spell.BindingHeal:CastEx(u) then return end
+    if u.HealthPct < 40 and Me.HealthPct < 50 and Spell.BindingHeal:CastEx(u) then return end
 
     if u.HealthPct < 55 and not u:HasAura("Weakened Soul") and Spell.PowerWordShield:CastEx(u) then return end
 
@@ -58,13 +76,18 @@ local function PriestDiscHeal()
 
     if u.HealthPct < 75 and Spell.Penance:CastEx(u) then return end
 
-    if u.HealthPct < 80 and Spell.GreaterHeal:CastEx(u) then return end
-
     if u.HealthPct < 90 and u.InCombat and Spell.PrayerOfMending:CastEx(u) then return end
 
-    if u.HealthPct < 90 and not u:HasAura("Renew") and Spell.Renew:CastEx(u) then return end
-
+    -- renew not important in wotlk disc
+    -- if u.HealthPct < 90 and not u:HasAura("Renew") and Spell.Renew:CastEx(u) then return end
   end
+
+  for _, tank in pairs(Heal.Friends.Tanks) do
+    if  tank.HealthPct < 80 and Spell.GreaterHeal:CastEx(tank) then return end
+  end
+
+  if Dispel() then return end
+  if AbolishDisease() then return end
 
 end
 
